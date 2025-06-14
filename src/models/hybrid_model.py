@@ -26,20 +26,25 @@ class KerasProgressCallback(Callback):
         self.update_gui_progress_callback(int(current_overall_progress), f"Training LSTM (Epoch {epoch+1}/{self.total_epochs})")
 
 class HybridAnomalyDetector:
-    def __init__(self, sequence_length: int = 10, lstm_units: int = 64, contamination: float = 0.1):
+    def __init__(self, sequence_length: int = 10, lstm_units: int = 64, contamination: float = 0.1,
+                 n_estimators_iso_forest: int = 100, max_features_iso_forest: float = 1.0,
+                 n_estimators_rf: int = 100, max_depth_rf: Optional[int] = None, min_samples_split_rf: int = 2):
         self.sequence_length = sequence_length
         self.lstm_units = lstm_units
         self.contamination = contamination
         self.scaler = StandardScaler()
         self.isolation_forest = IsolationForest(
-            n_estimators=100,
+            n_estimators=n_estimators_iso_forest,
+            max_features=max_features_iso_forest,
             contamination=self.contamination,
             random_state=42
         )
         self.random_forest = RandomForestClassifier(
-            n_estimators=100,
+            n_estimators=n_estimators_rf,
+            max_depth=max_depth_rf,
+            min_samples_split=min_samples_split_rf,
             random_state=42,
-            class_weight='balanced' # Add balanced class weight for imbalance
+            class_weight='balanced'
         )
         self.lstm_autoencoder = None
         self.feature_columns = None
@@ -150,14 +155,14 @@ class HybridAnomalyDetector:
         # Random Forest predictions (using features, not scores from other models directly)
         rf_predictions = self.random_forest.predict(X_scaled)
         
-        # Combine predictions: Anomaly if IF OR LSTM OR RF predicts anomaly
-        # Give more weight to IF and LSTM as primary anomaly detectors
-        combined_predictions = np.maximum.reduce([if_predictions, lstm_predictions, rf_predictions])
+        # Combined predictions: Anomaly if at least 2 models predict anomaly (majority vote)
+        # This increases precision by requiring more consensus
+        combined_predictions = (if_predictions + lstm_predictions + rf_predictions >= 2).astype(int)
 
         # A combined anomaly score could be an average or max of normalized scores
         # For simplicity, let's use IF scores as the primary score for plots for now, 
         # as LSTM scores are reconstruction error and need more careful normalization relative to IF scores.
-        return combined_predictions, if_scores # Returning if_scores for visualization as it's consistent
+        return combined_predictions, if_scores
     
     def save(self, path: str) -> None:
         """Save the model components."""
@@ -168,7 +173,12 @@ class HybridAnomalyDetector:
             'feature_columns': self.feature_columns,
             'sequence_length': self.sequence_length,
             'lstm_units': self.lstm_units,
-            'contamination': self.contamination, # Save contamination
+            'contamination': self.contamination,
+            'n_estimators_iso_forest': self.isolation_forest.n_estimators,
+            'max_features_iso_forest': self.isolation_forest.max_features,
+            'n_estimators_rf': self.random_forest.n_estimators,
+            'max_depth_rf': self.random_forest.max_depth,
+            'min_samples_split_rf': self.random_forest.min_samples_split,
             'lstm_autoencoder_config': self.lstm_autoencoder.get_config() if self.lstm_autoencoder else None,
             'lstm_autoencoder_weights': self.lstm_autoencoder.get_weights() if self.lstm_autoencoder else None
         }
@@ -181,7 +191,12 @@ class HybridAnomalyDetector:
         detector = cls(
             sequence_length=model_data['sequence_length'],
             lstm_units=model_data['lstm_units'],
-            contamination=model_data['contamination'] # Load contamination
+            contamination=model_data['contamination'],
+            n_estimators_iso_forest=model_data['n_estimators_iso_forest'],
+            max_features_iso_forest=model_data['max_features_iso_forest'],
+            n_estimators_rf=model_data['n_estimators_rf'],
+            max_depth_rf=model_data['max_depth_rf'],
+            min_samples_split_rf=model_data['min_samples_split_rf']
         )
         detector.scaler = model_data['scaler']
         detector.isolation_forest = model_data['isolation_forest']
