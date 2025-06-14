@@ -134,8 +134,8 @@ class HybridAnomalyDetector:
         if_predictions = (if_scores > np.percentile(if_scores, (1 - self.contamination) * 100)).astype(int) # Use contamination
         
         # LSTM Autoencoder predictions (only if trained)
-        lstm_scores = np.zeros(len(X)) # Initialize with zeros
-        lstm_predictions = np.zeros(len(X), dtype=int) # Initialize with zeros
+        lstm_scores = np.zeros(len(X_scaled)) # Initialize with zeros to match X_scaled length
+        lstm_predictions = np.zeros(len(X_scaled), dtype=int) # Initialize with zeros to match X_scaled length
         
         if self.lstm_autoencoder is not None and len(X_scaled) >= self.sequence_length:
             sequences = self._create_sequences(X_scaled)
@@ -144,19 +144,21 @@ class HybridAnomalyDetector:
             # Calculate reconstruction error (MSE)
             mse = np.mean(np.power(sequences - reconstructed, 2), axis=(1, 2))
             
-            # Map MSE scores back to original indices in X
-            # The LSTM prediction covers X[self.sequence_length-1:]
+            # Map MSE scores back to original indices in X_scaled
+            # The LSTM prediction naturally covers X_scaled[self.sequence_length-1:]
             lstm_scores[self.sequence_length-1:] = mse
             
             # Define LSTM anomaly threshold (e.g., top 10% reconstruction error)
-            lstm_threshold = np.percentile(lstm_scores[self.sequence_length-1:], (1 - self.contamination) * 100) # Use contamination
-            lstm_predictions[self.sequence_length-1:] = (mse > lstm_threshold).astype(int)
+            # Only consider the part of lstm_scores that actually has predictions for thresholding
+            if len(mse) > 0:
+                lstm_threshold = np.percentile(mse, (1 - self.contamination) * 100) # Use contamination on actual MSE values
+                lstm_predictions[self.sequence_length-1:] = (mse > lstm_threshold).astype(int)
 
         # Random Forest predictions (using features, not scores from other models directly)
         rf_predictions = self.random_forest.predict(X_scaled)
         
         # Combined predictions: Anomaly if at least 2 models predict anomaly (majority vote)
-        # This increases precision by requiring more consensus
+        # All prediction arrays now have the same length (len(X_scaled))
         combined_predictions = (if_predictions + lstm_predictions + rf_predictions >= 2).astype(int)
 
         # A combined anomaly score could be an average or max of normalized scores

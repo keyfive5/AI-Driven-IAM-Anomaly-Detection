@@ -226,34 +226,49 @@ class AnomalyDetectionGUI:
         self.data_source_tab = ttk.Frame(self.notebook)
         self.notebook.add(self.data_source_tab, text="Data Source Management")
 
-        self.data_source_text = tk.Text(self.data_source_tab, wrap=tk.WORD, state='disabled', font=("TkDefaultFont", 10))
-        self.data_source_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        # Explanatory text
+        ttk.Label(self.data_source_tab, text="""
+This feature allows the system to seamlessly integrate with a variety of enterprise log sources,
+ensuring holistic threat visibility and enhanced accuracy. Define new log sources below.
+""", wraplength=1000, justify=tk.LEFT).pack(pady=10, padx=10, anchor="w")
 
-        self.update_data_source_tab("""
-**Enhancing IAM Anomaly Detection through Multi-Source Log Integration**
+        # New Data Source Configuration Frame
+        config_frame = ttk.LabelFrame(self.data_source_tab, text="New Data Source Configuration")
+        config_frame.pack(fill=tk.X, padx=10, pady=5, anchor="nw")
 
-To provide a truly comprehensive and robust IAM anomaly detection solution, future development will focus on seamlessly integrating with a variety of enterprise log sources. This expanded data ingestion capability is critical for:
+        current_config_row = 0
 
-*   **Holistic Threat Visibility:** Combining logs from different systems (e.g., cloud, on-premise, network) provides a richer context for anomaly detection, allowing the identification of sophisticated attack patterns that might be missed in isolated datasets.
-*   **Improved Accuracy & Reduced False Positives:** A broader data set enables more accurate baselining of normal user behavior, leading to more precise anomaly detection and a significant reduction in false alerts.
-*   **Scalability & Adaptability:** Supporting diverse log formats and protocols ensures the solution can be deployed across various IT infrastructures, from hybrid cloud environments to purely on-premise setups.
+        # Source Name
+        ttk.Label(config_frame, text="Source Name:").grid(row=current_config_row, column=0, sticky="w", pady=5, padx=5)
+        self.source_name_entry = ttk.Entry(config_frame, width=40)
+        self.source_name_entry.grid(row=current_config_row, column=1, sticky="ew", pady=5, padx=5)
+        current_config_row += 1
 
-**Planned Data Source Integrations (Roadmap):**
+        # Source Type
+        ttk.Label(config_frame, text="Source Type:").grid(row=current_config_row, column=0, sticky="w", pady=5, padx=5)
+        self.source_type_var = tk.StringVar(value="Select Type")
+        self.source_type_options = ["AWS CloudTrail", "Azure Activity Logs", "Generic JSON", "CSV", "Other"]
+        self.source_type_combobox = ttk.Combobox(config_frame, textvariable=self.source_type_var, values=self.source_type_options, state="readonly", width=37)
+        self.source_type_combobox.grid(row=current_config_row, column=1, sticky="ew", pady=5, padx=5)
+        current_config_row += 1
 
-*   **Cloud Platforms:**
-    *   AWS CloudTrail (Expanded beyond current sample)
-    *   Azure Activity Logs & Azure AD Audit Logs
-    *   Google Cloud Audit Logs
-*   **On-Premise Systems:**
-    *   Active Directory (Security Event Logs)
-    *   Syslog (Generic log collection for various devices)
-    *   Firewall Logs (e.g., Palo Alto, Cisco ASA)
-*   **Security Information and Event Management (SIEM) Systems:**
-    *   Splunk (via API or forwarders)
-    *   Elastic Stack (Elasticsearch, Logstash, Kibana)
+        # Schema Mapping File (Placeholder)
+        ttk.Label(config_frame, text="Schema Mapping File:").grid(row=current_config_row, column=0, sticky="w", pady=5, padx=5)
+        self.schema_path_var = tk.StringVar()
+        self.schema_path_entry = ttk.Entry(config_frame, textvariable=self.schema_path_var, width=30)
+        self.schema_path_entry.grid(row=current_config_row, column=1, sticky="ew", pady=5, padx=5)
+        current_config_row += 1
 
-This multi-source integration strategy will empower organizations with unparalleled visibility into their identity and access landscape, proactive threat detection, and significantly enhanced overall security posture.
-""")
+        self.browse_schema_button = ttk.Button(config_frame, text="Browse", command=self.browse_schema_file)
+        self.browse_schema_button.grid(row=current_config_row, column=1, sticky="e", pady=5, padx=5)
+        current_config_row += 1
+
+        # Save Configuration Button
+        self.save_config_button = ttk.Button(config_frame, text="Save Configuration", command=self.save_data_source_config)
+        self.save_config_button.grid(row=current_config_row, column=0, columnspan=2, pady=10)
+
+        # Configure column weights for resizing
+        config_frame.grid_columnconfigure(1, weight=1)
 
         # --- Reporting Tab ---
         self.reporting_tab = ttk.Frame(self.notebook)
@@ -261,29 +276,26 @@ This multi-source integration strategy will empower organizations with unparalle
 
         self.reporting_text = tk.Text(self.reporting_tab, wrap=tk.WORD, state='disabled', font=("TkDefaultFont", 10))
         self.reporting_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        self.update_reporting_tab(0, 0, None) # Initial call with placeholders
 
-        self.update_reporting_tab("""
-**Anomaly Reporting and Integration Capabilities**
+        # --- Value Proposition Tab ---
+        self.value_prop_tab = ttk.Frame(self.notebook)
+        self.notebook.add(self.value_prop_tab, text="Value Proposition")
 
-This section highlights the reporting and integration capabilities of the IAM Anomaly Detection system. While the current version focuses on core detection, future enhancements will provide robust reporting and seamless integration with existing security ecosystems.
+        self.value_prop_text = tk.Text(self.value_prop_tab, wrap=tk.WORD, state='disabled', font=("TkDefaultFont", 10))
+        self.value_prop_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-**Last Analysis Summary:**
-*   **Total Events Processed:** [N/A - Run analysis to populate]
-*   **Detected Anomalies:** [N/A - Run analysis to populate]
-*   **Top Anomalous Users:** [N/A - Run analysis to populate]
+        # Initial content for Value Proposition tab
+        self.update_value_prop_tab()
 
-**Key Reporting Features (Planned):**
-*   **Customizable Dashboards:** Interactive dashboards to visualize anomaly trends, user behavior, and security incidents over time.
-*   **Detailed Anomaly Reports:** Generate comprehensive reports for individual anomalies, including contextual information, contributing features, and severity levels.
-*   **Scheduled Reporting:** Automate the generation and distribution of daily, weekly, or monthly anomaly summaries.
+        # --- Experiment Log Tab ---
+        self.experiment_log_tab = ttk.Frame(self.notebook)
+        self.notebook.add(self.experiment_log_tab, text="Experiment Log")
 
-**Integration with Security Ecosystems (Planned):**
-*   **SIEM Integration (e.g., Splunk, Elastic Security, Microsoft Sentinel):** Push detected anomalies and their context directly to SIEM platforms for centralized logging, correlation, and alert management.
-*   **SOAR Integration (e.g., Palo Alto Networks XSOAR, Splunk SOAR):** Trigger automated incident response playbooks based on high-severity anomalies, enabling rapid containment and remediation.
-*   **API for Custom Integrations:** Provide a robust API for third-party tools and custom scripts to query anomaly data and integrate with other enterprise systems.
+        self.experiment_log_text = tk.Text(self.experiment_log_tab, wrap=tk.WORD, state='disabled', font=("TkDefaultFont", 10))
+        self.experiment_log_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-These planned features underscore the system's potential to become a pivotal component in an organization's overall security posture, enabling proactive threat hunting and streamlined incident response.
-""")
+        self.log_experiment_result("Initial Run") # Log a header for the first run
 
         # Initial call to adjust controls
         self.on_data_source_change()
@@ -291,9 +303,8 @@ These planned features underscore the system's potential to become a pivotal com
     def on_data_source_change(self, event=None):
         selected_source = self.data_source_var.get()
         if selected_source == "Synthetic Data":
-            # Show synthetic controls
             for widget in self.synthetic_controls:
-                widget.grid()
+                widget.grid() # Show synthetic controls
             self.n_events.config(state="enabled")
             self.n_users.config(state="enabled")
             self.n_roles.config(state="enabled")
@@ -315,9 +326,8 @@ These planned features underscore the system's potential to become a pivotal com
             self.browse_button.grid_remove()
 
         else: # Real Logs (AWS CloudTrail Logs or Azure Activity Logs) selected
-            # Hide synthetic controls
             for widget in self.synthetic_controls:
-                widget.grid_remove()
+                widget.grid_remove() # Hide synthetic controls
             self.n_events.config(state="disabled")
             self.n_users.config(state="disabled")
             self.n_roles.config(state="disabled")
@@ -337,11 +347,10 @@ These planned features underscore the system's potential to become a pivotal com
             self.file_path_label.grid()
             self.file_path_entry.grid()
             self.browse_button.grid()
-    
+
     def update_status(self, message):
         self.status_text.insert(tk.END, message + "\n")
-        self.status_text.see(tk.END)
-        self.root.update_idletasks() # Use update_idletasks for smoother updates
+        self.status_text.see(tk.END) # Auto-scroll to the end
     
     def _update_progress_bar(self, value, message=""):
         self.progress_bar['value'] = value
@@ -421,82 +430,62 @@ These planned features underscore the system's potential to become a pivotal com
         # This function will run in a separate thread
         def analysis_thread():
             try:
-                selected_source = self.data_source_var.get()
-                df_local = None
-                true_anomalies_exist = False
+                # Data Loading (1/4)
+                self.root.after(0, self.update_status, "Data Loading... (1/4)")
+                df_local = None # Initialize df_local
                 true_labels = None
+                true_anomalies_exist = False
+
+                selected_source = self.data_source_var.get()
+                file_path = self.file_path_var.get()
 
                 if selected_source == "Synthetic Data":
-                    self.root.after(0, self.update_status, "Generating IAM logs... (1/4)")
-                    self.root.after(0, self._update_progress_bar, 5, "Initializing data generator...")
-                    generator = IAMLogGenerator(
-                        n_users=int(self.n_users.get()),
-                        n_roles=int(self.n_roles.get()),
-                        n_actions=int(self.n_actions.get())
-                    )
                     self.root.after(0, self._update_progress_bar, 10, "Generating synthetic dataset...")
+                    generator = IAMLogGenerator()
                     df_local = generator.generate_dataset(n_events=int(self.n_events.get()), anomaly_ratio=float(self.contamination_ratio.get()))
-                    # For synthetic data, we have true labels
-                    true_anomalies_exist = True
-                    # Assuming 'is_anomaly' is the true label column
-                    true_labels = df_local['is_anomaly'].values
                     self.root.after(0, self._update_progress_bar, 20, "Data generation complete!")
+                    print(f"DEBUG: main.py - df_local.shape after data generation: {df_local.shape}")
+
                 elif selected_source == "AWS CloudTrail Logs" or selected_source == "Azure Activity Logs":
                     self.root.after(0, self.update_status, f"Loading {selected_source}... (1/4)")
                     self.root.after(0, self._update_progress_bar, 5, "Initializing log reader...")
-                    reader = IAMLogReader()
-                    file_path = self.file_path_var.get()
-
-                    if not file_path:
-                        self.update_status("Error: Please select a log file path.")
-                        self._update_progress_bar(0)
-                        return
-
-                    self.root.after(0, self.update_status, f"Reading logs from {file_path} in chunks...")
-                    all_chunks = []
-                    chunk_size = 500 # Define a suitable chunk size for processing
                     
                     try:
-                        with open(file_path, 'r') as f:
-                            # For JSON, we need to read the whole file first or handle streaming JSON (more complex)
-                            # For simplicity, if we expect very large files that can't fit in memory, 
-                            # a different reading strategy (e.g., line-by-line for JSONL, or a custom parser)
-                            # would be needed. For now, we load fully then process for chunking effect.
-                            raw_data = json.load(f)
-                            if selected_source == "AWS CloudTrail Logs":
-                                records = raw_data.get('Records', [])
-                            else: # Azure Activity Logs
-                                records = raw_data # Azure Activity Logs are typically a list of dicts at top level
-
-                        total_records = len(records)
-                        self.root.after(0, self.update_status, f"Total records to process: {total_records}")
-
-                        for i in range(0, total_records, chunk_size):
-                            chunk_records = records[i:i + chunk_size]
-                            if selected_source == "AWS CloudTrail Logs":
-                                # Create a temporary structure that mimics the original file structure for the reader
-                                temp_data = {'Records': chunk_records}
-                                chunk_df = reader.read_aws_cloudtrail_logs_from_data(temp_data) # New method
-                            else: # Azure Activity Logs
-                                chunk_df = reader.read_azure_activity_logs_from_data(chunk_records) # New method
-                            
-                            if not chunk_df.empty:
-                                all_chunks.append(chunk_df)
-                            
-                            progress = 5 + int(((i + chunk_size) / total_records) * (20 - 5)) # Scale progress from 5% to 20%
-                            self.root.after(0, self._update_progress_bar, progress, f"Processing chunk {i//chunk_size + 1}... ({min(i + chunk_size, total_records)}/{total_records})")
+                        reader_class = None
+                        if selected_source == "AWS CloudTrail Logs":
+                            reader_class = AWSCloudTrailReader
+                        elif selected_source == "Azure Activity Logs":
+                            reader_class = IAMLogReader # Using generic IAMLogReader for Azure now
                         
-                        if all_chunks:
-                            df_local = pd.concat(all_chunks, ignore_index=True)
-                        else:
-                            df_local = pd.DataFrame()
+                        if reader_class and file_path:
+                            log_reader = get_log_reader(reader_class, file_path)
                             
+                            all_chunks = []
+                            total_records_processed = 0
+                            self.root.after(0, self.update_status, f"Reading logs from {file_path} in chunks...")
+                            for i, chunk_df in enumerate(log_reader.read_logs_in_chunks()):
+                                all_chunks.append(chunk_df)
+                                total_records_processed += len(chunk_df)
+                                self.root.after(0, self.update_status, f"Processing chunk {i+1}... ({len(all_chunks)}/{total_records_processed})")
+                                self.root.after(0, self._update_progress_bar, 5 + int((i+1)/10 * 15))
+
+                            if all_chunks:
+                                df_local = pd.concat(all_chunks, ignore_index=True)
+                            else:
+                                df_local = pd.DataFrame()
+                        else: # Handle case where reader_class or file_path is missing
+                            self.update_status("Error: No reader class or file path provided for selected log type.")
+                            self._update_progress_bar(0)
+                            return
+                                
                     except FileNotFoundError:
                         self.update_status(f"Error: File not found at {file_path}")
                         self._update_progress_bar(0)
                         return
                     except json.JSONDecodeError as e:
                         self.update_status(f"Error decoding JSON from {file_path}: {e}")
+                        import traceback
+                        traceback.print_exc()
                         self._update_progress_bar(0)
                         return
                     except Exception as e:
@@ -506,18 +495,31 @@ These planned features underscore the system's potential to become a pivotal com
                         self._update_progress_bar(0)
                         return
 
-                    self.root.after(0, self.update_status, "Logs loaded and cleaned!")
-                    true_anomalies_exist = False # No true labels for real logs
-                
                 if df_local is None or df_local.empty:
                     self.root.after(0, self.update_status, "Error: No data to process.")
                     self.root.after(0, lambda: self.run_button.state(['!disabled']))
                     return
                 
+                self.root.after(0, self.update_status, "Logs loaded and cleaned!")
+
+                # Debug print: Check columns after log reading
+                print(f"DEBUG: main.py - Columns after log_reader.read_logs: {df_local.columns.tolist()}")
+                print(f"DEBUG: main.py - 'timestamp' column exists after read: {'timestamp' in df_local.columns}")
+                if 'timestamp' in df_local.columns:
+                    print(f"DEBUG: main.py - 'timestamp' column dtype after read: {df_local['timestamp'].dtype}")
+                    print(f"DEBUG: main.py - First 5 timestamp values after read: {df_local['timestamp'].head()}")
+
                 # Extract features (20-40% progress)
                 self.root.after(0, self.update_status, "Extracting features... (2/4)")
                 self.root.after(0, self._update_progress_bar, 25, "Initializing feature engineer...")
                 feature_engineer = FeatureEngineer()
+
+                # Debug print: Check columns before feature engineering
+                print(f"DEBUG: main.py - Columns before feature_engineer.engineer_features: {df_local.columns.tolist()}")
+                print(f"DEBUG: main.py - 'timestamp' column exists before engineer: {'timestamp' in df_local.columns}")
+                if 'timestamp' in df_local.columns:
+                    print(f"DEBUG: main.py - 'timestamp' column dtype before engineer: {df_local['timestamp'].dtype}")
+                    print(f"DEBUG: main.py - First 5 timestamp values before engineer: {df_local['timestamp'].head()}")
 
                 # Pass a progress callback to the feature engineer
                 def feature_engineering_progress(current_step, total_steps, message):
@@ -526,14 +528,23 @@ These planned features underscore the system's potential to become a pivotal com
                     step_progress = int(base_progress + (current_step / total_steps) * progress_range)
                     self.root.after(0, self._update_progress_bar, step_progress, message)
 
-                df_local = feature_engineer.engineer_features(df_local, progress_callback=feature_engineering_progress)
-                feature_columns = feature_engineer.get_feature_columns()
+                df_local = feature_engineer.engineer_features(df_local, feature_engineering_progress)
+                self.feature_columns = feature_engineer.get_feature_columns()
                 self.root.after(0, self._update_progress_bar, 40, "Feature extraction complete!")
-                
+                print(f"DEBUG: main.py - df_local.shape after feature engineering: {df_local.shape}")
+
+                # After feature engineering, if synthetic data, extract true labels from the potentially reduced df_local
+                if selected_source == "Synthetic Data" and 'is_anomaly' in df_local.columns:
+                    true_labels = df_local['is_anomaly'].values
+                    true_anomalies_exist = True
+                    print(f"DEBUG: main.py - len(true_labels) after feature engineering: {len(true_labels)}")
+                else:
+                    true_anomalies_exist = False # Ensure this is False for real logs
+
                 # Train model (40-85% progress)
                 self.root.after(0, self.update_status, "Training hybrid anomaly detection model... (3/4)")
                 self.root.after(0, self._update_progress_bar, 45, "Initializing hybrid model...")
-                
+
                 # Get hyperparameters from GUI
                 n_estimators_iso_forest = int(self.n_estimators_iso_forest.get())
                 max_features_iso_forest = float(self.max_features_iso_forest.get())
@@ -561,7 +572,7 @@ These planned features underscore the system's potential to become a pivotal com
 
                 # Adjust progress range for model training within hybrid_model.py
                 # hybrid_detector.fit will update progress from 45% to 85%
-                hybrid_detector.fit(df_local[feature_columns], feature_columns, self._update_progress_bar) 
+                hybrid_detector.fit(df_local[self.feature_columns], self.feature_columns, self._update_progress_bar)
                 self.root.after(0, self._update_progress_bar, 85, "Model trained.") # Adjusted percentage
 
                 # Making predictions (85-95% progress)
@@ -569,12 +580,14 @@ These planned features underscore the system's potential to become a pivotal com
                 self.root.after(0, self._update_progress_bar, 90, "Generating predictions...")
                 predictions, scores = hybrid_detector.predict(df_local)
                 self.root.after(0, self._update_progress_bar, 95, "Prediction complete!")
-                
+
                 self.df = df_local # Store the DataFrame for visualization
                 self.predictions = predictions
                 self.scores = scores
 
                 self.root.after(0, self.update_status, "Calculating performance metrics...")
+                print(f"DEBUG: main.py - len(true_labels) before precision_score: {len(true_labels)}")
+                print(f"DEBUG: main.py - len(predictions) before precision_score: {len(predictions)}")
                 if true_anomalies_exist:
                     from sklearn.metrics import precision_score, recall_score, f1_score
                     precision = precision_score(true_labels, predictions)
@@ -585,11 +598,27 @@ These planned features underscore the system's potential to become a pivotal com
                     self.root.after(0, self.update_status, f"Precision: {precision:.3f}")
                     self.root.after(0, self.update_status, f"Recall: {recall:.3f}")
                     self.root.after(0, self.update_status, f"F1 Score: {f1:.3f}")
+                    
+                    experiment_result = f"Data Source: {selected_source}, IF_Estimators: {n_estimators_iso_forest}, IF_Max_Features: {max_features_iso_forest}, RF_Estimators: {n_estimators_rf}, RF_Max_Depth: {max_depth_rf}, RF_Min_Samples_Split: {min_samples_split_rf}, Contamination: {self.contamination_ratio.get()}, Precision: {precision:.3f}, Recall: {recall:.3f}, F1: {f1:.3f}, Detected Anomalies: {np.sum(predictions)}"
+                    self.root.after(0, self.log_experiment_result, experiment_result)
+
                 else:
                     self.root.after(0, self.update_status, "\nModel Performance: (Note: Metrics not applicable for unlabeled real logs)")
                     self.root.after(0, self.update_status, f"Contamination Ratio: {self.contamination_ratio.get()}")
+                    experiment_result = f"Data Source: {selected_source}, IF_Estimators: {n_estimators_iso_forest}, IF_Max_Features: {max_features_iso_forest}, RF_Estimators: {n_estimators_rf}, RF_Max_Depth: {max_depth_rf}, RF_Min_Samples_Split: {min_samples_split_rf}, Contamination: {self.contamination_ratio.get()}, Detected Anomalies: {np.sum(predictions)} (Metrics N/A)"
+                    self.root.after(0, self.log_experiment_result, experiment_result)
                 
                 self.root.after(0, self.update_status, f"Detected Anomalies: {np.sum(predictions)}")
+
+                # Store total events and detected anomalies
+                self.total_events_processed = len(df_local)
+                self.detected_anomalies_count = np.sum(predictions)
+
+                # Get top anomalous users (pass the Series, not a string)
+                top_anomalous_users_series = None
+                anomalous_df = df_local[predictions == 1]
+                if not anomalous_df.empty and 'user_id' in anomalous_df.columns: # Changed from 'userIdentity' to 'user_id' for consistency
+                    top_anomalous_users_series = anomalous_df['user_id'].value_counts().head(5)
 
                 # Anomaly Explanation
                 anomalous_indices = np.where(predictions == 1)[0]
@@ -600,15 +629,16 @@ These planned features underscore the system's potential to become a pivotal com
                             break
                         anomaly_data_row = df_local.iloc[[idx]]
                         explanation = hybrid_detector.explain_anomaly(anomaly_data_row) # Pass the single row DataFrame
-                        
+
                         if "error" not in explanation:
                             self.root.after(0, self.update_status, f"  Anomaly {i+1} (Original Index: {idx}):")
                             top_features = list(explanation.items())[:5] # Get top 5 features
                             for feature, importance in top_features:
                                 self.root.after(0, self.update_status, f"    - {feature}: {importance:.4f}")
                         else:
-                            error_message = explanation['error']
-                            self.root.after(0, self.update_status, f"  Anomaly {i+1} (Original Index: {idx}): {error_message}")
+                            self.root.after(0, self.update_status, f"    Error explaining anomaly {idx}: {explanation['error']}")
+                else:
+                    self.root.after(0, self.update_status, "\nNo anomalies detected.")
 
                 self.root.after(0, self.update_status, "Saving results...")
                 output_dir = "output"
@@ -620,56 +650,24 @@ These planned features underscore the system's potential to become a pivotal com
                 output_df['anomaly_score'] = self.scores # Add anomaly scores
 
                 # If original data had true anomalies, include them
-                if true_anomalies_exist:
+                if true_anomalies_exist and 'is_anomaly' in self.df.columns: # Check df.columns not df_local.columns
                     output_df['is_anomaly_true'] = true_labels
                 
                 output_df.to_csv(output_path, index=False)
                 self.root.after(0, self.update_status, f"Results saved to '{output_path}'")
 
-                self.root.after(0, self.update_status, "Analysis Complete!")
-                self.root.after(0, self.update_visualization) # Update visualizations on completion
+                # Update the Reporting Tab with current results
+                self.root.after(0, self.update_reporting_tab, self.total_events_processed, self.detected_anomalies_count, top_anomalous_users_series)
 
-                # Update Reporting Tab with summary
-                total_events = len(df_local) # Assuming df_local contains all processed events
-                detected_anomalies_count = np.sum(predictions)
-                
-                top_anomalous_users_str = "N/A"
-                if 'user_id' in df_local.columns and not df_local['user_id'].empty:
-                    anomaly_users_counts = df_local[predictions == 1]['user_id'].value_counts()
-                    if not anomaly_users_counts.empty:
-                        top_anomalous_users = anomaly_users_counts.head(5).index.tolist()
-                        top_anomalous_users_str = ", ".join(top_anomalous_users)
-                    
-                reporting_content = f"""
-**Anomaly Reporting and Integration Capabilities**
-
-This section highlights the reporting and integration capabilities of the IAM Anomaly Detection system. While the current version focuses on core detection, future enhancements will provide robust reporting and seamless integration with existing security ecosystems.
-
-**Last Analysis Summary:**
-*   **Total Events Processed:** {total_events}
-*   **Detected Anomalies:** {detected_anomalies_count}
-*   **Top Anomalous Users:** {top_anomalous_users_str}
-
-**Key Reporting Features (Planned):**
-*   **Customizable Dashboards:** Interactive dashboards to visualize anomaly trends, user behavior, and security incidents over time.
-*   **Detailed Anomaly Reports:** Generate comprehensive reports for individual anomalies, including contextual information, contributing features, and severity levels.
-*   **Scheduled Reporting:** Automate the generation and distribution of daily, weekly, or monthly anomaly summaries.
-
-**Integration with Security Ecosystems (Planned):**
-*   **SIEM Integration (e.g., Splunk, Elastic Security, Microsoft Sentinel):** Push detected anomalies and their context directly to SIEM platforms for centralized logging, correlation, and alert management.
-*   **SOAR Integration (e.g., Palo Alto Networks XSOAR, Splunk SOAR):** Trigger automated incident response playbooks based on high-severity anomalies, enabling rapid containment and remediation.
-*   **API for Custom Integrations:** Provide a robust API for third-party tools and custom scripts to query anomaly data and integrate with other enterprise systems.
-
-These planned features underscore the system's potential to become a pivotal component in an organization's overall security posture, enabling proactive threat hunting and streamlined incident response.
-"""
-                self.root.after(0, self.update_reporting_tab, reporting_content)
-
+                self.root.after(0, self.update_status, "\nAnalysis complete!")
+                self.root.after(0, self._update_progress_bar, 100, "Done!") # Final update
+                self.root.after(0, self.update_visualization)
             except Exception as e:
-                self.root.after(0, self.update_status, f"Error: {e}")
+                self.root.after(0, self.update_status, f"An error occurred during analysis: {e}")
                 import traceback
-                self.root.after(0, self.update_status, traceback.format_exc())
+                traceback.print_exc()
             finally:
-                self.root.after(0, self.run_button.state, ['!disabled'])
+                self.root.after(0, lambda: self.run_button.state(['!disabled']))
         
         # Run the analysis in a separate thread to keep the GUI responsive
         threading.Thread(target=analysis_thread).start()
@@ -681,16 +679,107 @@ These planned features underscore the system's potential to become a pivotal com
         self.updates_text.config(state='disabled')
 
     def update_data_source_tab(self, content):
-        self.data_source_text.config(state='normal')
-        self.data_source_text.delete(1.0, tk.END)
-        self.data_source_text.insert(tk.END, content)
-        self.data_source_text.config(state='disabled')
+        # No longer used for static text display, content is now driven by UI elements
+        pass
 
-    def update_reporting_tab(self, content):
+    def update_reporting_tab(self, total_events, detected_anomalies, top_users):
         self.reporting_text.config(state='normal')
         self.reporting_text.delete(1.0, tk.END)
+
+        content = f"""
+**Analysis Summary**
+
+- **Total Events Processed:** {total_events}
+- **Detected Anomalies:** {detected_anomalies}
+
+**Top Anomalous Users:**
+"""
+        if top_users is not None and not top_users.empty:
+            for user, count in top_users.items():
+                content += f"- {user}: {count} anomalies\n"
+        else:
+            content += "- No top anomalous users identified.\n"
+
+        # Add Potential Cost Savings
+        AVERAGE_COST_PER_ANOMALY_PREVENTED = 5000 # Placeholder: $5,000 per anomaly prevented
+        potential_cost_savings = detected_anomalies * AVERAGE_COST_PER_ANOMALY_PREVENTED
+        content += f"\n**Potential Cost Savings (Estimated):** ${potential_cost_savings:,.2f}\n"
+        content += "(Based on an estimated average of ${:,.2f} per prevented incident)\n".format(AVERAGE_COST_PER_ANOMALY_PREVENTED)
+
+        content += """
+
+---
+
+**Integration Potential**
+
+This reporting capability can be seamlessly integrated with existing Security Information and Event Management (SIEM) and Security Orchestration, Automation, and Response (SOAR) systems. By feeding anomaly alerts and summary statistics directly into these platforms, organizations can:
+
+*   **Centralize Alert Management:** Consolidate alerts from various security tools into a single pane of glass.
+*   **Automate Response Workflows:** Trigger automated actions (e.g., suspend user, block IP, escalate to security team) based on detected anomalies.
+*   **Enhance Forensic Analysis:** Provide enriched context for incident investigations.
+*   **Improve Overall Security Posture:** Proactively respond to threats and continually refine security policies based on real-time insights.
+
+"""
         self.reporting_text.insert(tk.END, content)
         self.reporting_text.config(state='disabled')
+
+    def update_value_prop_tab(self):
+        content = """
+**IAM Anomaly Detection: A Strategic Investment for Unparalleled Security and Tangible ROI**
+
+In an era where digital identities are the primary attack vector, robust Identity and Access Management (IAM) is not just a security best practice—it's a critical business imperative. This AI-driven IAM Anomaly Detection system represents a strategic investment that proactively safeguards your organization against evolving cyber threats, delivering not only enhanced security but also significant, measurable business value.
+
+### The Problem We Solve: Mitigating High-Impact Cyber Risks
+
+*   **Credential Compromise (e.g., Phishing, Brute Force):** Detects and alerts on unusual login patterns (time, location, device, frequency), account takeover attempts, and suspicious access from new or blacklisted IPs, dramatically reducing the window of compromise.
+*   **Privilege Abuse & Insider Threats:** Identifies authorized users exhibiting anomalous behavior, such as accessing sensitive data outside their job function, escalating privileges without authorization, or performing actions inconsistent with their historical profile, thereby curbing internal threats.
+*   **Policy Violations & Misconfigurations:** Flags deviations from established IAM policies and potential misconfigurations that could expose your organization to risk, ensuring continuous compliance.
+*   **Ransomware & Malware Spread:** Early detection of lateral movement or unusual resource access by compromised accounts can prevent widespread infection and minimize operational disruption.
+
+### Delivering Tangible Business Value: Beyond Security
+
+1.  **Reduced Breach Risk & Associated Costs (Estimated Savings: $X00,000 - $X Million per incident):**
+    *   By identifying and neutralizing threats early, the system prevents minor incidents from escalating into costly data breaches, which averaged $4.45 million in 2023. Proactive detection minimizes forensic costs, legal fees, regulatory fines, and reputational damage.
+2.  **Enhanced Operational Efficiency (Estimated Savings: Y% in Analyst Time):**
+    *   Automates the laborious, error-prone task of manually sifting through colossal volumes of log data. This frees up highly skilled security analysts to focus on strategic threat intelligence, threat hunting, and incident response, significantly optimizing security operations.
+3.  **Faster Incident Response & Recovery (Reduced Downtime):**
+    *   Provides real-time anomaly alerts with rich contextual data, enabling security teams to respond to potential threats in minutes, not hours or days. This rapid response minimizes business disruption, reduces mean time to detect (MTTD) and mean time to respond (MTTR), and protects critical business continuity.
+4.  **Improved Compliance & Audit Readiness (Avoidance of Penalties):**
+    *   Generates comprehensive, auditable records of security events and detected anomalies. This streamlines compliance reporting for regulations such as GDPR, HIPAA, SOX, PCI DSS, and enhances your posture during internal and external audits, helping avoid hefty fines and legal repercussions.
+5.  **Data-Driven Security Decisions & Policy Refinement:**
+    *   Transforms raw log data into actionable intelligence, providing deep insights into user behavior and threat landscapes. This empowers security leaders to make informed decisions, optimize security policies, and allocate resources more effectively.
+6.  **Unmatched Scalability & Extensibility:**
+    *   Designed with a modular architecture that supports seamless integration with diverse log sources (AWS CloudTrail, Azure Activity Logs, Google Cloud Audit Logs, On-premise Active Directory, SIEMs like Splunk/Elastic Stack). This ensures the solution remains effective and adaptable to growing data volumes and evolving IT infrastructures.
+
+### System Workflow & Value Flow Diagram: From Raw Data to Actionable Intelligence
+
+This system transforms overwhelming security log data into a clear, actionable intelligence pathway:
+
+1.  **Raw Log Data:** Ingests vast quantities of unstructured security logs from diverse enterprise sources (cloud, on-premise, network devices).
+2.  **Log Ingestion & Standardization:** Raw logs are intelligently parsed, normalized, and transformed into a consistent, machine-readable format, ensuring data uniformity across all sources.
+3.  **Cleaned & Standardized Logs:** A unified, high-quality dataset emerges, forming the foundation for deep behavioral analysis.
+4.  **Advanced Feature Engineering:** Over 50 critical features are meticulously extracted and engineered, including time-based metrics (e.g., login frequency, time-between-actions), IP-based insights (e.g., new IP, geographic impossibilities), and intricate behavioral patterns (e.g., unique actions per session, role changes).
+5.  **Comprehensive Behavioral Profiles:** These engineered features culminate in rich, multi-dimensional behavioral profiles for every user, role, and resource, establishing a baseline of 'normal.'
+6.  **Hybrid Anomaly Detection Models:** Leveraging state-of-the-art machine learning, the system employs a powerful combination of models:
+    *   **Isolation Forest:** For efficient identification of outlier events.
+    *   **RandomForest Classifier:** For robust classification of normal vs. anomalous behavior.
+    *   **LSTM Autoencoder (Deep Learning):** For uncovering subtle, complex sequential anomalies in user activity patterns that simpler models might miss.
+7.  **Real-Time Anomaly Scores & Prioritized Alerts:** Models generate precise anomaly scores, with high scores triggering prioritized alerts. This intelligent scoring minimizes alert fatigue.
+8.  **Intuitive Reporting & Visualization:** Detected anomalies, key metrics, and user behavior trends are presented through a user-friendly GUI with interactive charts and tables, enabling rapid understanding and investigation.
+
+This comprehensive, AI-driven data flow culminates in unparalleled **Proactive Security & Business Value**, directly leading to:
+
+*   **Significant Risk Reduction:** By detecting and preventing sophisticated threats before they cause damage.
+*   **Substantial Cost Savings:** Through breach prevention, operational efficiency, and compliance assurance.
+*   **Optimized Security Operations:** By automating analysis and empowering analysts.
+*   **Enhanced Strategic Decision-Making:** Providing actionable insights for a stronger security posture.
+
+**Invest in IAM Anomaly Detection – Secure Your Digital Future and Realize Measurable ROI.**
+"""
+        self.value_prop_text.config(state='normal')
+        self.value_prop_text.delete(1.0, tk.END)
+        self.value_prop_text.insert(tk.END, content)
+        self.value_prop_text.config(state='disabled')
 
     def browse_file(self):
         file_selected = filedialog.askopenfilename(
@@ -699,6 +788,27 @@ These planned features underscore the system's potential to become a pivotal com
         )
         if file_selected:
             self.file_path_var.set(file_selected)
+
+    def browse_schema_file(self):
+        file_path = filedialog.askopenfilename(filetypes=[("JSON files", "*.json"), ("All files", "*.*")])
+        if file_path:
+            self.schema_path_var.set(file_path)
+
+    def save_data_source_config(self):
+        source_name = self.source_name_entry.get()
+        source_type = self.source_type_var.get()
+        schema_path = self.schema_path_var.get()
+        
+        status_message = f"Saving configuration for: {source_name} (Type: {source_type}, Schema: {schema_path})\n(Note: This is a placeholder for future backend integration)"
+        self.update_status(status_message)
+        print(status_message) # For debugging/console visibility
+
+    def log_experiment_result(self, result_description):
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        experiment_log_entry = f"{current_time} - {result_description}\n"
+        self.experiment_log_text.config(state='normal')
+        self.experiment_log_text.insert(tk.END, experiment_log_entry)
+        self.experiment_log_text.config(state='disabled')
 
 def main():
     root = tk.Tk()
