@@ -276,7 +276,17 @@ ensuring holistic threat visibility and enhanced accuracy. Define new log source
 
         self.reporting_text = tk.Text(self.reporting_tab, wrap=tk.WORD, state='disabled', font=("TkDefaultFont", 10))
         self.reporting_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
-        self.update_reporting_tab(0, 0, None) # Initial call with placeholders
+
+        # Frame for reporting visualizations
+        self.reporting_viz_frame = ttk.LabelFrame(self.reporting_tab, text="Anomaly Trends")
+        self.reporting_viz_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+
+        self.reporting_figure = plt.Figure(figsize=(8, 4))
+        self.reporting_canvas = FigureCanvasTkAgg(self.reporting_figure, master=self.reporting_viz_frame)
+        self.reporting_canvas_widget = self.reporting_canvas.get_tk_widget()
+        self.reporting_canvas_widget.pack(fill=tk.BOTH, expand=True)
+
+        self.update_reporting_tab(0, 0, None, None, None) # Initial call with placeholders
 
         # --- Value Proposition Tab ---
         self.value_prop_tab = ttk.Frame(self.notebook)
@@ -657,7 +667,7 @@ ensuring holistic threat visibility and enhanced accuracy. Define new log source
                 self.root.after(0, self.update_status, f"Results saved to '{output_path}'")
 
                 # Update the Reporting Tab with current results
-                self.root.after(0, self.update_reporting_tab, self.total_events_processed, self.detected_anomalies_count, top_anomalous_users_series)
+                self.root.after(0, self.update_reporting_tab, self.total_events_processed, self.detected_anomalies_count, top_anomalous_users_series, df_local, predictions)
 
                 self.root.after(0, self.update_status, "\nAnalysis complete!")
                 self.root.after(0, self._update_progress_bar, 100, "Done!") # Final update
@@ -682,7 +692,7 @@ ensuring holistic threat visibility and enhanced accuracy. Define new log source
         # No longer used for static text display, content is now driven by UI elements
         pass
 
-    def update_reporting_tab(self, total_events, detected_anomalies, top_users):
+    def update_reporting_tab(self, total_events, detected_anomalies, top_users, df_local, predictions):
         self.reporting_text.config(state='normal')
         self.reporting_text.delete(1.0, tk.END)
 
@@ -695,10 +705,57 @@ ensuring holistic threat visibility and enhanced accuracy. Define new log source
 **Top Anomalous Users:**
 """
         if top_users is not None and not top_users.empty:
-            for user, count in top_users.items():
-                content += f"- {user}: {count} anomalies\n"
+            # Calculate average anomaly score for top users
+            anomalous_df_with_scores = df_local[predictions == 1].copy()
+            if 'user_id' in anomalous_df_with_scores.columns and 'anomaly_score' in anomalous_df_with_scores.columns:
+                # Filter anomalous_df_with_scores to only include the top_users
+                top_user_ids = top_users.index.tolist()
+                anomalous_df_top_users = anomalous_df_with_scores[anomalous_df_with_scores['user_id'].isin(top_user_ids)]
+                
+                avg_scores_by_user = anomalous_df_top_users.groupby('user_id')['anomaly_score'].mean()
+                
+                for user, count in top_users.items():
+                    avg_score = avg_scores_by_user.get(user, 'N/A') # Get average score, N/A if not found
+                    if avg_score != 'N/A':
+                        content += f"- {user}: {count} anomalies (Avg Score: {avg_score:.3f})\n"
+                    else:
+                        content += f"- {user}: {count} anomalies\n"
+            else:
+                for user, count in top_users.items():
+                    content += f"- {user}: {count} anomalies\n"
         else:
             content += "- No top anomalous users identified.\n"
+
+        # Add Anomaly Trends Visualization
+        self.reporting_figure.clear()
+        ax = self.reporting_figure.add_subplot(111)
+
+        if df_local is not None and predictions is not None and 'timestamp' in df_local.columns:
+            anomalous_df = df_local[predictions == 1].copy()
+            if not anomalous_df.empty:
+                anomalous_df['timestamp'] = pd.to_datetime(anomalous_df['timestamp'])
+                anomalies_by_hour = anomalous_df.groupby(anomalous_df['timestamp'].dt.hour).size()
+                
+                # Ensure all hours (0-23) are present, even if no anomalies
+                all_hours = pd.Series(0, index=range(24))
+                anomalies_by_hour = all_hours.add(anomalies_by_hour, fill_value=0)
+                anomalies_by_hour = anomalies_by_hour.sort_index()
+
+                ax.bar(anomalies_by_hour.index, anomalies_by_hour.values, color='skyblue')
+                ax.set_title('Anomalies by Hour of Day')
+                ax.set_xlabel('Hour of Day')
+                ax.set_ylabel('Number of Anomalies')
+                ax.set_xticks(range(0, 24, 2)) # Show every 2nd hour
+                ax.grid(axis='y', linestyle='--', alpha=0.7)
+            else:
+                ax.text(0.5, 0.5, 'No anomalies detected for trend analysis', horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
+                ax.set_title('Anomalies by Hour of Day')
+        else:
+            ax.text(0.5, 0.5, 'Data not available for trend analysis', horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
+            ax.set_title('Anomalies by Hour of Day')
+        
+        self.reporting_figure.tight_layout()
+        self.reporting_canvas.draw()
 
         # Add Potential Cost Savings
         AVERAGE_COST_PER_ANOMALY_PREVENTED = 5000 # Placeholder: $5,000 per anomaly prevented
