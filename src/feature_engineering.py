@@ -19,10 +19,8 @@ class FeatureEngineer:
         df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
         
         # Basic time features
-        # Fill NaT in timestamp before extracting features that expect valid datetime
-        # Use .loc to avoid SettingWithCopyWarning
-        df_temp = df.copy()
-        df_temp = df_temp.dropna(subset=['timestamp'])
+        # Use original df directly as _temp_row_id is already set
+        df_temp = df.dropna(subset=['timestamp']).copy()
 
         df['hour'] = df_temp['timestamp'].dt.hour
         df['day_of_week'] = df_temp['timestamp'].dt.dayofweek
@@ -33,8 +31,8 @@ class FeatureEngineer:
         df['hour_sin'] = np.sin(2 * np.pi * df['hour'].fillna(0)/24)
         df['hour_cos'] = np.cos(2 * np.pi * df['hour'].fillna(0)/24)
         
-        # Time since last access for each user
-        df = df.sort_values(['user_id', 'timestamp'])
+        # Time since last access for each user - ensure sorting includes _temp_row_id
+        df = df.sort_values(['user_id', 'timestamp', '_temp_row_id'])
         # Ensure user_id is not NA for groupby. Fill with a placeholder string if needed
         df['user_id_filled'] = df['user_id'].fillna('unknown_user')
         df['time_since_last_access'] = df.groupby('user_id_filled')['timestamp'].diff().dt.total_seconds()
@@ -102,6 +100,8 @@ class FeatureEngineer:
     
     def extract_behavioral_features(self, df: pd.DataFrame) -> pd.DataFrame:
         """Extract behavioral features based on user actions."""
+        print(f"DEBUG: extract_behavioral_features - df.index.is_unique at start: {df.index.is_unique}") # DEBUG PRINT
+
         # Ensure 'user_id', 'action', 'resource', 'status' are strings and filled
         df['user_id'] = df['user_id'].fillna('unknown_user').astype(str)
         df['action'] = df['action'].fillna('unknown_action').astype(str)
@@ -128,63 +128,31 @@ class FeatureEngineer:
         df['success_ratio'] = df['success_count'] / (df['success_count'] + df['failure_count'])
         df['success_ratio'] = df['success_ratio'].fillna(1) # Fill NaN where total count is 0 (divide by zero)
 
-        # Add rate-based features
-        df_temp = df[['user_id', 'timestamp', 'action', 'resource']].copy()
-        df_temp = df_temp.sort_values(by=['user_id', 'timestamp'])
-        # Drop rows where timestamp is NaT before time-based calculations
-        df_temp = df_temp.dropna(subset=['timestamp'])
+        # Add rate-based features (optimized using rolling windows)
+        # Ensure df is sorted by user_id, timestamp, and _temp_row_id for correct rolling window calculation
+        df_temp_behavioral = df.sort_values(by=['user_id', 'timestamp', '_temp_row_id']).copy()
 
-        # Actions per minute (Manual rolling window for robustness)
-        actions_per_minute_list = []
-        for user_id, group in df_temp.groupby('user_id'):
-            group = group.sort_values(by='timestamp').reset_index(drop=True)
-            for i in range(len(group)):
-                current_time = group.loc[i, 'timestamp']
-                window_start = current_time - pd.Timedelta(minutes=1)
-                # Select rows within the 1-minute window ending at current_time (exclusive)
-                window_data = group[(group['timestamp'] >= window_start) & (group['timestamp'] < current_time)]
-                actions_count = len(window_data) if not window_data.empty else 0
-                actions_per_minute_list.append({
-                    'user_id': user_id,
-                    'timestamp': current_time,
-                    'actions_per_minute': actions_count
-                })
-        actions_per_minute_df = pd.DataFrame(actions_per_minute_list)
-        df = df.merge(actions_per_minute_df, on=['user_id', 'timestamp'], how='left').fillna({'actions_per_minute': 0})
+        # Actions per minute
+        actions_per_minute_rolled = df_temp_behavioral.groupby('user_id').rolling('1min', on='timestamp')['action'].count()
+        # Reset index and merge back using _temp_row_id
+        actions_per_minute_df = actions_per_minute_rolled.reset_index()
+        actions_per_minute_df = actions_per_minute_df.rename(columns={'action': 'actions_per_minute'})
+        print(f"DEBUG: extract_behavioral_features - df.index.is_unique before actions_per_minute merge: {df.index.is_unique}") # DEBUG PRINT
+        df = df.merge(actions_per_minute_df[['_temp_row_id', 'actions_per_minute']], on='_temp_row_id', how='left').fillna({'actions_per_minute': 0})
 
-        # Unique actions per hour (Manual rolling window for robustness)
-        unique_actions_per_hour_list = []
-        for user_id, group in df_temp.groupby('user_id'):
-            group = group.sort_values(by='timestamp').reset_index(drop=True)
-            for i in range(len(group)):
-                current_time = group.loc[i, 'timestamp']
-                window_start = current_time - pd.Timedelta(hours=1)
-                window_data = group[(group['timestamp'] >= window_start) & (group['timestamp'] < current_time)]
-                unique_count = window_data['action'].nunique() if not window_data.empty else 0
-                unique_actions_per_hour_list.append({
-                    'user_id': user_id,
-                    'timestamp': current_time,
-                    'unique_actions_per_hour': unique_count
-                })
-        unique_actions_per_hour_df = pd.DataFrame(unique_actions_per_hour_list)
-        df = df.merge(unique_actions_per_hour_df, on=['user_id', 'timestamp'], how='left').fillna({'unique_actions_per_hour': 0})
+        # Unique actions per hour
+        unique_actions_per_hour_rolled = df_temp_behavioral.groupby('user_id').rolling('1h', on='timestamp')['action'].apply(lambda x: x.nunique(), raw=False)
+        # Reset index and merge back using _temp_row_id
+        unique_actions_per_hour_df = unique_actions_per_hour_rolled.reset_index()
+        unique_actions_per_hour_df = unique_actions_per_hour_df.rename(columns={'action': 'unique_actions_per_hour'})
+        df = df.merge(unique_actions_per_hour_df[['_temp_row_id', 'unique_actions_per_hour']], on='_temp_row_id', how='left').fillna({'unique_actions_per_hour': 0})
 
-        # Unique resources per hour (Manual rolling window for robustness)
-        unique_resources_per_hour_list = []
-        for user_id, group in df_temp.groupby('user_id'):
-            group = group.sort_values(by='timestamp').reset_index(drop=True)
-            for i in range(len(group)):
-                current_time = group.loc[i, 'timestamp']
-                window_start = current_time - pd.Timedelta(hours=1)
-                window_data = group[(group['timestamp'] >= window_start) & (group['timestamp'] < current_time)]
-                unique_count = window_data['resource'].nunique() if not window_data.empty else 0
-                unique_resources_per_hour_list.append({
-                    'user_id': user_id,
-                    'timestamp': current_time,
-                    'unique_resources_per_hour': unique_count
-                })
-        unique_resources_per_hour_df = pd.DataFrame(unique_resources_per_hour_list)
-        df = df.merge(unique_resources_per_hour_df, on=['user_id', 'timestamp'], how='left').fillna({'unique_resources_per_hour': 0})
+        # Unique resources per hour
+        unique_resources_per_hour_rolled = df_temp_behavioral.groupby('user_id').rolling('1h', on='timestamp')['resource'].apply(lambda x: x.nunique(), raw=False)
+        # Reset index and merge back using _temp_row_id
+        unique_resources_per_hour_df = unique_resources_per_hour_rolled.reset_index()
+        unique_resources_per_hour_df = unique_resources_per_hour_df.rename(columns={'resource': 'unique_resources_per_hour'})
+        df = df.merge(unique_resources_per_hour_df[['_temp_row_id', 'unique_resources_per_hour']], on='_temp_row_id', how='left').fillna({'unique_resources_per_hour': 0})
 
         # Add to feature columns
         self.numerical_columns.extend(action_counts.columns.tolist())
@@ -206,60 +174,37 @@ class FeatureEngineer:
         df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
 
         # Drop rows where timestamp is NaT as they are crucial for time-based calculations
-        df_temp = df.dropna(subset=['timestamp']).copy()
+        # Include _temp_row_id in sorting to maintain its relative order within groups if timestamps are identical
+        df_temp = df.dropna(subset=['timestamp']).sort_values(by=['session_id', 'timestamp', '_temp_row_id']).copy()
 
         # Only process sessions if there are valid session IDs beyond 'unknown_session'
         # and if there's enough data to form groups (i.e., more than one record after dropping NaNs)
         if not df_temp[df_temp['session_id'] != 'unknown_session'].empty and len(df_temp) > 0:
-            # Sort within each session for time-based calculations
-            df_temp = df_temp.sort_values(by=['session_id', 'timestamp'])
 
             # 1. Actions per session
-            # Use transform to broadcast the session size back to the original DataFrame's index
-            df_temp['actions_per_session'] = df_temp.groupby('session_id').transform('size')
+            df_temp['actions_per_session'] = df_temp.groupby('session_id')['session_id'].transform('size')
 
             # 2. Distinct actions per session
             df_temp['distinct_actions_per_session'] = df_temp.groupby('session_id')['action'].transform('nunique')
 
             # 3. Time between actions in session (for each user within a session)
-            # Calculate diff of timestamps within each session
             df_temp['time_between_actions_in_session'] = df_temp.groupby('session_id')['timestamp'].diff().dt.total_seconds().fillna(0)
 
-            # 4. Average time between actions in session (Manual rolling mean for robustness)
-            average_time_between_actions_list = []
-            for session_id_val, group in df_temp.groupby('session_id'):
-                group = group.sort_values(by='timestamp').reset_index(drop=True)
-                # Ensure time_between_actions_in_session is available for rolling
-                group['time_between_actions_in_session'] = group['timestamp'].diff().dt.total_seconds().fillna(0)
-                for i in range(len(group)):
-                    current_time = group.loc[i, 'timestamp']
-                    window_start = current_time - pd.Timedelta(seconds=300) # 5 minutes window
-                    window_data = group[(group['timestamp'] >= window_start) & (group['timestamp'] < current_time)]
-                    avg_duration = window_data['time_between_actions_in_session'].mean() if not window_data.empty else 0
-                    average_time_between_actions_list.append({
-                        'session_id': session_id_val,
-                        'timestamp': current_time,
-                        'average_time_between_actions_in_session': avg_duration
-                    })
-            average_time_between_actions_df = pd.DataFrame(average_time_between_actions_list)
+            # 4. Average time between actions in session (Optimized using rolling mean)
+            df_temp['average_time_between_actions_in_session'] = df_temp.groupby('session_id')['time_between_actions_in_session'].rolling(window=5, min_periods=1).mean().reset_index(level=0, drop=True)
+            df_temp['average_time_between_actions_in_session'] = df_temp['average_time_between_actions_in_session'].fillna(0)
 
-            # Merge this new dataframe back to df_temp, then df
-            df_temp = df_temp.merge(average_time_between_actions_df, on=['session_id', 'timestamp'], how='left').fillna({'average_time_between_actions_in_session': 0})
-
-            # Merge back to the original DataFrame
-            # Ensure df_temp has the original index so merge works correctly
-            df_temp = df_temp.set_index(df_temp.index)
-
-            # Select only the newly created features for merging
-            features_to_merge = df_temp[[
+            # Merge back to the original DataFrame using _temp_row_id
+            features_to_merge_cols = [
                 'actions_per_session',
                 'distinct_actions_per_session',
                 'time_between_actions_in_session',
-                'average_time_between_actions_in_session'
-            ]]
-
-            # Use left_index=True, right_index=True to merge on index
-            df = df.merge(features_to_merge, left_index=True, right_index=True, how='left')
+                'average_time_between_actions_in_session',
+                '_temp_row_id' # Include the temp_row_id for merging
+            ]
+            # Filter df_temp to only the columns needed for merging
+            features_to_merge = df_temp[features_to_merge_cols]
+            df = df.merge(features_to_merge, on='_temp_row_id', how='left')
 
             # Fill any NaNs that might result from sessions with no activity or single events
             df['actions_per_session'] = df['actions_per_session'].fillna(0)
@@ -300,15 +245,17 @@ class FeatureEngineer:
         df['region_frequency'] = df['region_str'].map(region_counts).fillna(0)
 
         # Top N regions as categorical features
-        top_n_regions = region_counts.head(10).index.tolist() # Consider top 10 regions
+        top_n_regions = region_counts.head(5).index.tolist() # Consider top 5 regions
         df['top_region'] = df['region_str'].apply(lambda x: x if x in top_n_regions else 'other_region')
         
         # Region changes per session - 'session_id' and 'region' are now guaranteed to exist.
         # Ensure 'session_id' is not NA for groupby. Fill with a placeholder string if needed
-        df['session_id_filled'] = df['session_id'].fillna('unknown_session')
-        df['region_changes_in_session'] = df.groupby('session_id_filled')['region_str'].transform('nunique')
-        df['region_changes_in_session'] = df['region_changes_in_session'].fillna(0) # Fill NaN from transform
-        df.drop(columns=['session_id_filled'], inplace=True)
+        df_temp_region = df.dropna(subset=['session_id', 'region_str']).sort_values(by=['session_id', '_temp_row_id']).copy()
+        df_temp_region['session_id_filled'] = df_temp_region['session_id'].fillna('unknown_session')
+        df_temp_region['region_changes_in_session'] = df_temp_region.groupby('session_id_filled')['region_str'].transform('nunique')
+        df_temp_region['region_changes_in_session'] = df_temp_region['region_changes_in_session'].fillna(0) # Fill NaN from transform
+        
+        df = df.merge(df_temp_region[['_temp_row_id', 'region_changes_in_session']], on='_temp_row_id', how='left').fillna({'region_changes_in_session': 0})
 
         # Add to feature columns
         self.numerical_columns.extend(['region_frequency', 'region_changes_in_session'])
@@ -329,7 +276,7 @@ class FeatureEngineer:
         df['user_agent_frequency'] = df['user_agent_str'].map(ua_counts).fillna(0)
         
         # Top N user agents as categorical features
-        top_n_uas = ua_counts.head(10).index.tolist() # Consider top 10 UAs
+        top_n_uas = ua_counts.head(5).index.tolist() # Consider top 5 UAs
         df['top_user_agent'] = df['user_agent_str'].apply(lambda x: x if x in top_n_uas else 'other_user_agent')
         
         # Extract OS and browser from user agent string (simplified)
@@ -349,10 +296,12 @@ class FeatureEngineer:
         
         # User agent changes per session - 'session_id' and 'user_agent' are now guaranteed to exist.
         # Ensure 'session_id' is not NA for groupby. Fill with a placeholder string if needed
-        df['session_id_filled'] = df['session_id'].fillna('unknown_session')
-        df['user_agent_changes_in_session'] = df.groupby('session_id_filled')['user_agent_str'].transform('nunique')
-        df['user_agent_changes_in_session'] = df['user_agent_changes_in_session'].fillna(0)
-        df.drop(columns=['session_id_filled'], inplace=True)
+        df_temp_ua = df.dropna(subset=['session_id', 'user_agent_str']).sort_values(by=['session_id', '_temp_row_id']).copy()
+        df_temp_ua['session_id_filled'] = df_temp_ua['session_id'].fillna('unknown_session')
+        df_temp_ua['user_agent_changes_in_session'] = df_temp_ua.groupby('session_id_filled')['user_agent_str'].transform('nunique')
+        df_temp_ua['user_agent_changes_in_session'] = df_temp_ua['user_agent_changes_in_session'].fillna(0)
+
+        df = df.merge(df_temp_ua[['_temp_row_id', 'user_agent_changes_in_session']], on='_temp_row_id', how='left').fillna({'user_agent_changes_in_session': 0})
 
         # Add to feature columns
         self.numerical_columns.extend(['user_agent_frequency', 'user_agent_changes_in_session'])
@@ -363,7 +312,7 @@ class FeatureEngineer:
         
         return df
     
-    def _scale_features(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _scale_features(self, df: pd.DataFrame, is_training: bool = True) -> pd.DataFrame:
         """Scales numerical features using StandardScaler."""
         if not self.numerical_columns:
             print("No numerical columns to scale.")
@@ -377,72 +326,319 @@ class FeatureEngineer:
             return df
 
         # Fit scaler only on the first batch of data or if not fitted yet
-        if not hasattr(self.scaler, 'mean_'):
+        if is_training and not hasattr(self.scaler, 'mean_'):
             # Filter df to only numerical columns that are not all zeros or NaNs
             # to avoid issues with fitting on constant features
             train_data = df[cols_to_scale].replace([np.inf, -np.inf], np.nan).dropna(axis=1, how='all')
             
-            if not train_data.empty:
+            if not train_data.empty and train_data.nunique().sum() > 0: # Ensure there's actually varying data to fit on
                 self.scaler.fit(train_data)
             else:
                 print("Warning: No varying numerical data to fit scaler. Skipping scaling for this batch.")
                 return df
 
         # Transform data. Handle potential new columns during transform by re-filtering.
-        scaled_data = self.scaler.transform(df[cols_to_scale])
-        df[cols_to_scale] = scaled_data
+        # Only transform if scaler has been fitted
+        if hasattr(self.scaler, 'mean_'):
+            scaled_data = self.scaler.transform(df[cols_to_scale])
+            df[cols_to_scale] = scaled_data
+            print(f"Scaled {len(cols_to_scale)} numerical features.")
+        else:
+            print("Scaler not fitted, skipping transformation.")
         
-        print(f"Scaled {len(cols_to_scale)} numerical features.")
         return df
 
-    def engineer_features(self, df: pd.DataFrame, progress_callback: Optional[Callable[[int, int, str], None]] = None) -> pd.DataFrame:
-        """Main method to engineer all features."""
-        self.feature_columns = [] # Reset for each run
-        self.categorical_columns = []
-        self.numerical_columns = []
-
-        total_steps = 8 # Adjusted for scaling step
-        current_step = 0
-
-        def update_progress(message):
-            nonlocal current_step
-            current_step += 1
-            if progress_callback:
-                progress_callback(current_step, total_steps, message)
-
-        update_progress("Starting feature engineering...")
+    def extract_sequence_features(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Extract sequence-based features to detect unusual patterns of actions."""
+        # Ensure required columns are present and properly formatted
+        df['user_id'] = df['user_id'].fillna('unknown_user').astype(str)
+        df['action'] = df['action'].fillna('unknown_action').astype(str)
+        df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
         
-        # Add a unique identifier for each row before any merges/resets
-        # This ensures we can always merge back to the original rows if needed.
-        df['_row_id'] = df.index # Use original DataFrame index as a stable row ID
+        # Sort by user and timestamp, including _temp_row_id for stability
+        df_temp = df.sort_values(['user_id', 'timestamp', '_temp_row_id']).copy()
+        
+        # Action sequence entropy (measures randomness in action patterns)
+        def calculate_entropy(series):
+            value_counts = series.value_counts(normalize=True)
+            return -np.sum(value_counts * np.log2(value_counts)) if not value_counts.empty else 0
+        
+        # Calculate entropy for each user's action sequence
+        action_entropy = df_temp.groupby('user_id')['action'].apply(calculate_entropy).rename('action_entropy').reset_index()
+        df = df.merge(action_entropy, on='user_id', how='left').fillna({'action_entropy': 0})
+        
+        # Action transition matrix features
+        def get_transition_features(group):
+            actions = group['action'].tolist()
+            if len(actions) < 2: # Need at least two actions for a transition
+                return pd.Series({'common_transition_prob': 0, 'unique_transitions': 0})
+            transitions = list(zip(actions[:-1], actions[1:]))
+            transition_counts = pd.Series(transitions).value_counts(normalize=True)
+            return pd.Series({
+                'common_transition_prob': transition_counts.max() if not transition_counts.empty else 0,
+                'unique_transitions': len(transition_counts)
+            })
+        
+        transition_features = df_temp.groupby('user_id').apply(get_transition_features).reset_index()
+        df = df.merge(transition_features, on='user_id', how='left').fillna(0)
+        
+        # Add to numerical columns
+        self.numerical_columns.extend(['action_entropy', 'common_transition_prob', 'unique_transitions'])
+        
+        return df
 
-        # Convert key columns to string types early and fill NAs to prevent errors in grouping/merging
+    def extract_advanced_behavioral_features(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Extract advanced behavioral features focusing on unusual patterns."""
+        # Ensure required columns
         df['user_id'] = df['user_id'].fillna('unknown_user').astype(str)
         df['action'] = df['action'].fillna('unknown_action').astype(str)
         df['resource'] = df['resource'].fillna('unknown_resource').astype(str)
-        df['status'] = df['status'].fillna('unknown_status').astype(str)
-        df['ip_address'] = df['ip_address'].fillna('unknown_ip').astype(str)
-        df['region'] = df['region'].fillna('unknown_region').astype(str)
-        df['user_agent'] = df['user_agent'].fillna('unknown_user_agent').astype(str)
-        df['session_id'] = df['session_id'].fillna('unknown_session').astype(str)
+        df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
+        
+        # Calculate action velocity (actions per time unit)
+        df_temp = df.sort_values(['user_id', 'timestamp', '_temp_row_id']).copy() # Include _temp_row_id for stable sort
+        df_temp['time_diff'] = df_temp.groupby('user_id')['timestamp'].diff().dt.total_seconds()
+        df_temp['action_velocity'] = 1 / df_temp['time_diff'].replace(0, np.nan).fillna(1) # Avoid division by zero, fill with 1 for initial actions
+        
+        # Detect burst activity (sudden spikes in activity)
+        df_temp['rolling_velocity'] = df_temp.groupby('user_id')['action_velocity'].transform(
+            lambda x: x.rolling(window=5, min_periods=1).mean()
+        )
+        df_temp['velocity_std'] = df_temp.groupby('user_id')['action_velocity'].transform(
+            lambda x: x.rolling(window=5, min_periods=1).std()
+        ).fillna(0) # Fill NaN for std where not enough periods
+        
+        # Handle cases where velocity_std might be zero to avoid division by zero in the next step
+        # Replace 0 with a small epsilon to prevent division by zero in the burst calculation
+        df_temp['is_burst'] = ((df_temp['action_velocity'] > df_temp['rolling_velocity'] + 2 * df_temp['velocity_std']) & (df_temp['velocity_std'] > 0)).astype(int)
+        
+        # Resource access diversity
+        df_temp['resource_diversity'] = df_temp.groupby('user_id')['resource'].transform(
+            lambda x: x.nunique() / len(x) if len(x) > 0 else 0
+        ).fillna(0)
+        
+        # Merge action_velocity, is_burst, resource_diversity back to original df using _temp_row_id
+        # Filter df_temp to only columns needed for merge, including _temp_row_id
+        df = df.merge(df_temp[['_temp_row_id', 'action_velocity', 'is_burst', 'resource_diversity']],
+                      on='_temp_row_id', how='left').fillna({'action_velocity': 0, 'is_burst': 0, 'resource_diversity': 0})
 
-        update_progress("Extracting time-based features...")
+        # Action-resource co-occurrence patterns (limit to top N for efficiency)
+        df_temp['action_resource_pair'] = df_temp['action'] + '_' + df_temp['resource']
+        
+        # Calculate frequency of each pair
+        pair_frequencies = df_temp['action_resource_pair'].value_counts(normalize=True)
+        
+        # Select top N most frequent pairs (e.g., top 20, adjust as needed)
+        top_n_pairs = pair_frequencies.head(20).index.tolist()
+        
+        # Map all other pairs to an 'other_pair' category
+        df_temp['action_resource_pair_reduced'] = df_temp['action_resource_pair'].apply(lambda x: x if x in top_n_pairs else 'other_pair')
+        
+        # Now, group by user_id and this reduced pair feature for counts
+        pair_counts = df_temp.groupby(['user_id', 'action_resource_pair_reduced']).size().unstack(fill_value=0)
+        pair_counts.columns = [f'pair_{col}' for col in pair_counts.columns] # Ensure unique column names
+        df = df.merge(pair_counts, on='user_id', how='left').fillna(0)
+        
+        # Add to numerical columns
+        self.numerical_columns.extend([
+            'action_velocity', 'is_burst', 'resource_diversity'
+        ] + pair_counts.columns.tolist())
+        
+        return df
+
+    def extract_temporal_pattern_features(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Extract advanced temporal pattern features."""
+        # Ensure timestamp is datetime
+        df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
+        df['user_id'] = df['user_id'].fillna('unknown_user').astype(str)
+        
+        # Calculate time-based patterns
+        df['hour'] = df['timestamp'].dt.hour
+        df['minute'] = df['timestamp'].dt.minute
+        
+        # Time-of-day patterns
+        df['is_early_morning'] = ((df['hour'] >= 0) & (df['hour'] < 6)).astype(int)
+        df['is_morning'] = ((df['hour'] >= 6) & (df['hour'] < 12)).astype(int)
+        df['is_afternoon'] = ((df['hour'] >= 12) & (df['hour'] < 18)).astype(int)
+        df['is_evening'] = ((df['hour'] >= 18) & (df['hour'] < 24)).astype(int)
+        
+        # Calculate user's typical active hours
+        user_active_hours = df.groupby('user_id')['hour'].agg(['mean', 'std']).fillna(0)
+        # Rename columns to avoid conflict during merge
+        user_active_hours.columns = ['user_mean_hour', 'user_std_hour']
+        df = df.merge(user_active_hours.reset_index(), on='user_id', how='left').fillna(0)
+
+        # Optimized calculation for hours_from_mean
+        df['hours_from_mean'] = np.abs(df['hour'] - df['user_mean_hour'])
+        
+        # Session timing patterns
+        # Ensure 'session_id' and 'timestamp' are not null for these calculations
+        df_temp = df.dropna(subset=['session_id', 'timestamp', 'hour']).copy()
+        df_temp['session_start_hour'] = df_temp.groupby('session_id')['hour'].transform('first')
+        df_temp['session_end_hour'] = df_temp.groupby('session_id')['hour'].transform('last')
+        df_temp['session_hour_span'] = df_temp['session_end_hour'] - df_temp['session_start_hour']
+
+        # Merge session-based temporal features back to the original df
+        df = df.merge(df_temp[['session_id', 'timestamp', 'session_start_hour', 'session_end_hour', 'session_hour_span']],
+                      on=['session_id', 'timestamp'], how='left').fillna(0)
+
+        # Drop the temporary mean/std columns after calculation
+        df.drop(columns=['user_mean_hour', 'user_std_hour'], errors='ignore', inplace=True)
+        
+        # Add to numerical columns
+        self.numerical_columns.extend([
+            'is_early_morning', 'is_morning', 'is_afternoon', 'is_evening',
+            'hours_from_mean', 'session_hour_span'
+        ])
+        
+        return df
+
+    def extract_cyberark_features(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Extract features specific to CyberArk logs."""
+        # Ensure required CyberArk columns exist and are handled
+        required_cyberark_cols = [
+            'privileged_account_used',
+            'vault_name',
+            'session_duration_seconds',
+            'is_privileged_session',
+            'policy_violation',
+            'reason_for_access',
+            'ticket_id'
+        ]
+        for col in required_cyberark_cols:
+            if col not in df.columns:
+                df[col] = np.nan # Add column if missing, fill with NaN
+            # Convert to string for categorical/grouping where appropriate, fillna for consistency
+            if df[col].dtype == 'object' or col in ['privileged_account_used', 'vault_name', 'reason_for_access', 'ticket_id']:
+                df[col] = df[col].fillna(f'unknown_{col}').astype(str)
+            elif col in ['is_privileged_session', 'policy_violation']:
+                df[col] = df[col].fillna(False).astype(bool)
+            elif col == 'session_duration_seconds':
+                df[col] = df[col].fillna(0).astype(float)
+        
+        # --- Privileged Account Usage Features ---
+        # Frequency of each privileged account used per user
+        priv_acc_counts = df.groupby(['user_id', 'privileged_account_used']).size().unstack(fill_value=0)
+        priv_acc_counts.columns = [f'priv_acc_{col}_count' for col in priv_acc_counts.columns]
+        df = df.merge(priv_acc_counts.reset_index(), on='user_id', how='left').fillna(0)
+        self.numerical_columns.extend(priv_acc_counts.columns.tolist())
+
+        # Top N privileged accounts as categorical
+        top_n_priv_acc = df['privileged_account_used'].value_counts().head(10).index.tolist()
+        df['top_priv_account'] = df['privileged_account_used'].apply(lambda x: x if x in top_n_priv_acc else 'other_priv_account')
+        self.categorical_columns.append('top_priv_account')
+
+        # --- Vault Access Features ---
+        # Frequency of each vault accessed per user
+        vault_counts = df.groupby(['user_id', 'vault_name']).size().unstack(fill_value=0)
+        vault_counts.columns = [f'vault_{col}_count' for col in vault_counts.columns]
+        df = df.merge(vault_counts.reset_index(), on='user_id', how='left').fillna(0)
+        self.numerical_columns.extend(vault_counts.columns.tolist())
+
+        # Top N vaults as categorical
+        top_n_vaults = df['vault_name'].value_counts().head(5).index.tolist()
+        df['top_vault'] = df['vault_name'].apply(lambda x: x if x in top_n_vaults else 'other_vault')
+        self.categorical_columns.append('top_vault')
+
+        # --- Session Duration Features ---
+        # Min, Max, Mean, Std of session duration per user (for privileged sessions)
+        session_duration_stats = df[df['is_privileged_session']].groupby('user_id')['session_duration_seconds'].agg([
+            'min', 'max', 'mean', 'std'
+        ]).add_prefix('priv_session_duration_').fillna(0) # Fill NaN for users with no privileged sessions
+        df = df.merge(session_duration_stats.reset_index(), on='user_id', how='left').fillna(0)
+        self.numerical_columns.extend(session_duration_stats.columns.tolist())
+
+        # Flag for unusually long/short privileged sessions (e.g., > 3 std from mean, if mean/std exist)
+        df['is_long_priv_session'] = 0
+        df['is_short_priv_session'] = 0
+
+        # Only apply this logic if std dev is not zero and mean is not zero
+        if 'priv_session_duration_mean' in df.columns and 'priv_session_duration_std' in df.columns:
+            df.loc[df['is_privileged_session'] == True, 'is_long_priv_session'] = (
+                df['session_duration_seconds'] > (df['priv_session_duration_mean'] + 3 * df['priv_session_duration_std'])).astype(int)
+            df.loc[df['is_privileged_session'] == True, 'is_short_priv_session'] = (
+                df['session_duration_seconds'] < (df['priv_session_duration_mean'] - 3 * df['priv_session_duration_std'])).astype(int)
+
+        self.numerical_columns.extend(['is_long_priv_session', 'is_short_priv_session'])
+
+        # --- Policy Violation Features ---
+        # Count of policy violations per user
+        policy_violation_counts = df.groupby('user_id')['policy_violation'].sum().rename('policy_violation_count').fillna(0)
+        df = df.merge(policy_violation_counts.reset_index(), on='user_id', how='left').fillna(0)
+        self.numerical_columns.append('policy_violation_count')
+
+        # Ratio of policy violations to total actions per user
+        total_actions_per_user = df.groupby('user_id').size().rename('total_actions_count')
+        df = df.merge(total_actions_per_user.reset_index(), on='user_id', how='left').fillna(0)
+        df['policy_violation_ratio'] = df['policy_violation_count'] / df['total_actions_count']
+        df['policy_violation_ratio'] = df['policy_violation_ratio'].fillna(0) # Fill NaN if total_actions_count is 0
+        self.numerical_columns.append('policy_violation_ratio')
+        self.numerical_columns.append('is_privileged_session') # Add this as a direct numerical feature (0 or 1)
+
+        # --- Reason for Access & Ticket ID Features ---
+        # Flag for missing reason for access for privileged sessions
+        df['missing_reason_for_access'] = ((df['is_privileged_session'] == True) & 
+                                           (df['reason_for_access'] == 'unknown_reason_for_access')).astype(int)
+        self.numerical_columns.append('missing_reason_for_access')
+
+        # Flag for missing ticket ID for privileged sessions
+        df['missing_ticket_id'] = ((df['is_privileged_session'] == True) & 
+                                   (df['ticket_id'] == 'unknown_ticket_id')).astype(int)
+        self.numerical_columns.append('missing_ticket_id')
+
+        return df
+
+    def engineer_features(self, df: pd.DataFrame, progress_callback: Optional[Callable[[int, int, str], None]] = None) -> pd.DataFrame:
+        """Engineer all features for the dataset."""
+        def update_progress(message):
+            if progress_callback:
+                progress_callback(0, 100, message)
+        
+        # Reset feature columns
+        self.feature_columns = []
+        self.categorical_columns = [] # Reset for each run
+        self.numerical_columns = []
+        
+        # Create a stable unique row ID at the beginning
+        df['_temp_row_id'] = df.index 
+        print(f"DEBUG: engineer_features - df.index.is_unique at start: {df.index.is_unique}") # DEBUG PRINT
+
+        # Identify initial categorical columns that should be one-hot encoded
+        # Assuming 'role' is a primary categorical feature not converted to numerical counts elsewhere
+        initial_categorical_cols = [col for col in ['role'] if col in df.columns]
+        self.categorical_columns.extend(initial_categorical_cols)
+
+        # Apply all feature engineering steps
+        update_progress("Extracting time features...")
         df = self.extract_time_features(df)
-
-        update_progress("Extracting IP-based features...")
+        
+        update_progress("Extracting IP features...")
         df = self.extract_ip_features(df)
-
+        
         update_progress("Extracting behavioral features...")
         df = self.extract_behavioral_features(df)
-
-        update_progress("Extracting session-based features...")
+        
+        update_progress("Extracting session features...")
         df = self.extract_session_features(df)
-
-        update_progress("Extracting region-based features...")
+        
+        update_progress("Extracting region features...")
         df = self.extract_region_features(df)
-
+        
         update_progress("Extracting user agent features...")
         df = self.extract_user_agent_features(df)
+        
+        # Add new feature extraction steps
+        update_progress("Extracting sequence features...")
+        df = self.extract_sequence_features(df)
+        
+        update_progress("Extracting advanced behavioral features...")
+        df = self.extract_advanced_behavioral_features(df)
+        
+        update_progress("Extracting temporal pattern features...")
+        df = self.extract_temporal_pattern_features(df)
+
+        update_progress("Extracting CyberArk features...")
+        df = self.extract_cyberark_features(df)
 
         # One-hot encode categorical features
         update_progress("One-hot encoding categorical features...")
@@ -453,11 +649,8 @@ class FeatureEngineer:
         if categorical_cols_to_encode:
             try:
                 df_encoded = pd.get_dummies(df[categorical_cols_to_encode], prefix=categorical_cols_to_encode)
-                # Align columns - crucial for consistent model input
-                for col in df_encoded.columns:
-                    if col not in self.feature_columns:
-                        self.feature_columns.append(col)
-                
+                # Add new encoded columns to numerical_columns. They are essentially numerical.
+                self.numerical_columns.extend(df_encoded.columns.tolist())
                 df = pd.concat([df.drop(columns=categorical_cols_to_encode), df_encoded], axis=1)
             except Exception as e:
                 print(f"Error during one-hot encoding: {e}")
@@ -475,37 +668,45 @@ class FeatureEngineer:
 
         self.numerical_columns = final_numerical_columns # Update numerical columns list
 
-        # Apply feature scaling after all features are engineered and numerical columns are finalized
-        update_progress("Scaling numerical features...")
+        # Scale numerical features
+        update_progress("Scaling features...")
         df = self._scale_features(df)
-
-        # Final feature column list should include numerical and encoded categorical
-        self.feature_columns = list(set(self.numerical_columns + [col for col in df.columns if '_' in col and any(cat_col in col for cat_col in categorical_cols_to_encode)]))
+        
+        # Update feature columns list - this should be done after all transformations
+        # self.feature_columns should only contain column names that are actually in df after processing
+        # and are intended to be used as features.
+        
+        # Collect all potential feature columns that are now numerical (either originally or one-hot encoded)
+        all_current_numerical_features = list(set(self.numerical_columns + [col for col in df.columns if col.startswith('pair_')]))
 
         # Exclude original identifier columns, datetime columns, and any temporary columns
-        # This list should be managed carefully to ensure no features are accidentally dropped
         exclude_cols = [
             'timestamp', 'session_start', 'session_end', 'user_id', 'action', 'resource',
-            'ip_address', 'region', 'status', 'session_id', 'user_agent', '_row_id',
-            'is_anomaly' # Keep if for training, exclude for prediction
+            'ip_address', 'region', 'status', 'session_id', 'user_agent',
+            'ip_address_str', 'session_id_filled', 'user_id_filled', # Temporary columns
+            'time_diff', 'rolling_velocity', 'velocity_std', 'action_resource_pair', 'action_resource_pair_reduced', # Intermediate calculation columns
+            'user_mean_hour', 'user_std_hour', '_temp_row_id', # Exclude the temporary row ID as it's not a feature
+            'region_str', 'user_agent_str' # Temporary string columns for features
         ]
-        # Filter out original categorical columns that are now one-hot encoded
+        # Filter out original categorical columns that are now one-hot encoded, and any duplicates
         exclude_cols.extend(categorical_cols_to_encode)
 
-        # Filter self.feature_columns to only include those actually in df and not in exclude_cols
-        self.feature_columns = [col for col in self.feature_columns if col in df.columns and col not in exclude_cols]
+        self.feature_columns = [col for col in all_current_numerical_features if col in df.columns and col not in exclude_cols]
         
-        # Ensure no duplicates in feature_columns
-        self.feature_columns = list(dict.fromkeys(self.feature_columns)) # Preserve order while removing duplicates
+        # Remove duplicates while preserving order
+        self.feature_columns = list(dict.fromkeys(self.feature_columns)) 
 
-        # If 'is_anomaly' exists, keep it in the dataframe but exclude from features
-        if 'is_anomaly' in df.columns and 'is_anomaly' not in self.feature_columns:
-            # Make sure it's at the end or handled separately
-            pass # It will be handled outside by main.py for training/evaluation
+        # If 'is_anomaly' exists, ensure it's not treated as a feature but is kept in the DataFrame
+        if 'is_anomaly' in df.columns and 'is_anomaly' in self.feature_columns:
+            self.feature_columns.remove('is_anomaly')
 
         update_progress("Feature engineering complete.")
-        print(f"DEBUG: Final features to return: {self.feature_columns[:5]}...") # Debug print
         
+        # Restore original index before returning, if _temp_row_id was created from df.index
+        # If the original df had a RangeIndex, setting it back will be simple. If it had a custom index,
+        # this might need more robust handling. Assuming it starts with a default index.
+        # df = df.set_index(df['_temp_row_id']).drop(columns=['_temp_row_id'])
+
         return df
 
     def get_feature_columns(self) -> List[str]:

@@ -39,7 +39,7 @@ class AnomalyDetectionGUI:
         # Data Source Selection
         ttk.Label(self.control_frame, text="Data Source:").grid(row=current_row, column=0, sticky="w", pady=5, padx=5)
         self.data_source_var = tk.StringVar(value="Synthetic Data")
-        self.data_source_options = ["Synthetic Data", "AWS CloudTrail Logs", "Azure Activity Logs"]
+        self.data_source_options = ["Synthetic Data", "AWS CloudTrail Logs", "Azure Activity Logs", "CyberArk Logs (Synthetic)"]
         self.data_source_combobox = ttk.Combobox(self.control_frame, textvariable=self.data_source_var, values=self.data_source_options, state="readonly")
         self.data_source_combobox.grid(row=current_row, column=1, sticky="ew", pady=5, padx=5)
         self.data_source_combobox.bind("<<ComboboxSelected>>", self.on_data_source_change)
@@ -61,7 +61,7 @@ class AnomalyDetectionGUI:
         self.num_events_label = ttk.Label(self.control_frame, text="Number of Events:")
         self.num_events_label.grid(row=current_row, column=0, sticky="w", pady=5, padx=5)
         self.n_events = ttk.Spinbox(self.control_frame, from_=100, to=5000, width=10)
-        self.n_events.set(500)
+        self.n_events.set(1000) # Reduced for debugging
         self.n_events.grid(row=current_row, column=1, sticky="ew", pady=5, padx=5)
         current_row += 1
         
@@ -89,7 +89,7 @@ class AnomalyDetectionGUI:
         self.contamination_ratio_label = ttk.Label(self.control_frame, text="Contamination Ratio:")
         self.contamination_ratio_label.grid(row=current_row, column=0, sticky="w", pady=5, padx=5)
         self.contamination_ratio = ttk.Spinbox(self.control_frame, from_=0.01, to=0.5, increment=0.01, width=10, format="%.2f")
-        self.contamination_ratio.set(0.15) # Default from HybridAnomalyDetector
+        self.contamination_ratio.set(0.35) # Default from HybridAnomalyDetector
         self.contamination_ratio.grid(row=current_row, column=1, sticky="ew", pady=5, padx=5)
         current_row += 1
         
@@ -97,7 +97,7 @@ class AnomalyDetectionGUI:
         self.if_estimators_label = ttk.Label(self.control_frame, text="IF Estimators (n):")
         self.if_estimators_label.grid(row=current_row, column=0, sticky="w", pady=5, padx=5)
         self.n_estimators_iso_forest = ttk.Spinbox(self.control_frame, from_=50, to=500, increment=50, width=10)
-        self.n_estimators_iso_forest.set(300) # Default
+        self.n_estimators_iso_forest.set(400) # Default
         self.n_estimators_iso_forest.grid(row=current_row, column=1, sticky="ew", pady=5, padx=5)
         current_row += 1
 
@@ -312,7 +312,7 @@ ensuring holistic threat visibility and enhanced accuracy. Define new log source
 
     def on_data_source_change(self, event=None):
         selected_source = self.data_source_var.get()
-        if selected_source == "Synthetic Data":
+        if selected_source == "Synthetic Data" or selected_source == "CyberArk Logs (Synthetic)":
             for widget in self.synthetic_controls:
                 widget.grid() # Show synthetic controls
             self.n_events.config(state="enabled")
@@ -449,12 +449,22 @@ ensuring holistic threat visibility and enhanced accuracy. Define new log source
                 selected_source = self.data_source_var.get()
                 file_path = self.file_path_var.get()
 
+                print(f"DEBUG: main.py - Selected Data Source: {selected_source}") # Added debug print
+
                 if selected_source == "Synthetic Data":
                     self.root.after(0, self._update_progress_bar, 10, "Generating synthetic dataset...")
                     generator = IAMLogGenerator()
                     df_local = generator.generate_dataset(n_events=int(self.n_events.get()), anomaly_ratio=float(self.contamination_ratio.get()))
                     self.root.after(0, self._update_progress_bar, 20, "Data generation complete!")
                     print(f"DEBUG: main.py - df_local.shape after data generation: {df_local.shape}")
+
+                elif selected_source == "CyberArk Logs (Synthetic)":
+                    print("DEBUG: main.py - Entering CyberArk Logs (Synthetic) block.") # Added debug print
+                    self.root.after(0, self._update_progress_bar, 10, "Generating synthetic CyberArk logs...")
+                    log_reader = get_log_reader('cyberark') # Get CyberArkLogReader instance
+                    df_local = log_reader.read_logs(num_events=int(self.n_events.get()), anomaly_ratio=float(self.contamination_ratio.get()))
+                    self.root.after(0, self._update_progress_bar, 20, "CyberArk log generation complete!")
+                    print(f"DEBUG: main.py - df_local.shape after CyberArk data generation: {df_local.shape}") # Added debug print
 
                 elif selected_source == "AWS CloudTrail Logs" or selected_source == "Azure Activity Logs":
                     self.root.after(0, self.update_status, f"Loading {selected_source}... (1/4)")

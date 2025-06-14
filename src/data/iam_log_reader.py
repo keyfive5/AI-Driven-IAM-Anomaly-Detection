@@ -1,9 +1,10 @@
 import pandas as pd
 import json
 from typing import Dict, List, Optional
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 import uuid
+import numpy as np
 
 class IAMLogReader:
     """Base class for reading IAM logs from different sources."""
@@ -71,17 +72,15 @@ class IAMLogReader:
                 )
 
         # Fill missing session_start/end with timestamp if session_id is present but start/end are missing
-        if 'session_id' in df.columns:
-            df['session_start'] = df.apply(
-                lambda row: row['timestamp'] if pd.isna(row['session_start']) and pd.notna(row['session_id']) else row['session_start'],
-                axis=1
-            )
-            df['session_end'] = df.apply(
-                lambda row: row['timestamp'] if pd.isna(row['session_end']) and pd.notna(row['session_id']) else row['session_end'],
-                axis=1
-            )
-            # If session_id is also missing, then session_start/end will remain NA and will be filled by feature engineering if needed
+        if 'session_id' in df.columns and 'timestamp' in df.columns:
+            # Vectorized assignment for session_start
+            mask_start = df['session_start'].isna() & df['session_id'].notna()
+            df.loc[mask_start, 'session_start'] = df.loc[mask_start, 'timestamp']
 
+            # Vectorized assignment for session_end
+            mask_end = df['session_end'].isna() & df['session_id'].notna()
+            df.loc[mask_end, 'session_end'] = df.loc[mask_end, 'timestamp']
+            
         return df
 
     def read_aws_cloudtrail_logs(self, file_path: str) -> pd.DataFrame:
@@ -416,12 +415,107 @@ class SyntheticLogReader(IAMLogReader):
     def clean_logs(self, df: pd.DataFrame) -> pd.DataFrame:
         return super().clean_logs(df)
 
+class CyberArkLogReader(IAMLogReader):
+    def __init__(self):
+        super().__init__()
+        # Add CyberArk-specific standard columns if needed, beyond the base ones
+        self.standard_columns.extend([
+            'privileged_account_used',
+            'vault_name',
+            'session_duration_seconds',
+            'is_privileged_session',
+            'policy_violation',
+            'reason_for_access',
+            'ticket_id'
+        ])
+
+    def read_logs(self, file_path: str = None, num_events: int = 1000, anomaly_ratio: float = 0.1, num_privileged_accounts: int = 10) -> pd.DataFrame:
+        """Generates synthetic CyberArk-like logs."""
+        print(f"Generating {num_events} synthetic CyberArk logs...")
+        logs = []
+        privileged_accounts = [f'privileged_account_{i}' for i in range(num_privileged_accounts)]
+        regular_users = [f'user_{i}' for i in range(50)]
+        vaults = [f'Vault_{i}' for i in range(5)]
+        target_resources = [f'Server_{i}' for i in range(20)]
+        action_types = ['Logon', 'RetrievePassword', 'Connect', 'ChangePassword', 'View', 'RotatePassword']
+        ip_addresses = [f'192.168.1.{i}' for i in range(50)] + [f'10.0.0.{i}' for i in range(20)] # Mix of private and public-like
+        
+        start_time = datetime.now() - timedelta(days=7)
+
+        for i in range(num_events):
+            event_time = start_time + timedelta(seconds=i * 60 * np.random.rand() * 5) # Events spread over time
+            
+            is_anomaly = np.random.rand() < anomaly_ratio
+
+            user_id = np.random.choice(regular_users)
+            privileged_account_used = np.random.choice(privileged_accounts)
+            action_type = np.random.choice(action_types)
+            target_resource = np.random.choice(target_resources)
+            vault_name = np.random.choice(vaults)
+            ip_address = np.random.choice(ip_addresses)
+            session_id = str(uuid.uuid4())
+            status = 'success' if np.random.rand() > 0.1 else 'failure' # 10% failure rate
+            session_duration_seconds = int(np.random.normal(300, 100)) # Avg 5 min session, std 100 sec
+            if session_duration_seconds < 10: session_duration_seconds = 10
+            is_privileged_session = True # For now, assume all generated are privileged for focus
+            policy_violation = False
+            reason_for_access = 'Routine access'
+            ticket_id = None
+
+            if is_anomaly:
+                anomaly_type = np.random.choice([
+                    'unusual_time', 'unusual_action', 'unusual_ip', 
+                    'excessive_duration', 'policy_violation'
+                ])
+
+                if anomaly_type == 'unusual_time':
+                    event_time = start_time + timedelta(days=np.random.randint(7, 14)) # Far future/past
+                    event_time += timedelta(hours=int(np.random.choice([0, 23]))) # Midnight or late night
+                elif anomaly_type == 'unusual_action':
+                    action_type = 'UnauthorizedFileAccess' # A fabricated anomalous action
+                    status = 'failure'
+                elif anomaly_type == 'unusual_ip':
+                    ip_address = f'203.0.113.{np.random.randint(1,254)}' # Public IP not typical
+                elif anomaly_type == 'excessive_duration':
+                    session_duration_seconds = int(np.random.normal(3600, 1800)) # Very long session (avg 1 hour)
+                elif anomaly_type == 'policy_violation':
+                    policy_violation = True
+                    reason_for_access = 'No valid reason provided'
+                    status = 'failure'
+
+            logs.append({
+                'timestamp': event_time,
+                'user_id': user_id,
+                'privileged_account_used': privileged_account_used,
+                'action': action_type,
+                'resource': target_resource,
+                'ip_address': ip_address,
+                'region': 'unknown_region', # CyberArk logs might not always have direct region
+                'status': status,
+                'session_id': session_id,
+                'session_start': event_time, 
+                'session_end': event_time + timedelta(seconds=session_duration_seconds),
+                'user_agent': 'CyberArk-Client',
+                'vault_name': vault_name,
+                'session_duration_seconds': session_duration_seconds,
+                'is_privileged_session': is_privileged_session,
+                'policy_violation': policy_violation,
+                'reason_for_access': reason_for_access,
+                'ticket_id': ticket_id,
+                'is_anomaly': is_anomaly # Label for supervised learning/evaluation
+            })
+
+        df = pd.DataFrame(logs)
+        print(f"Generated {len(df)} synthetic CyberArk logs.")
+        return self._standardize_columns(df)
+
 def get_log_reader(source: str) -> IAMLogReader:
     """Factory function to get the appropriate log reader."""
     readers = {
         'aws': AWSCloudTrailReader,
         'azure': AzureADReader,
-        'synthetic': SyntheticLogReader
+        'synthetic': SyntheticLogReader,
+        'cyberark': CyberArkLogReader
     }
     
     if source.lower() not in readers:
