@@ -1,0 +1,22 @@
+# Virtual environment
+venv/
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# IDE files
+.vscode/
+.idea/
+
+# Output and generated files
+output/
+*.log
+*.csv
+*.json # Only if all JSONs are output, be careful if source JSONs exist
+*.onnx # Example for model files
+*.pkl # Example for joblib saved models
+
+# Jupyter Notebook files
+.ipynb_checkpoints/ 
