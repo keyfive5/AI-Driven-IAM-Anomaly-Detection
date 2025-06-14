@@ -33,9 +33,10 @@ class FeatureEngineer:
             df['session_duration'] = df['session_duration'].fillna(0)
             self.numerical_columns.append('session_duration')
         else:
-            df['session_duration'] = 0 # Placeholder if not available
+            # Initialize column if it might be used later, but don't add to numerical_columns if not truly a feature
+            df['session_duration'] = 0 
         
-        # Add to feature columns
+        # Add to feature columns (only base ones here, session_duration added conditionally above)
         self.numerical_columns.extend(['hour', 'day_of_week', 'is_weekend', 'is_working_hour',
                                      'time_since_last_access'])
         
@@ -57,15 +58,16 @@ class FeatureEngineer:
         df['ip_frequency'] = df['ip_address'].map(ip_counts)
         
         # IP changes per session - make conditional for real logs
-        if 'session_id' in df.columns:
+        if 'session_id' in df.columns and df['session_id'].count() > 0:
             df['ip_changes_in_session'] = df.groupby('session_id')['ip_address'].transform(
                 lambda x: x.nunique()
             )
+            df['ip_changes_in_session'] = df['ip_changes_in_session'].fillna(0) # Fill NaN from transform
             self.numerical_columns.append('ip_changes_in_session')
         else:
-            df['ip_changes_in_session'] = 0 # Placeholder if not available
+            df['ip_changes_in_session'] = 0 # Placeholder
         
-        # Add to feature columns
+        # Add to feature columns (only base ones here, ip_changes_in_session added conditionally above)
         self.numerical_columns.extend(['is_private_ip', 'ip_frequency'])
         
         return df
@@ -101,21 +103,31 @@ class FeatureEngineer:
     
     def extract_session_features(self, df: pd.DataFrame) -> pd.DataFrame:
         """Extract session-based features."""
-        if 'session_id' not in df.columns or 'session_duration' not in df.columns:
-            print("Skipping session-based feature extraction: 'session_id' or 'session_duration' column missing.")
+        # Check if session_id or session_duration columns are entirely NaN or missing, if so, skip
+        if df['session_id'].count() == 0 or df['session_duration'].count() == 0:
+            print("Skipping session-based feature extraction: 'session_id' or 'session_duration' column contains no valid data.")
+            # Ensure columns are created as placeholders so later steps don't fail, but not added to numerical_columns
+            df['actions_per_session'] = 0
+            df['unique_resources_per_session'] = 0
+            df['sessions_per_user'] = 0
+            df['avg_session_duration'] = 0
             return df # Return original DataFrame if session columns are missing
 
         # Actions per session
         df['actions_per_session'] = df.groupby('session_id').size()
+        df['actions_per_session'] = df['actions_per_session'].fillna(0) # Fill NaNs from merge/groupby
         
         # Unique resources accessed per session
         df['unique_resources_per_session'] = df.groupby('session_id')['resource'].transform('nunique')
+        df['unique_resources_per_session'] = df['unique_resources_per_session'].fillna(0)
         
         # Session frequency per user
         df['sessions_per_user'] = df.groupby('user_id')['session_id'].transform('nunique')
+        df['sessions_per_user'] = df['sessions_per_user'].fillna(0)
         
         # Average session duration per user
         df['avg_session_duration'] = df.groupby('user_id')['session_duration'].transform('mean')
+        df['avg_session_duration'] = df['avg_session_duration'].fillna(0)
         
         # Add to feature columns
         self.numerical_columns.extend([
@@ -133,11 +145,16 @@ class FeatureEngineer:
         region_counts = df['region'].value_counts()
         df['region_frequency'] = df['region'].map(region_counts)
         
-        # Region changes per session
-        df['region_changes_in_session'] = df.groupby('session_id')['region'].transform('nunique')
+        # Region changes per session - make conditional for real logs
+        if 'session_id' in df.columns and df['session_id'].count() > 0:
+            df['region_changes_in_session'] = df.groupby('session_id')['region'].transform('nunique')
+            df['region_changes_in_session'] = df['region_changes_in_session'].fillna(0)
+            self.numerical_columns.append('region_changes_in_session')
+        else:
+            df['region_changes_in_session'] = 0 # Placeholder
         
-        # Add to feature columns
-        self.numerical_columns.extend(['region_frequency', 'region_changes_in_session'])
+        # Add to feature columns (only base ones here, region_changes_in_session added conditionally)
+        self.numerical_columns.extend(['region_frequency'])
         
         return df
     
@@ -147,39 +164,97 @@ class FeatureEngineer:
         ua_counts = df['user_agent'].value_counts()
         df['user_agent_frequency'] = df['user_agent'].map(ua_counts)
         
-        # User agent changes per session
-        df['user_agent_changes_in_session'] = df.groupby('session_id')['user_agent'].transform('nunique')
+        # User agent changes per session - make conditional for real logs
+        if 'session_id' in df.columns and df['session_id'].count() > 0:
+            df['user_agent_changes_in_session'] = df.groupby('session_id')['user_agent'].transform('nunique')
+            df['user_agent_changes_in_session'] = df['user_agent_changes_in_session'].fillna(0)
+            self.numerical_columns.append('user_agent_changes_in_session')
+        else:
+            df['user_agent_changes_in_session'] = 0 # Placeholder
         
-        # Add to feature columns
-        self.numerical_columns.extend(['user_agent_frequency', 'user_agent_changes_in_session'])
+        # Add to feature columns (only base ones here, user_agent_changes_in_session added conditionally)
+        self.numerical_columns.extend(['user_agent_frequency'])
         
         return df
     
     def engineer_features(self, df: pd.DataFrame) -> pd.DataFrame:
         """Apply all feature engineering steps."""
-        print("Extracting time-based features...")
-        df = self.extract_time_features(df)
+        # Reset numerical columns before each run to avoid duplicates if called multiple times
+        self.numerical_columns = []
+
+        # Ensure essential columns for session-based features exist, fill with NaN if missing
+        # This prevents KeyError when df['session_id'] or similar is accessed
+        if 'session_id' not in df.columns:
+            df['session_id'] = np.nan
+        if 'session_start' not in df.columns:
+            df['session_start'] = pd.NaT # Use NaT for datetime NaNs
+        if 'session_end' not in df.columns:
+            df['session_end'] = pd.NaT # Use NaT for datetime NaNs
+
+        print(f"DEBUG: Initial df columns: {df.columns.tolist()}")
+        print(f"DEBUG: session_id value_counts (including NaNs) after initial check:\n{df['session_id'].value_counts(dropna=False)}")
+
+        try:
+            print("Extracting time-based features...")
+            df = self.extract_time_features(df)
+            print(f"DEBUG: Columns after time features: {df.columns.tolist()}")
+        except Exception as e:
+            print(f"ERROR in extract_time_features: {e}")
+            raise
         
-        print("Extracting IP-based features...")
-        df = self.extract_ip_features(df)
+        try:
+            print("Extracting IP-based features...")
+            df = self.extract_ip_features(df)
+            print(f"DEBUG: Columns after IP features: {df.columns.tolist()}")
+        except Exception as e:
+            print(f"ERROR in extract_ip_features: {e}")
+            raise
         
-        print("Extracting behavioral features...")
-        df = self.extract_behavioral_features(df)
+        try:
+            print("Extracting behavioral features...")
+            df = self.extract_behavioral_features(df)
+            print(f"DEBUG: Columns after behavioral features: {df.columns.tolist()}")
+        except Exception as e:
+            print(f"ERROR in extract_behavioral_features: {e}")
+            raise
         
-        print("Extracting session-based features...")
-        df = self.extract_session_features(df)
+        try:
+            print("Extracting session-based features...")
+            df = self.extract_session_features(df)
+            print(f"DEBUG: Columns after session features: {df.columns.tolist()}")
+        except Exception as e:
+            print(f"ERROR in extract_session_features: {e}")
+            raise
         
-        print("Extracting region-based features...")
-        df = self.extract_region_features(df)
+        try:
+            print("Extracting region-based features...")
+            df = self.extract_region_features(df)
+            print(f"DEBUG: Columns after region features: {df.columns.tolist()}")
+        except Exception as e:
+            print(f"ERROR in extract_region_features: {e}")
+            raise
         
-        print("Extracting user agent features...")
-        df = self.extract_user_agent_features(df)
+        try:
+            print("Extracting user agent features...")
+            df = self.extract_user_agent_features(df)
+            print(f"DEBUG: Columns after user agent features: {df.columns.tolist()}")
+        except Exception as e:
+            print(f"ERROR in extract_user_agent_features: {e}")
+            raise
         
         # Fill any remaining NaN values with 0
         df = df.fillna(0)
         
         # Get final feature set
-        self.feature_columns = self.numerical_columns
+        # Ensure only columns that truly exist and are numerical are in feature_columns
+        # Filter out any non-numeric or temporary placeholder columns that shouldn't be features
+        final_numerical_columns = [col for col in self.numerical_columns if col in df.columns and pd.api.types.is_numeric_dtype(df[col])]
+        self.feature_columns = list(set(final_numerical_columns)) # Use set to remove duplicates, then convert to list
+
+        # Ensure all feature columns have numeric types before passing to models
+        for col in self.feature_columns:
+            if not pd.api.types.is_numeric_dtype(df[col]):
+                df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0) # Coerce to numeric, fill any new NaNs
         
         return df
     

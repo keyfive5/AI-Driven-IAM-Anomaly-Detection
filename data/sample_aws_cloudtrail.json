@@ -92,6 +92,856 @@
                 "clientProvidedHostHeader": "iam.amazonaws.com"
             },
             "sessionCredentialFromConsole": "true"
+        },
+        {
+            "eventVersion": "1.08",
+            "userIdentity": {
+                "type": "IAMUser",
+                "principalId": "AIDA6ON6E4XEGITEXAMPLE",
+                "arn": "arn:aws:iam::888888888888:user/Mary",
+                "accountId": "888888888888",
+                "accessKeyId": "AKIAIOSFODNN7EXAMPLE",
+                "userName": "Mary",
+                "sessionContext": {
+                    "sessionIssuer": {},
+                    "webIdFederationData": {},
+                    "attributes": {
+                        "creationDate": "2023-07-19T21:11:57Z",
+                        "mfaAuthenticated": "false"
+                    }
+                }
+            },
+            "eventTime": "2023-07-19T21:26:00Z",
+            "eventSource": "s3.amazonaws.com",
+            "eventName": "ListBuckets",
+            "awsRegion": "us-east-1",
+            "sourceIPAddress": "192.0.2.0",
+            "userAgent": "aws-cli/2.13.5 Python/3.11.4",
+            "requestParameters": null,
+            "responseElements": {
+                "buckets": []
+            },
+            "requestID": "a1b2c3d4-e5f6-7890-1234-EXAMPLE56789",
+            "eventID": "b2c3d4e5-f678-9012-3456-EXAMPLE78901",
+            "readOnly": true,
+            "eventType": "AwsApiCall",
+            "managementEvent": true,
+            "recipientAccountId": "888888888888",
+            "eventCategory": "Management"
+        },
+        {
+            "eventVersion": "1.08",
+            "userIdentity": {
+                "type": "AssumedRole",
+                "principalId": "AROA6ON6E4XEGITEXAMPLE:Jane-Session",
+                "arn": "arn:aws:iam::888888888888:assumed-role/AdminRole/Jane-Session",
+                "accountId": "888888888888",
+                "accessKeyId": "ASIAIOSFODNN7EXAMPLE",
+                "sessionContext": {
+                    "sessionIssuer": {
+                        "type": "Role",
+                        "principalId": "AROA6ON6E4XEGITEXAMPLE",
+                        "arn": "arn:aws:iam::888888888888:role/AdminRole",
+                        "accountId": "888888888888",
+                        "userName": "AdminRole"
+                    },
+                    "webIdFederationData": {},
+                    "attributes": {
+                        "creationDate": "2023-07-19T21:26:10Z",
+                        "mfaAuthenticated": "true"
+                    }
+                }
+            },
+            "eventTime": "2023-07-19T21:27:00Z",
+            "eventSource": "s3.amazonaws.com",
+            "eventName": "PutObject",
+            "awsRegion": "us-east-1",
+            "sourceIPAddress": "203.0.113.45",
+            "userAgent": "S3Console",
+            "requestParameters": {
+                "bucketName": "my-secure-bucket",
+                "key": "sensitive-data.txt"
+            },
+            "responseElements": null,
+            "requestID": "c3d4e5f6-7890-1234-5678-EXAMPLE90123",
+            "eventID": "d4e5f678-9012-3456-7890-EXAMPLE12345",
+            "readOnly": false,
+            "eventType": "AwsApiCall",
+            "managementEvent": false,
+            "recipientAccountId": "888888888888",
+            "eventCategory": "Data"
+        },
+        {
+            "eventVersion": "1.08",
+            "userIdentity": {
+                "type": "Root",
+                "principalId": "888888888888",
+                "arn": "arn:aws:iam::888888888888:root",
+                "accountId": "888888888888",
+                "accessKeyId": "AKIAIOSFODNN7EXAMPLE"
+            },
+            "eventTime": "2023-07-19T21:28:15Z",
+            "eventSource": "ec2.amazonaws.com",
+            "eventName": "RunInstances",
+            "awsRegion": "us-west-2",
+            "sourceIPAddress": "172.16.0.10",
+            "userAgent": "EC2Console",
+            "requestParameters": {
+                "instanceType": "t2.micro",
+                "imageId": "ami-0abcdef1234567890"
+            },
+            "responseElements": {
+                "instancesSet": {
+                    "items": [
+                        {
+                            "instanceId": "i-0abcdef1234567890"
+                        }
+                    ]
+                }
+            },
+            "requestID": "e5f67890-1234-5678-9012-EXAMPLE34567",
+            "eventID": "f6789012-3456-7890-1234-EXAMPLE56789",
+            "readOnly": false,
+            "eventType": "AwsApiCall",
+            "managementEvent": true,
+            "recipientAccountId": "888888888888",
+            "eventCategory": "Management"
+        },
+        {
+            "eventVersion": "1.08",
+            "userIdentity": {
+                "type": "IAMUser",
+                "principalId": "AIDA6ON6E4XEGITEXAMPLE",
+                "arn": "arn:aws:iam::888888888888:user/Mary",
+                "accountId": "888888888888",
+                "accessKeyId": "AKIAIOSFODNN7EXAMPLE",
+                "userName": "Mary",
+                "sessionContext": {
+                    "sessionIssuer": {},
+                    "webIdFederationData": {},
+                    "attributes": {
+                        "creationDate": "2023-07-19T21:11:57Z",
+                        "mfaAuthenticated": "false"
+                    }
+                }
+            },
+            "eventTime": "2023-07-19T21:29:00Z",
+            "eventSource": "iam.amazonaws.com",
+            "eventName": "DeleteUser",
+            "awsRegion": "us-east-1",
+            "sourceIPAddress": "192.0.2.0",
+            "userAgent": "aws-cli/2.13.5 Python/3.11.4",
+            "requestParameters": {
+                "userName": "Richard"
+            },
+            "responseElements": null,
+            "requestID": "a1b2c3d4-e5f6-7890-1234-EXAMPLE98765",
+            "eventID": "b2c3d4e5-f678-9012-3456-EXAMPLE87654",
+            "readOnly": false,
+            "eventType": "AwsApiCall",
+            "managementEvent": true,
+            "recipientAccountId": "888888888888",
+            "eventCategory": "Management"
+        },
+        {
+            "eventVersion": "1.08",
+            "userIdentity": {
+                "type": "IAMUser",
+                "principalId": "AIDA6ON6E4XEGITEXAMPLE",
+                "arn": "arn:aws:iam::888888888888:user/Mary",
+                "accountId": "888888888888",
+                "accessKeyId": "AKIAIOSFODNN7EXAMPLE",
+                "userName": "Mary",
+                "sessionContext": {
+                    "sessionIssuer": {},
+                    "webIdFederationData": {},
+                    "attributes": {
+                        "creationDate": "2023-07-19T21:11:57Z",
+                        "mfaAuthenticated": "false"
+                    }
+                }
+            },
+            "eventTime": "2023-07-19T21:30:00Z",
+            "eventSource": "iam.amazonaws.com",
+            "eventName": "AttachUserPolicy",
+            "awsRegion": "us-east-1",
+            "sourceIPAddress": "192.0.2.0",
+            "userAgent": "aws-cli/2.13.5 Python/3.11.4",
+            "requestParameters": {
+                "policyArn": "arn:aws:iam::aws:policy/AdministratorAccess",
+                "userName": "Richard"
+            },
+            "responseElements": null,
+            "requestID": "c3d4e5f6-7890-1234-5678-EXAMPLE43210",
+            "eventID": "d4e5f678-9012-3456-7890-EXAMPLE09876",
+            "readOnly": false,
+            "eventType": "AwsApiCall",
+            "managementEvent": true,
+            "recipientAccountId": "888888888888",
+            "eventCategory": "Management"
+        },
+        {
+            "eventVersion": "1.08",
+            "userIdentity": {
+                "type": "AssumedRole",
+                "principalId": "AROA6ON6E4XEGITEXAMPLE:Dev-Session",
+                "arn": "arn:aws:iam::888888888888:assumed-role/DeveloperRole/Dev-Session",
+                "accountId": "888888888888",
+                "accessKeyId": "ASIAIOSFODNN7EXAMPLE",
+                "sessionContext": {
+                    "sessionIssuer": {
+                        "type": "Role",
+                        "principalId": "AROA6ON6E4XEGITEXAMPLE",
+                        "arn": "arn:aws:iam::888888888888:role/DeveloperRole",
+                        "accountId": "888888888888",
+                        "userName": "DeveloperRole"
+                    },
+                    "webIdFederationData": {},
+                    "attributes": {
+                        "creationDate": "2023-07-19T21:30:10Z",
+                        "mfaAuthenticated": "true"
+                    }
+                }
+            },
+            "eventTime": "2023-07-19T21:31:00Z",
+            "eventSource": "lambda.amazonaws.com",
+            "eventName": "InvokeFunction",
+            "awsRegion": "us-east-1",
+            "sourceIPAddress": "198.51.100.12",
+            "userAgent": "LambdaConsole",
+            "requestParameters": {
+                "functionName": "my-dev-function"
+            },
+            "responseElements": null,
+            "requestID": "e5f67890-1234-5678-9012-EXAMPLE54321",
+            "eventID": "f6789012-3456-7890-1234-EXAMPLE32109",
+            "readOnly": false,
+            "eventType": "AwsApiCall",
+            "managementEvent": false,
+            "recipientAccountId": "888888888888",
+            "eventCategory": "Data"
+        },
+        {
+            "eventVersion": "1.08",
+            "userIdentity": {
+                "type": "IAMUser",
+                "principalId": "AIDA6ON6E4XEGITEXAMPLE",
+                "arn": "arn:aws:iam::888888888888:user/Mary",
+                "accountId": "888888888888",
+                "accessKeyId": "AKIAIOSFODNN7EXAMPLE",
+                "userName": "Mary",
+                "sessionContext": {
+                    "sessionIssuer": {},
+                    "webIdFederationData": {},
+                    "attributes": {
+                        "creationDate": "2023-07-19T21:11:57Z",
+                        "mfaAuthenticated": "false"
+                    }
+                }
+            },
+            "eventTime": "2023-07-19T21:32:00Z",
+            "eventSource": "iam.amazonaws.com",
+            "eventName": "GetAccessKeyLastUsed",
+            "awsRegion": "us-east-1",
+            "sourceIPAddress": "192.0.2.0",
+            "userAgent": "aws-cli/2.13.5 Python/3.11.4",
+            "requestParameters": {
+                "accessKeyId": "AKIAIOSFODNN7EXAMPLE"
+            },
+            "responseElements": {
+                "accessKeyLastUsed": {
+                    "lastUsedDate": "2023-07-19T21:32:00Z",
+                    "region": "us-east-1",
+                    "serviceName": "iam"
+                }
+            },
+            "requestID": "a1b2c3d4-e5f6-7890-1234-EXAMPLE09876",
+            "eventID": "b2c3d4e5-f678-9012-3456-EXAMPLE76543",
+            "readOnly": true,
+            "eventType": "AwsApiCall",
+            "managementEvent": true,
+            "recipientAccountId": "888888888888",
+            "eventCategory": "Management"
+        },
+        {
+            "eventVersion": "1.08",
+            "userIdentity": {
+                "type": "IAMUser",
+                "principalId": "AIDA6ON6E4XEGITEXAMPLE",
+                "arn": "arn:aws:iam::888888888888:user/Mary",
+                "accountId": "888888888888",
+                "accessKeyId": "AKIAIOSFODNN7EXAMPLE",
+                "userName": "Mary",
+                "sessionContext": {
+                    "sessionIssuer": {},
+                    "webIdFederationData": {},
+                    "attributes": {
+                        "creationDate": "2023-07-19T21:11:57Z",
+                        "mfaAuthenticated": "false"
+                    }
+                }
+            },
+            "eventTime": "2023-07-19T21:33:00Z",
+            "eventSource": "s3.amazonaws.com",
+            "eventName": "GetBucketAcl",
+            "awsRegion": "eu-west-1",
+            "sourceIPAddress": "203.0.113.100",
+            "userAgent": "aws-cli/2.13.5 Python/3.11.4",
+            "requestParameters": {
+                "bucketName": "my-public-bucket"
+            },
+            "responseElements": null,
+            "requestID": "c3d4e5f6-7890-1234-5678-EXAMPLE65432",
+            "eventID": "d4e5f678-9012-3456-7890-EXAMPLE43210",
+            "readOnly": true,
+            "eventType": "AwsApiCall",
+            "managementEvent": false,
+            "recipientAccountId": "888888888888",
+            "eventCategory": "Data"
+        },
+        {
+            "eventVersion": "1.08",
+            "userIdentity": {
+                "type": "IAMUser",
+                "principalId": "AIDA6ON6E4XEGITEXAMPLE",
+                "arn": "arn:aws:iam::888888888888:user/Mary",
+                "accountId": "888888888888",
+                "accessKeyId": "AKIAIOSFODNN7EXAMPLE",
+                "userName": "Mary",
+                "sessionContext": {
+                    "sessionIssuer": {},
+                    "webIdFederationData": {},
+                    "attributes": {
+                        "creationDate": "2023-07-19T21:11:57Z",
+                        "mfaAuthenticated": "false"
+                    }
+                }
+            },
+            "eventTime": "2023-07-19T21:34:00Z",
+            "eventSource": "s3.amazonaws.com",
+            "eventName": "PutBucketPolicy",
+            "awsRegion": "us-east-1",
+            "sourceIPAddress": "192.0.2.0",
+            "userAgent": "aws-cli/2.13.5 Python/3.11.4",
+            "requestParameters": {
+                "bucketName": "my-public-bucket",
+                "policy": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": "*",
+                            "Action": "s3:GetObject",
+                            "Resource": "arn:aws:s3:::my-public-bucket/*"
+                        }
+                    ]
+                }
+            },
+            "responseElements": null,
+            "requestID": "e5f67890-1234-5678-9012-EXAMPLE10987",
+            "eventID": "f6789012-3456-7890-1234-EXAMPLE87654",
+            "readOnly": false,
+            "eventType": "AwsApiCall",
+            "managementEvent": false,
+            "recipientAccountId": "888888888888",
+            "eventCategory": "Management"
+        },
+        {
+            "eventVersion": "1.08",
+            "userIdentity": {
+                "type": "Root",
+                "principalId": "888888888888",
+                "arn": "arn:aws:iam::888888888888:root",
+                "accountId": "888888888888",
+                "accessKeyId": "AKIAIOSFODNN7EXAMPLE"
+            },
+            "eventTime": "2023-07-19T21:35:00Z",
+            "eventSource": "ec2.amazonaws.com",
+            "eventName": "TerminateInstances",
+            "awsRegion": "us-east-1",
+            "sourceIPAddress": "172.16.0.10",
+            "userAgent": "EC2Console",
+            "requestParameters": {
+                "instanceId": ["i-0abcdef1234567890"]
+            },
+            "responseElements": null,
+            "requestID": "a1b2c3d4-e5f6-7890-1234-EXAMPLE67890",
+            "eventID": "b2c3d4e5-f678-9012-3456-EXAMPLE54321",
+            "readOnly": false,
+            "eventType": "AwsApiCall",
+            "managementEvent": true,
+            "recipientAccountId": "888888888888",
+            "eventCategory": "Management"
+        },
+        {
+            "eventVersion": "1.08",
+            "userIdentity": {
+                "type": "IAMUser",
+                "principalId": "AIDA6ON6E4XEGITEXAMPLE",
+                "arn": "arn:aws:iam::888888888888:user/John",
+                "accountId": "888888888888",
+                "accessKeyId": "AKIAIOSFODNN7EXAMPLE",
+                "userName": "John",
+                "sessionContext": {
+                    "sessionIssuer": {},
+                    "webIdFederationData": {},
+                    "attributes": {
+                        "creationDate": "2023-07-19T21:11:57Z",
+                        "mfaAuthenticated": "false"
+                    }
+                }
+            },
+            "eventTime": "2023-07-19T21:36:00Z",
+            "eventSource": "s3.amazonaws.com",
+            "eventName": "GetObject",
+            "awsRegion": "us-east-1",
+            "sourceIPAddress": "192.0.2.5",
+            "userAgent": "Go-http-client/1.1",
+            "requestParameters": {
+                "bucketName": "my-secure-bucket",
+                "key": "report.pdf"
+            },
+            "responseElements": null,
+            "requestID": "c3d4e5f6-7890-1234-5678-EXAMPLE98765",
+            "eventID": "d4e5f678-9012-3456-7890-EXAMPLE87654",
+            "readOnly": true,
+            "eventType": "AwsApiCall",
+            "managementEvent": false,
+            "recipientAccountId": "888888888888",
+            "eventCategory": "Data"
+        },
+        {
+            "eventVersion": "1.08",
+            "userIdentity": {
+                "type": "IAMUser",
+                "principalId": "AIDA6ON6E4XEGITEXAMPLE",
+                "arn": "arn:aws:iam::888888888888:user/Alice",
+                "accountId": "888888888888",
+                "accessKeyId": "AKIAIOSFODNN7EXAMPLE",
+                "userName": "Alice",
+                "sessionContext": {
+                    "sessionIssuer": {},
+                    "webIdFederationData": {},
+                    "attributes": {
+                        "creationDate": "2023-07-19T21:11:57Z",
+                        "mfaAuthenticated": "false"
+                    }
+                }
+            },
+            "eventTime": "2023-07-19T21:37:00Z",
+            "eventSource": "iam.amazonaws.com",
+            "eventName": "ListUsers",
+            "awsRegion": "us-east-1",
+            "sourceIPAddress": "192.0.2.10",
+            "userAgent": "aws-cli/2.13.5 Python/3.11.4",
+            "requestParameters": null,
+            "responseElements": {
+                "users": []
+            },
+            "requestID": "e5f67890-1234-5678-9012-EXAMPLE34567",
+            "eventID": "f6789012-3456-7890-1234-EXAMPLE56789",
+            "readOnly": true,
+            "eventType": "AwsApiCall",
+            "managementEvent": true,
+            "recipientAccountId": "888888888888",
+            "eventCategory": "Management"
+        },
+        {
+            "eventVersion": "1.08",
+            "userIdentity": {
+                "type": "IAMUser",
+                "principalId": "AIDA6ON6E4XEGITEXAMPLE",
+                "arn": "arn:aws:iam::888888888888:user/Bob",
+                "accountId": "888888888888",
+                "accessKeyId": "AKIAIOSFODNN7EXAMPLE",
+                "userName": "Bob",
+                "sessionContext": {
+                    "sessionIssuer": {},
+                    "webIdFederationData": {},
+                    "attributes": {
+                        "creationDate": "2023-07-19T21:11:57Z",
+                        "mfaAuthenticated": "false"
+                    }
+                }
+            },
+            "eventTime": "2023-07-19T21:38:00Z",
+            "eventSource": "s3.amazonaws.com",
+            "eventName": "DeleteObject",
+            "awsRegion": "us-east-1",
+            "sourceIPAddress": "192.0.2.15",
+            "userAgent": "S3Console",
+            "requestParameters": {
+                "bucketName": "my-public-bucket",
+                "key": "old-file.txt"
+            },
+            "responseElements": null,
+            "requestID": "a1b2c3d4-e5f6-7890-1234-EXAMPLE09876",
+            "eventID": "b2c3d4e5-f678-9012-3456-EXAMPLE76543",
+            "readOnly": false,
+            "eventType": "AwsApiCall",
+            "managementEvent": false,
+            "recipientAccountId": "888888888888",
+            "eventCategory": "Data"
+        },
+        {
+            "eventVersion": "1.08",
+            "userIdentity": {
+                "type": "IAMUser",
+                "principalId": "AIDA6ON6E4XEGITEXAMPLE",
+                "arn": "arn:aws:iam::888888888888:user/Charlie",
+                "accountId": "888888888888",
+                "accessKeyId": "AKIAIOSFODNN7EXAMPLE",
+                "userName": "Charlie",
+                "sessionContext": {
+                    "sessionIssuer": {},
+                    "webIdFederationData": {},
+                    "attributes": {
+                        "creationDate": "2023-07-19T21:11:57Z",
+                        "mfaAuthenticated": "false"
+                    }
+                }
+            },
+            "eventTime": "2023-07-19T21:39:00Z",
+            "eventSource": "iam.amazonaws.com",
+            "eventName": "DeleteRole",
+            "awsRegion": "us-west-2",
+            "sourceIPAddress": "203.0.113.200",
+            "userAgent": "aws-cli/2.13.5 Python/3.11.4",
+            "requestParameters": {
+                "roleName": "DevRole"
+            },
+            "responseElements": null,
+            "requestID": "c3d4e5f6-7890-1234-5678-EXAMPLE43210",
+            "eventID": "d4e5f678-9012-3456-7890-EXAMPLE09876",
+            "readOnly": false,
+            "eventType": "AwsApiCall",
+            "managementEvent": true,
+            "recipientAccountId": "888888888888",
+            "eventCategory": "Management"
+        },
+        {
+            "eventVersion": "1.08",
+            "userIdentity": {
+                "type": "IAMUser",
+                "principalId": "AIDA6ON6E4XEGITEXAMPLE",
+                "arn": "arn:aws:iam::888888888888:user/David",
+                "accountId": "888888888888",
+                "accessKeyId": "AKIAIOSFODNN7EXAMPLE",
+                "userName": "David",
+                "sessionContext": {
+                    "sessionIssuer": {},
+                    "webIdFederationData": {},
+                    "attributes": {
+                        "creationDate": "2023-07-19T21:11:57Z",
+                        "mfaAuthenticated": "false"
+                    }
+                }
+            },
+            "eventTime": "2023-07-19T21:40:00Z",
+            "eventSource": "ec2.amazonaws.com",
+            "eventName": "StopInstances",
+            "awsRegion": "us-east-1",
+            "sourceIPAddress": "192.0.2.20",
+            "userAgent": "EC2Console",
+            "requestParameters": {
+                "instanceId": ["i-0abcdef1234567890"]
+            },
+            "responseElements": null,
+            "requestID": "e5f67890-1234-5678-9012-EXAMPLE54321",
+            "eventID": "f6789012-3456-7890-1234-EXAMPLE32109",
+            "readOnly": false,
+            "eventType": "AwsApiCall",
+            "managementEvent": true,
+            "recipientAccountId": "888888888888",
+            "eventCategory": "Management"
+        },
+        {
+            "eventVersion": "1.08",
+            "userIdentity": {
+                "type": "IAMUser",
+                "principalId": "AIDA6ON6E4XEGITEXAMPLE",
+                "arn": "arn:aws:iam::888888888888:user/Mary",
+                "accountId": "888888888888",
+                "accessKeyId": "AKIAIOSFODNN7EXAMPLE",
+                "userName": "Mary",
+                "sessionContext": {
+                    "sessionIssuer": {},
+                    "webIdFederationData": {},
+                    "attributes": {
+                        "creationDate": "2023-07-20T10:00:00Z",
+                        "mfaAuthenticated": "false"
+                    }
+                }
+            },
+            "eventTime": "2023-07-20T10:05:00Z",
+            "eventSource": "s3.amazonaws.com",
+            "eventName": "GetObject",
+            "awsRegion": "us-west-2",
+            "sourceIPAddress": "192.0.2.25",
+            "userAgent": "Mozilla/5.0",
+            "requestParameters": {
+                "bucketName": "secure-logs",
+                "key": "audit.log"
+            },
+            "responseElements": null,
+            "requestID": "f6789012-3456-7890-1234-EXAMPLE00000",
+            "eventID": "a1b2c3d4-e5f6-7890-1234-EXAMPLE11111",
+            "readOnly": true,
+            "eventType": "AwsApiCall",
+            "managementEvent": false,
+            "recipientAccountId": "888888888888",
+            "eventCategory": "Data"
+        },
+        {
+            "eventVersion": "1.08",
+            "userIdentity": {
+                "type": "AssumedRole",
+                "principalId": "AROA6ON6E4XEGITEXAMPLE:Auditor-Session",
+                "arn": "arn:aws:iam::888888888888:assumed-role/AuditorRole/Auditor-Session",
+                "accountId": "888888888888",
+                "accessKeyId": "ASIAIOSFODNN7EXAMPLE",
+                "sessionContext": {
+                    "sessionIssuer": {
+                        "type": "Role",
+                        "principalId": "AROA6ON6E4XEGITEXAMPLE",
+                        "arn": "arn:aws:iam::888888888888:role/AuditorRole",
+                        "accountId": "888888888888",
+                        "userName": "AuditorRole"
+                    },
+                    "webIdFederationData": {},
+                    "attributes": {
+                        "creationDate": "2023-07-20T10:00:00Z",
+                        "mfaAuthenticated": "true"
+                    }
+                }
+            },
+            "eventTime": "2023-07-20T10:10:00Z",
+            "eventSource": "cloudwatch.amazonaws.com",
+            "eventName": "GetMetricData",
+            "awsRegion": "us-east-1",
+            "sourceIPAddress": "198.51.100.20",
+            "userAgent": "CloudWatchConsole",
+            "requestParameters": null,
+            "responseElements": null,
+            "requestID": "b2c3d4e5-f678-9012-3456-EXAMPLE22222",
+            "eventID": "c3d4e5f6-7890-1234-5678-EXAMPLE33333",
+            "readOnly": true,
+            "eventType": "AwsApiCall",
+            "managementEvent": false,
+            "recipientAccountId": "888888888888",
+            "eventCategory": "Management"
+        },
+        {
+            "eventVersion": "1.08",
+            "userIdentity": {
+                "type": "IAMUser",
+                "principalId": "AIDA6ON6E4XEGITEXAMPLE",
+                "arn": "arn:aws:iam::888888888888:user/John",
+                "accountId": "888888888888",
+                "accessKeyId": "AKIAIOSFODNN7EXAMPLE",
+                "userName": "John",
+                "sessionContext": {
+                    "sessionIssuer": {},
+                    "webIdFederationData": {},
+                    "attributes": {
+                        "creationDate": "2023-07-20T10:00:00Z",
+                        "mfaAuthenticated": "false"
+                    }
+                }
+            },
+            "eventTime": "2023-07-20T10:15:00Z",
+            "eventSource": "s3.amazonaws.com",
+            "eventName": "PutObject",
+            "awsRegion": "eu-central-1",
+            "sourceIPAddress": "203.0.113.10",
+            "userAgent": "AWS SDK for Java",
+            "requestParameters": {
+                "bucketName": "my-data-backup",
+                "key": "db-backup-2023-07-20.zip"
+            },
+            "responseElements": null,
+            "requestID": "d4e5f678-9012-3456-7890-EXAMPLE44444",
+            "eventID": "e5f67890-1234-5678-9012-EXAMPLE55555",
+            "readOnly": false,
+            "eventType": "AwsApiCall",
+            "managementEvent": false,
+            "recipientAccountId": "888888888888",
+            "eventCategory": "Data"
+        },
+        {
+            "eventVersion": "1.08",
+            "userIdentity": {
+                "type": "IAMUser",
+                "principalId": "AIDA6ON6E4XEGITEXAMPLE",
+                "arn": "arn:aws:iam::888888888888:user/David",
+                "accountId": "888888888888",
+                "accessKeyId": "AKIAIOSFODNN7EXAMPLE",
+                "userName": "David",
+                "sessionContext": {
+                    "sessionIssuer": {},
+                    "webIdFederationData": {},
+                    "attributes": {
+                        "creationDate": "2023-07-20T10:00:00Z",
+                        "mfaAuthenticated": "false"
+                    }
+                }
+            },
+            "eventTime": "2023-07-20T10:20:00Z",
+            "eventSource": "ec2.amazonaws.com",
+            "eventName": "AuthorizeSecurityGroupIngress",
+            "awsRegion": "us-east-1",
+            "sourceIPAddress": "192.0.2.30",
+            "userAgent": "aws-cli/2.13.5 Python/3.11.4",
+            "requestParameters": {
+                "groupId": "sg-0abcdef1234567890",
+                "ipPermissions": {
+                    "items": [
+                        {
+                            "ipProtocol": "tcp",
+                            "fromPort": 22,
+                            "toPort": 22,
+                            "ipRanges": {
+                                "items": [
+                                    {
+                                        "cidrIp": "0.0.0.0/0"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            "responseElements": null,
+            "requestID": "f6789012-3456-7890-1234-EXAMPLE66666",
+            "eventID": "a1b2c3d4-e5f6-7890-1234-EXAMPLE77777",
+            "readOnly": false,
+            "eventType": "AwsApiCall",
+            "managementEvent": true,
+            "recipientAccountId": "888888888888",
+            "eventCategory": "Management"
+        },
+        {
+            "eventVersion": "1.08",
+            "userIdentity": {
+                "type": "IAMUser",
+                "principalId": "AIDA6ON6E4XEGITEXAMPLE",
+                "arn": "arn:aws:iam::888888888888:user/Mary",
+                "accountId": "888888888888",
+                "accessKeyId": "AKIAIOSFODNN7EXAMPLE",
+                "userName": "Mary",
+                "sessionContext": {
+                    "sessionIssuer": {},
+                    "webIdFederationData": {},
+                    "attributes": {
+                        "creationDate": "2023-07-20T10:00:00Z",
+                        "mfaAuthenticated": "false"
+                    }
+                }
+            },
+            "eventTime": "2023-07-20T10:25:00Z",
+            "eventSource": "iam.amazonaws.com",
+            "eventName": "CreateAccessKey",
+            "awsRegion": "us-east-1",
+            "sourceIPAddress": "192.0.2.35",
+            "userAgent": "aws-cli/2.13.5 Python/3.11.4",
+            "requestParameters": {
+                "userName": "Alice"
+            },
+            "responseElements": {
+                "accessKey": {
+                    "accessKeyId": "AKIAIOSFODNN7EXAMPLE",
+                    "status": "Active",
+                    "secretAccessKey": "EXAMPLE_SECRET_ACCESS_KEY",
+                    "createDate": "Jul 20, 2023 10:25:00 AM",
+                    "userName": "Alice"
+                }
+            },
+            "requestID": "b2c3d4e5-f678-9012-3456-EXAMPLE88888",
+            "eventID": "c3d4e5f6-7890-1234-5678-EXAMPLE99999",
+            "readOnly": false,
+            "eventType": "AwsApiCall",
+            "managementEvent": true,
+            "recipientAccountId": "888888888888",
+            "eventCategory": "Management"
+        },
+        {
+            "eventVersion": "1.08",
+            "userIdentity": {
+                "type": "IAMUser",
+                "principalId": "AIDA6ON6E4XEGITEXAMPLE",
+                "arn": "arn:aws:iam::888888888888:user/Mary",
+                "accountId": "888888888888",
+                "accessKeyId": "AKIAIOSFODNN7EXAMPLE",
+                "userName": "Mary",
+                "sessionContext": {
+                    "sessionIssuer": {},
+                    "webIdFederationData": {},
+                    "attributes": {
+                        "creationDate": "2023-07-20T10:00:00Z",
+                        "mfaAuthenticated": "false"
+                    }
+                }
+            },
+            "eventTime": "2023-07-20T10:30:00Z",
+            "eventSource": "s3.amazonaws.com",
+            "eventName": "DeleteBucketPolicy",
+            "awsRegion": "us-east-1",
+            "sourceIPAddress": "192.0.2.40",
+            "userAgent": "aws-cli/2.13.5 Python/3.11.4",
+            "requestParameters": {
+                "bucketName": "my-public-bucket"
+            },
+            "responseElements": null,
+            "requestID": "d4e5f678-9012-3456-7890-EXAMPLEAAAAA",
+            "eventID": "e5f67890-1234-5678-9012-EXAMPLEBBBBB",
+            "readOnly": false,
+            "eventType": "AwsApiCall",
+            "managementEvent": false,
+            "recipientAccountId": "888888888888",
+            "eventCategory": "Management"
+        },
+        {
+            "eventVersion": "1.08",
+            "userIdentity": {
+                "type": "AssumedRole",
+                "principalId": "AROA6ON6E4XEGITEXAMPLE:MaliciousActor-Session",
+                "arn": "arn:aws:iam::888888888888:assumed-role/MaliciousRole/MaliciousActor-Session",
+                "accountId": "888888888888",
+                "accessKeyId": "ASIAIOSFODNN7EXAMPLE",
+                "sessionContext": {
+                    "sessionIssuer": {
+                        "type": "Role",
+                        "principalId": "AROA6ON6E4XEGITEXAMPLE",
+                        "arn": "arn:aws:iam::888888888888:role/MaliciousRole",
+                        "accountId": "888888888888",
+                        "userName": "MaliciousRole"
+                    },
+                    "webIdFederationData": {},
+                    "attributes": {
+                        "creationDate": "2023-07-20T10:00:00Z",
+                        "mfaAuthenticated": "false"
+                    }
+                }
+            },
+            "eventTime": "2023-07-20T10:35:00Z",
+            "eventSource": "ec2.amazonaws.com",
+            "eventName": "CreateSnapshot",
+            "awsRegion": "ap-northeast-1",
+            "sourceIPAddress": "1.1.1.1",
+            "userAgent": "Nmap Scripting Engine",
+            "requestParameters": {
+                "volumeId": "vol-0abcdef1234567890"
+            },
+            "responseElements": {
+                "snapshotId": "snap-0abcdef1234567890"
+            },
+            "requestID": "f6789012-3456-7890-1234-EXAMPLECCCCC",
+            "eventID": "a1b2c3d4-e5f6-7890-1234-EXAMPLEDDDDD",
+            "readOnly": false,
+            "eventType": "AwsApiCall",
+            "managementEvent": true,
+            "recipientAccountId": "888888888888",
+            "eventCategory": "Management"
         }
     ]
-} 
+}

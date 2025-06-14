@@ -37,12 +37,12 @@ class AWSCloudTrailReader(IAMLogReader):
                 for record in full_log_content['Records']:
                     records.append({
                         'timestamp': record.get('eventTime'),
-                        'user_id': record.get('userIdentity', {}).get('userName'),
-                        'role': record.get('userIdentity', {}).get('arn'),
+                        'user_id': (record.get('userIdentity') or {}).get('userName'),
+                        'role': (record.get('userIdentity') or {}).get('arn'),
                         'action': record.get('eventName'),
                         'ip_address': record.get('sourceIPAddress'),
                         'status': 'success' if record.get('errorCode') is None else 'failure',
-                        'resource': record.get('requestParameters', {}).get('resourceId'),
+                        'resource': (record.get('requestParameters') or {}).get('resourceId'),
                         'user_agent': record.get('userAgent'),
                         'region': record.get('awsRegion')
                     })
