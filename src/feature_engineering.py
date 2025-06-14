@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from typing import List, Dict
+from typing import List, Dict, Optional, Callable
 from datetime import datetime, timedelta
 import ipaddress
 from collections import defaultdict
@@ -260,7 +260,7 @@ class FeatureEngineer:
         
         return df
     
-    def engineer_features(self, df: pd.DataFrame) -> pd.DataFrame:
+    def engineer_features(self, df: pd.DataFrame, progress_callback: Optional[Callable[[int, int, str], None]] = None) -> pd.DataFrame:
         """Apply all feature engineering steps."""
         # Reset numerical columns before each run to avoid duplicates if called multiple times
         self.numerical_columns = []
@@ -284,35 +284,44 @@ class FeatureEngineer:
         print(f"DEBUG: session_id value_counts (including NaNs) after initial check:\n{df['session_id'].value_counts(dropna=False)}")
 
         try:
-            print("Extracting time-based features...")
+            steps = 7 # Time, IP, Behavioral, Session, Region, User Agent, One-Hot Encoding
+            current_step = 0
+
+            if progress_callback: progress_callback(current_step, steps, "Extracting time-based features...")
             df = self.extract_time_features(df)
             print(f"DEBUG: Columns after time features: {df.columns.tolist()}")
+            current_step += 1
             
-            print("Extracting IP-based features...")
+            if progress_callback: progress_callback(current_step, steps, "Extracting IP-based features...")
             df = self.extract_ip_features(df)
             print(f"DEBUG: Columns after IP features: {df.columns.tolist()}")
+            current_step += 1
 
-            print("Extracting behavioral features...")
+            if progress_callback: progress_callback(current_step, steps, "Extracting behavioral features...")
             df = self.extract_behavioral_features(df)
             print(f"DEBUG: Columns after behavioral features: {df.columns.tolist()}")
             print(f"DEBUG: Duplicates in ['user_id', 'timestamp'] after behavioral features: {df.duplicated(subset=['user_id', 'timestamp']).any()}")
+            current_step += 1
 
-            print("Extracting session-based features...")
+            if progress_callback: progress_callback(current_step, steps, "Extracting session-based features...")
             df = self.extract_session_features(df)
             print(f"DEBUG: Columns after session features: {df.columns.tolist()}")
             print(f"DEBUG: Duplicates in ['user_id', 'timestamp'] after session features: {df.duplicated(subset=['user_id', 'timestamp']).any()}")
+            current_step += 1
 
-            print("Extracting region-based features...")
+            if progress_callback: progress_callback(current_step, steps, "Extracting region-based features...")
             df = self.extract_region_features(df)
             print(f"DEBUG: Columns after region features: {df.columns.tolist()}")
+            current_step += 1
 
-            print("Extracting user agent features...")
+            if progress_callback: progress_callback(current_step, steps, "Extracting user agent features...")
             df = self.extract_user_agent_features(df)
             print(f"DEBUG: Columns after user agent features: {df.columns.tolist()}")
+            current_step += 1
             
             # Convert categorical features to numerical using one-hot encoding
             if self.categorical_columns:
-                print(f"Applying one-hot encoding for categorical columns: {self.categorical_columns}")
+                if progress_callback: progress_callback(current_step, steps, f"Applying one-hot encoding for categorical columns: {self.categorical_columns}")
                 df = pd.get_dummies(df, columns=self.categorical_columns, dummy_na=False) # Use dummy_na=False to avoid NaN columns
                 
                 # Add newly created dummy columns to numerical_columns
@@ -320,6 +329,7 @@ class FeatureEngineer:
                 new_dummy_columns = [col for col in df.columns if any(cat_col + '_' in col for cat_col in self.categorical_columns)]
                 self.numerical_columns.extend(new_dummy_columns)
                 print(f"DEBUG: Columns after one-hot encoding: {df.columns.tolist()}")
+                current_step += 1
 
             # Final cleanup: fill any remaining NaNs in numerical columns
             for col in self.numerical_columns:

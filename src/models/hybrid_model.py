@@ -164,6 +164,29 @@ class HybridAnomalyDetector:
         # as LSTM scores are reconstruction error and need more careful normalization relative to IF scores.
         return combined_predictions, if_scores
     
+    def explain_anomaly(self, X_anomaly: pd.DataFrame) -> Dict[str, float]:
+        """Explains an anomaly by showing the most important features from Random Forest.
+        X_anomaly should be a single row (DataFrame) corresponding to the anomalous event.
+        """
+        if self.random_forest is None or self.feature_columns is None:
+            return {"error": "Model not trained or feature columns not set."}
+
+        # Scale the anomalous instance using the *trained* scaler
+        X_scaled_anomaly = self.scaler.transform(X_anomaly[self.feature_columns])
+
+        # Get feature importances from Random Forest
+        feature_importances = self.random_forest.feature_importances_
+        
+        # Create a mapping of feature names to their importances
+        importance_dict = dict(zip(self.feature_columns, feature_importances))
+        
+        # Sort features by importance in descending order
+        sorted_importance = sorted(importance_dict.items(), key=lambda item: item[1], reverse=True)
+        
+        # You can return top N features or all of them
+        # For simplicity, let's return a dictionary of all features and their importances
+        return {feature: importance for feature, importance in sorted_importance}
+
     def save(self, path: str) -> None:
         """Save the model components."""
         model_data = {

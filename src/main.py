@@ -5,14 +5,15 @@ from datetime import datetime
 import os
 from typing import Tuple, List
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, filedialog
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import threading
+import json
 
 from data_generator import IAMLogGenerator
 from feature_engineering import FeatureEngineer
 from models.hybrid_model import HybridAnomalyDetector
-from data.iam_log_reader import get_log_reader, AWSCloudTrailReader # Import necessary reader classes
+from data.iam_log_reader import get_log_reader, AWSCloudTrailReader, IAMLogReader # Import necessary reader classes
 
 class AnomalyDetectionGUI:
     def __init__(self, root):
@@ -38,107 +39,116 @@ class AnomalyDetectionGUI:
         # Data Source Selection
         ttk.Label(self.control_frame, text="Data Source:").grid(row=current_row, column=0, sticky="w", pady=5, padx=5)
         self.data_source_var = tk.StringVar(value="Synthetic Data")
-        self.data_source_options = ["Synthetic Data", "Real AWS CloudTrail Logs"]
+        self.data_source_options = ["Synthetic Data", "AWS CloudTrail Logs", "Azure Activity Logs"]
         self.data_source_combobox = ttk.Combobox(self.control_frame, textvariable=self.data_source_var, values=self.data_source_options, state="readonly")
         self.data_source_combobox.grid(row=current_row, column=1, sticky="ew", pady=5, padx=5)
-        self.data_source_combobox.bind("<<ComboboxSelected>>", self.on_data_source_change) # Bind event
+        self.data_source_combobox.bind("<<ComboboxSelected>>", self.on_data_source_change)
         current_row += 1
 
-        # Synthetic Data Controls (initially visible)
-        self.synthetic_controls = []
+        # File path selection for real logs
+        self.file_path_var = tk.StringVar()
+        self.file_path_label = ttk.Label(self.control_frame, text="Log File Path:")
+        self.file_path_label.grid(row=current_row, column=0, sticky="w", pady=5, padx=5)
+        self.file_path_entry = ttk.Entry(self.control_frame, textvariable=self.file_path_var, width=30)
+        self.file_path_entry.grid(row=current_row, column=1, sticky="ew", pady=5, padx=5)
+        current_row += 1
 
-        label = ttk.Label(self.control_frame, text="Number of Events:")
-        label.grid(row=current_row, column=0, sticky="w", pady=5, padx=5)
-        self.synthetic_controls.append(label)
+        self.browse_button = ttk.Button(self.control_frame, text="Browse", command=self.browse_file)
+        self.browse_button.grid(row=current_row, column=1, sticky="e", pady=5, padx=5)
+        current_row += 1
+
+        # Synthetic Data Controls
+        self.num_events_label = ttk.Label(self.control_frame, text="Number of Events:")
+        self.num_events_label.grid(row=current_row, column=0, sticky="w", pady=5, padx=5)
         self.n_events = ttk.Spinbox(self.control_frame, from_=100, to=5000, width=10)
         self.n_events.set(500)
         self.n_events.grid(row=current_row, column=1, sticky="ew", pady=5, padx=5)
-        self.synthetic_controls.append(self.n_events)
         current_row += 1
         
-        label = ttk.Label(self.control_frame, text="Number of Users:")
-        label.grid(row=current_row, column=0, sticky="w", pady=5, padx=5)
-        self.synthetic_controls.append(label)
+        self.num_users_label = ttk.Label(self.control_frame, text="Number of Users:")
+        self.num_users_label.grid(row=current_row, column=0, sticky="w", pady=5, padx=5)
         self.n_users = ttk.Spinbox(self.control_frame, from_=10, to=200, width=10)
         self.n_users.set(20)
         self.n_users.grid(row=current_row, column=1, sticky="ew", pady=5, padx=5)
-        self.synthetic_controls.append(self.n_users)
         current_row += 1
         
-        label = ttk.Label(self.control_frame, text="Number of Roles:")
-        label.grid(row=current_row, column=0, sticky="w", pady=5, padx=5)
-        self.synthetic_controls.append(label)
+        self.num_roles_label = ttk.Label(self.control_frame, text="Number of Roles:")
+        self.num_roles_label.grid(row=current_row, column=0, sticky="w", pady=5, padx=5)
         self.n_roles = ttk.Spinbox(self.control_frame, from_=2, to=20, width=10)
         self.n_roles.set(3)
         self.n_roles.grid(row=current_row, column=1, sticky="ew", pady=5, padx=5)
-        self.synthetic_controls.append(self.n_roles)
         current_row += 1
         
-        label = ttk.Label(self.control_frame, text="Number of Actions:")
-        label.grid(row=current_row, column=0, sticky="w", pady=5, padx=5)
-        self.synthetic_controls.append(label)
+        self.num_actions_label = ttk.Label(self.control_frame, text="Number of Actions:")
+        self.num_actions_label.grid(row=current_row, column=0, sticky="w", pady=5, padx=5)
         self.n_actions = ttk.Spinbox(self.control_frame, from_=5, to=50, width=10)
         self.n_actions.set(5)
         self.n_actions.grid(row=current_row, column=1, sticky="ew", pady=5, padx=5)
-        self.synthetic_controls.append(self.n_actions)
         current_row += 1
         
-        ttk.Label(self.control_frame, text="Contamination Ratio:").grid(row=current_row, column=0, sticky="w", pady=5, padx=5)
+        self.contamination_ratio_label = ttk.Label(self.control_frame, text="Contamination Ratio:")
+        self.contamination_ratio_label.grid(row=current_row, column=0, sticky="w", pady=5, padx=5)
         self.contamination_ratio = ttk.Spinbox(self.control_frame, from_=0.01, to=0.5, increment=0.01, width=10, format="%.2f")
         self.contamination_ratio.set(0.15) # Default from HybridAnomalyDetector
         self.contamination_ratio.grid(row=current_row, column=1, sticky="ew", pady=5, padx=5)
         current_row += 1
         
         # --- Hyperparameter Tuning Controls ---
-        self.model_tuning_controls = []
-
-        label = ttk.Label(self.control_frame, text="IF Estimators (n):")
-        label.grid(row=current_row, column=0, sticky="w", pady=5, padx=5)
-        self.model_tuning_controls.append(label)
+        self.if_estimators_label = ttk.Label(self.control_frame, text="IF Estimators (n):")
+        self.if_estimators_label.grid(row=current_row, column=0, sticky="w", pady=5, padx=5)
         self.n_estimators_iso_forest = ttk.Spinbox(self.control_frame, from_=50, to=500, increment=50, width=10)
         self.n_estimators_iso_forest.set(300) # Default
         self.n_estimators_iso_forest.grid(row=current_row, column=1, sticky="ew", pady=5, padx=5)
-        self.model_tuning_controls.append(self.n_estimators_iso_forest)
         current_row += 1
 
-        label = ttk.Label(self.control_frame, text="IF Max Features (float):")
-        label.grid(row=current_row, column=0, sticky="w", pady=5, padx=5)
-        self.model_tuning_controls.append(label)
+        self.if_max_features_label = ttk.Label(self.control_frame, text="IF Max Features (float):")
+        self.if_max_features_label.grid(row=current_row, column=0, sticky="w", pady=5, padx=5)
         self.max_features_iso_forest = ttk.Spinbox(self.control_frame, from_=0.1, to=1.0, increment=0.1, width=10, format="%.1f")
         self.max_features_iso_forest.set(1.0) # Default
         self.max_features_iso_forest.grid(row=current_row, column=1, sticky="ew", pady=5, padx=5)
-        self.model_tuning_controls.append(self.max_features_iso_forest)
         current_row += 1
 
-        label = ttk.Label(self.control_frame, text="RF Estimators (n):")
-        label.grid(row=current_row, column=0, sticky="w", pady=5, padx=5)
-        self.model_tuning_controls.append(label)
+        self.rf_estimators_label = ttk.Label(self.control_frame, text="RF Estimators (n):")
+        self.rf_estimators_label.grid(row=current_row, column=0, sticky="w", pady=5, padx=5)
         self.n_estimators_rf = ttk.Spinbox(self.control_frame, from_=50, to=500, increment=50, width=10)
         self.n_estimators_rf.set(250) # Default
         self.n_estimators_rf.grid(row=current_row, column=1, sticky="ew", pady=5, padx=5)
-        self.model_tuning_controls.append(self.n_estimators_rf)
         current_row += 1
 
-        label = ttk.Label(self.control_frame, text="RF Max Depth (int/None):")
-        label.grid(row=current_row, column=0, sticky="w", pady=5, padx=5)
-        self.model_tuning_controls.append(label)
+        self.rf_max_depth_label = ttk.Label(self.control_frame, text="RF Max Depth (int/None):")
+        self.rf_max_depth_label.grid(row=current_row, column=0, sticky="w", pady=5, padx=5)
         # Using Combobox for Max Depth to allow 'None'
         self.max_depth_rf_var = tk.StringVar(value="30")
         self.max_depth_rf = ttk.Combobox(self.control_frame, textvariable=self.max_depth_rf_var, values=["None", 10, 20, 30, 50], state="readonly", width=10)
         self.max_depth_rf.grid(row=current_row, column=1, sticky="ew", pady=5, padx=5)
-        self.model_tuning_controls.append(self.max_depth_rf)
         current_row += 1
 
-        label = ttk.Label(self.control_frame, text="RF Min Samples Split (n):")
-        label.grid(row=current_row, column=0, sticky="w", pady=5, padx=5)
-        self.model_tuning_controls.append(label)
+        self.rf_min_samples_split_label = ttk.Label(self.control_frame, text="RF Min Samples Split (n):")
+        self.rf_min_samples_split_label.grid(row=current_row, column=0, sticky="w", pady=5, padx=5)
         self.min_samples_split_rf = ttk.Spinbox(self.control_frame, from_=2, to=20, width=10)
         self.min_samples_split_rf.set(2) # Default
         self.min_samples_split_rf.grid(row=current_row, column=1, sticky="ew", pady=5, padx=5)
-        self.model_tuning_controls.append(self.min_samples_split_rf)
         current_row += 1
         # --- End Hyperparameter Tuning Controls ---
         
+        # List of widgets for synthetic data controls
+        self.synthetic_controls = [
+            self.num_events_label, self.n_events,
+            self.num_users_label, self.n_users,
+            self.num_roles_label, self.n_roles,
+            self.num_actions_label, self.n_actions,
+            self.contamination_ratio_label, self.contamination_ratio
+        ]
+
+        # List of widgets for model tuning controls
+        self.model_tuning_controls = [
+            self.if_estimators_label, self.n_estimators_iso_forest,
+            self.if_max_features_label, self.max_features_iso_forest,
+            self.rf_estimators_label, self.n_estimators_rf,
+            self.rf_max_depth_label, self.max_depth_rf,
+            self.rf_min_samples_split_label, self.min_samples_split_rf
+        ]
+
         # Add run button
         self.run_button = ttk.Button(self.control_frame, text="Run Analysis", command=self.run_analysis)
         self.run_button.grid(row=current_row, column=0, columnspan=2, pady=20)
@@ -245,39 +255,88 @@ To provide a truly comprehensive and robust IAM anomaly detection solution, futu
 This multi-source integration strategy will empower organizations with unparalleled visibility into their identity and access landscape, proactive threat detection, and significantly enhanced overall security posture.
 """)
 
+        # --- Reporting Tab ---
+        self.reporting_tab = ttk.Frame(self.notebook)
+        self.notebook.add(self.reporting_tab, text="Reporting")
+
+        self.reporting_text = tk.Text(self.reporting_tab, wrap=tk.WORD, state='disabled', font=("TkDefaultFont", 10))
+        self.reporting_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+        self.update_reporting_tab("""
+**Anomaly Reporting and Integration Capabilities**
+
+This section highlights the reporting and integration capabilities of the IAM Anomaly Detection system. While the current version focuses on core detection, future enhancements will provide robust reporting and seamless integration with existing security ecosystems.
+
+**Last Analysis Summary:**
+*   **Total Events Processed:** [N/A - Run analysis to populate]
+*   **Detected Anomalies:** [N/A - Run analysis to populate]
+*   **Top Anomalous Users:** [N/A - Run analysis to populate]
+
+**Key Reporting Features (Planned):**
+*   **Customizable Dashboards:** Interactive dashboards to visualize anomaly trends, user behavior, and security incidents over time.
+*   **Detailed Anomaly Reports:** Generate comprehensive reports for individual anomalies, including contextual information, contributing features, and severity levels.
+*   **Scheduled Reporting:** Automate the generation and distribution of daily, weekly, or monthly anomaly summaries.
+
+**Integration with Security Ecosystems (Planned):**
+*   **SIEM Integration (e.g., Splunk, Elastic Security, Microsoft Sentinel):** Push detected anomalies and their context directly to SIEM platforms for centralized logging, correlation, and alert management.
+*   **SOAR Integration (e.g., Palo Alto Networks XSOAR, Splunk SOAR):** Trigger automated incident response playbooks based on high-severity anomalies, enabling rapid containment and remediation.
+*   **API for Custom Integrations:** Provide a robust API for third-party tools and custom scripts to query anomaly data and integrate with other enterprise systems.
+
+These planned features underscore the system's potential to become a pivotal component in an organization's overall security posture, enabling proactive threat hunting and streamlined incident response.
+""")
+
         # Initial call to adjust controls
-        self.on_data_source_change() # Call once to set initial state
+        self.on_data_source_change()
 
     def on_data_source_change(self, event=None):
         selected_source = self.data_source_var.get()
         if selected_source == "Synthetic Data":
+            # Show synthetic controls
             for widget in self.synthetic_controls:
                 widget.grid()
             self.n_events.config(state="enabled")
             self.n_users.config(state="enabled")
             self.n_roles.config(state="enabled")
             self.n_actions.config(state="enabled")
+            self.contamination_ratio.config(state="enabled")
+
+            # Show model tuning controls (always visible for synthetic data)
             for widget in self.model_tuning_controls:
-                widget.grid() # Show widgets
+                widget.grid()
             self.n_estimators_iso_forest.config(state="enabled")
             self.max_features_iso_forest.config(state="enabled")
             self.n_estimators_rf.config(state="enabled")
-            self.max_depth_rf.config(state="readonly") # Combobox is readonly when enabled
+            self.max_depth_rf.config(state="readonly")
             self.min_samples_split_rf.config(state="enabled")
-        else: # Real Logs selected
+
+            # Hide file path selection
+            self.file_path_label.grid_remove()
+            self.file_path_entry.grid_remove()
+            self.browse_button.grid_remove()
+
+        else: # Real Logs (AWS CloudTrail Logs or Azure Activity Logs) selected
+            # Hide synthetic controls
             for widget in self.synthetic_controls:
-                widget.grid_remove() # Hide widgets
+                widget.grid_remove()
             self.n_events.config(state="disabled")
             self.n_users.config(state="disabled")
             self.n_roles.config(state="disabled")
             self.n_actions.config(state="disabled")
+            self.contamination_ratio.config(state="disabled")
+
+            # Show model tuning controls (always visible for real logs too)
             for widget in self.model_tuning_controls:
-                widget.grid_remove() # Hide widgets
-            self.n_estimators_iso_forest.config(state="disabled")
-            self.max_features_iso_forest.config(state="disabled")
-            self.n_estimators_rf.config(state="disabled")
-            self.max_depth_rf.config(state="disabled")
-            self.min_samples_split_rf.config(state="disabled")
+                widget.grid()
+            self.n_estimators_iso_forest.config(state="enabled")
+            self.max_features_iso_forest.config(state="enabled")
+            self.n_estimators_rf.config(state="enabled")
+            self.max_depth_rf.config(state="readonly")
+            self.min_samples_split_rf.config(state="enabled")
+
+            # Show file path selection
+            self.file_path_label.grid()
+            self.file_path_entry.grid()
+            self.browse_button.grid()
     
     def update_status(self, message):
         self.status_text.insert(tk.END, message + "\n")
@@ -382,31 +441,96 @@ This multi-source integration strategy will empower organizations with unparalle
                     # Assuming 'is_anomaly' is the true label column
                     true_labels = df_local['is_anomaly'].values
                     self.root.after(0, self._update_progress_bar, 20, "Data generation complete!")
-                elif selected_source == "Real AWS CloudTrail Logs":
-                    self.root.after(0, self.update_status, "Loading real AWS CloudTrail logs... (1/4)")
+                elif selected_source == "AWS CloudTrail Logs" or selected_source == "Azure Activity Logs":
+                    self.root.after(0, self.update_status, f"Loading {selected_source}... (1/4)")
                     self.root.after(0, self._update_progress_bar, 5, "Initializing log reader...")
-                    log_reader = AWSCloudTrailReader()
-                    log_file_path = "data/sample_aws_cloudtrail.json"
-                    self.root.after(0, self.update_status, f"Reading logs from {log_file_path}...")
-                    df_local = log_reader.read_logs(log_file_path)
-                    self.root.after(0, self.update_status, "Real logs loaded and cleaned!")
-                    true_anomalies_exist = False # No true labels for real logs
+                    reader = IAMLogReader()
+                    file_path = self.file_path_var.get()
 
+                    if not file_path:
+                        self.update_status("Error: Please select a log file path.")
+                        self._update_progress_bar(0)
+                        return
+
+                    self.root.after(0, self.update_status, f"Reading logs from {file_path} in chunks...")
+                    all_chunks = []
+                    chunk_size = 500 # Define a suitable chunk size for processing
+                    
+                    try:
+                        with open(file_path, 'r') as f:
+                            # For JSON, we need to read the whole file first or handle streaming JSON (more complex)
+                            # For simplicity, if we expect very large files that can't fit in memory, 
+                            # a different reading strategy (e.g., line-by-line for JSONL, or a custom parser)
+                            # would be needed. For now, we load fully then process for chunking effect.
+                            raw_data = json.load(f)
+                            if selected_source == "AWS CloudTrail Logs":
+                                records = raw_data.get('Records', [])
+                            else: # Azure Activity Logs
+                                records = raw_data # Azure Activity Logs are typically a list of dicts at top level
+
+                        total_records = len(records)
+                        self.root.after(0, self.update_status, f"Total records to process: {total_records}")
+
+                        for i in range(0, total_records, chunk_size):
+                            chunk_records = records[i:i + chunk_size]
+                            if selected_source == "AWS CloudTrail Logs":
+                                # Create a temporary structure that mimics the original file structure for the reader
+                                temp_data = {'Records': chunk_records}
+                                chunk_df = reader.read_aws_cloudtrail_logs_from_data(temp_data) # New method
+                            else: # Azure Activity Logs
+                                chunk_df = reader.read_azure_activity_logs_from_data(chunk_records) # New method
+                            
+                            if not chunk_df.empty:
+                                all_chunks.append(chunk_df)
+                            
+                            progress = 5 + int(((i + chunk_size) / total_records) * (20 - 5)) # Scale progress from 5% to 20%
+                            self.root.after(0, self._update_progress_bar, progress, f"Processing chunk {i//chunk_size + 1}... ({min(i + chunk_size, total_records)}/{total_records})")
+                        
+                        if all_chunks:
+                            df_local = pd.concat(all_chunks, ignore_index=True)
+                        else:
+                            df_local = pd.DataFrame()
+                            
+                    except FileNotFoundError:
+                        self.update_status(f"Error: File not found at {file_path}")
+                        self._update_progress_bar(0)
+                        return
+                    except json.JSONDecodeError as e:
+                        self.update_status(f"Error decoding JSON from {file_path}: {e}")
+                        self._update_progress_bar(0)
+                        return
+                    except Exception as e:
+                        self.update_status(f"An unexpected error occurred during log reading: {e}")
+                        import traceback
+                        traceback.print_exc()
+                        self._update_progress_bar(0)
+                        return
+
+                    self.root.after(0, self.update_status, "Logs loaded and cleaned!")
+                    true_anomalies_exist = False # No true labels for real logs
+                
                 if df_local is None or df_local.empty:
                     self.root.after(0, self.update_status, "Error: No data to process.")
                     self.root.after(0, lambda: self.run_button.state(['!disabled']))
                     return
                 
-                # Extract features (40% progress)
+                # Extract features (20-40% progress)
                 self.root.after(0, self.update_status, "Extracting features... (2/4)")
                 self.root.after(0, self._update_progress_bar, 25, "Initializing feature engineer...")
                 feature_engineer = FeatureEngineer()
-                self.root.after(0, self.update_status, "Applying feature engineering...")
-                df_local = feature_engineer.engineer_features(df_local)
+
+                # Pass a progress callback to the feature engineer
+                def feature_engineering_progress(current_step, total_steps, message):
+                    base_progress = 25 # Start of feature engineering progress
+                    progress_range = 40 - base_progress # Total range for feature engineering
+                    step_progress = int(base_progress + (current_step / total_steps) * progress_range)
+                    self.root.after(0, self._update_progress_bar, step_progress, message)
+
+                df_local = feature_engineer.engineer_features(df_local, progress_callback=feature_engineering_progress)
                 feature_columns = feature_engineer.get_feature_columns()
                 self.root.after(0, self._update_progress_bar, 40, "Feature extraction complete!")
                 
-                # Train model (70% progress, as this is typically the longest part)
+                # Train model (40-85% progress)
                 self.root.after(0, self.update_status, "Training hybrid anomaly detection model... (3/4)")
                 self.root.after(0, self._update_progress_bar, 45, "Initializing hybrid model...")
                 
@@ -435,10 +559,12 @@ This multi-source integration strategy will empower organizations with unparalle
                     min_samples_split_rf=min_samples_split_rf
                 )
 
-                hybrid_detector.fit(df_local[feature_columns], feature_columns, self._update_progress_bar)
+                # Adjust progress range for model training within hybrid_model.py
+                # hybrid_detector.fit will update progress from 45% to 85%
+                hybrid_detector.fit(df_local[feature_columns], feature_columns, self._update_progress_bar) 
                 self.root.after(0, self._update_progress_bar, 85, "Model trained.") # Adjusted percentage
 
-                # Making predictions (90% progress)
+                # Making predictions (85-95% progress)
                 self.root.after(0, self.update_status, "Making predictions... (4/4)")
                 self.root.after(0, self._update_progress_bar, 90, "Generating predictions...")
                 predictions, scores = hybrid_detector.predict(df_local)
@@ -465,6 +591,25 @@ This multi-source integration strategy will empower organizations with unparalle
                 
                 self.root.after(0, self.update_status, f"Detected Anomalies: {np.sum(predictions)}")
 
+                # Anomaly Explanation
+                anomalous_indices = np.where(predictions == 1)[0]
+                if len(anomalous_indices) > 0:
+                    self.root.after(0, self.update_status, "\nAnomaly Explanations (Top 5 features for first 3 anomalies):")
+                    for i, idx in enumerate(anomalous_indices):
+                        if i >= 3: # Limit to first 3 anomalies for explanation in GUI
+                            break
+                        anomaly_data_row = df_local.iloc[[idx]]
+                        explanation = hybrid_detector.explain_anomaly(anomaly_data_row) # Pass the single row DataFrame
+                        
+                        if "error" not in explanation:
+                            self.root.after(0, self.update_status, f"  Anomaly {i+1} (Original Index: {idx}):")
+                            top_features = list(explanation.items())[:5] # Get top 5 features
+                            for feature, importance in top_features:
+                                self.root.after(0, self.update_status, f"    - {feature}: {importance:.4f}")
+                        else:
+                            error_message = explanation['error']
+                            self.root.after(0, self.update_status, f"  Anomaly {i+1} (Original Index: {idx}): {error_message}")
+
                 self.root.after(0, self.update_status, "Saving results...")
                 output_dir = "output"
                 os.makedirs(output_dir, exist_ok=True)
@@ -483,6 +628,41 @@ This multi-source integration strategy will empower organizations with unparalle
 
                 self.root.after(0, self.update_status, "Analysis Complete!")
                 self.root.after(0, self.update_visualization) # Update visualizations on completion
+
+                # Update Reporting Tab with summary
+                total_events = len(df_local) # Assuming df_local contains all processed events
+                detected_anomalies_count = np.sum(predictions)
+                
+                top_anomalous_users_str = "N/A"
+                if 'user_id' in df_local.columns and not df_local['user_id'].empty:
+                    anomaly_users_counts = df_local[predictions == 1]['user_id'].value_counts()
+                    if not anomaly_users_counts.empty:
+                        top_anomalous_users = anomaly_users_counts.head(5).index.tolist()
+                        top_anomalous_users_str = ", ".join(top_anomalous_users)
+                    
+                reporting_content = f"""
+**Anomaly Reporting and Integration Capabilities**
+
+This section highlights the reporting and integration capabilities of the IAM Anomaly Detection system. While the current version focuses on core detection, future enhancements will provide robust reporting and seamless integration with existing security ecosystems.
+
+**Last Analysis Summary:**
+*   **Total Events Processed:** {total_events}
+*   **Detected Anomalies:** {detected_anomalies_count}
+*   **Top Anomalous Users:** {top_anomalous_users_str}
+
+**Key Reporting Features (Planned):**
+*   **Customizable Dashboards:** Interactive dashboards to visualize anomaly trends, user behavior, and security incidents over time.
+*   **Detailed Anomaly Reports:** Generate comprehensive reports for individual anomalies, including contextual information, contributing features, and severity levels.
+*   **Scheduled Reporting:** Automate the generation and distribution of daily, weekly, or monthly anomaly summaries.
+
+**Integration with Security Ecosystems (Planned):**
+*   **SIEM Integration (e.g., Splunk, Elastic Security, Microsoft Sentinel):** Push detected anomalies and their context directly to SIEM platforms for centralized logging, correlation, and alert management.
+*   **SOAR Integration (e.g., Palo Alto Networks XSOAR, Splunk SOAR):** Trigger automated incident response playbooks based on high-severity anomalies, enabling rapid containment and remediation.
+*   **API for Custom Integrations:** Provide a robust API for third-party tools and custom scripts to query anomaly data and integrate with other enterprise systems.
+
+These planned features underscore the system's potential to become a pivotal component in an organization's overall security posture, enabling proactive threat hunting and streamlined incident response.
+"""
+                self.root.after(0, self.update_reporting_tab, reporting_content)
 
             except Exception as e:
                 self.root.after(0, self.update_status, f"Error: {e}")
@@ -505,6 +685,20 @@ This multi-source integration strategy will empower organizations with unparalle
         self.data_source_text.delete(1.0, tk.END)
         self.data_source_text.insert(tk.END, content)
         self.data_source_text.config(state='disabled')
+
+    def update_reporting_tab(self, content):
+        self.reporting_text.config(state='normal')
+        self.reporting_text.delete(1.0, tk.END)
+        self.reporting_text.insert(tk.END, content)
+        self.reporting_text.config(state='disabled')
+
+    def browse_file(self):
+        file_selected = filedialog.askopenfilename(
+            title="Select Log File",
+            filetypes=(("JSON files", "*.json"), ("All files", "*.*" ))
+        )
+        if file_selected:
+            self.file_path_var.set(file_selected)
 
 def main():
     root = tk.Tk()

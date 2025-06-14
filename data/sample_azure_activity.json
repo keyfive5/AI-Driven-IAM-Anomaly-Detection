@@ -1,0 +1,38 @@
+[
+  {
+    "time": "2024-07-20T10:00:00.000Z",
+    "resourceId": "/subscriptions/sub_id/resourceGroups/rg_name/providers/Microsoft.Compute/virtualMachines/vm_name",
+    "category": "Administrative",
+    "operationName": "Microsoft.Compute/virtualMachines/start/action",
+    "resultType": "Success",
+    "resultSignature": "Succeeded.OK",
+    "durationMs": 120,
+    "callerIpAddress": "203.0.113.45",
+    "correlationId": "corr-id-123",
+    "identity": {
+      "claims": {
+        "oid": "user1@example.com",
+        "name": "User One"
+      },
+      "principalId": "user-obj-id-1"
+    }
+  },
+  {
+    "time": "2024-07-20T10:05:00.000Z",
+    "resourceId": "/subscriptions/sub_id/resourceGroups/rg_name/providers/Microsoft.Network/networkSecurityGroups/nsg_name",
+    "category": "Administrative",
+    "operationName": "Microsoft.Network/networkSecurityGroups/write",
+    "resultType": "Failed",
+    "resultSignature": "BadRequest",
+    "durationMs": 80,
+    "callerIpAddress": "203.0.113.46",
+    "correlationId": "corr-id-124",
+    "identity": {
+      "claims": {
+        "oid": "user2@example.com",
+        "name": "User Two"
+      },
+      "principalId": "user-obj-id-2"
+    }
+  }
+] 

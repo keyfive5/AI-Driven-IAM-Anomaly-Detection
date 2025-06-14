@@ -22,6 +22,240 @@ class IAMLogReader:
         """Clean and preprocess the logs."""
         raise NotImplementedError("Subclasses must implement clean_logs")
 
+    def read_aws_cloudtrail_logs(self, file_path: str) -> pd.DataFrame:
+        """Reads AWS CloudTrail logs from a JSON file and flattens them into a DataFrame."""
+        try:
+            with open(file_path, 'r') as f:
+                # CloudTrail logs are often a list of records under a 'Records' key
+                data = json.load(f)
+                records = data.get('Records', [])
+
+            logs = []
+            for record in records:
+                event_time = record.get('eventTime')
+                # Handle different identity types
+                user_identity = record.get('userIdentity', {})
+                user_id = user_identity.get('userName') or user_identity.get('principalId') or user_identity.get('sessionContext', {}).get('sessionIssuer', {}).get('userName') or user_identity.get('arn')
+                
+                event_name = record.get('eventName')
+                event_source = record.get('eventSource')
+                resource_name = record.get('resources',[{}])[0].get('resourceName') if record.get('resources') else None
+                ip_address = record.get('sourceIPAddress')
+                aws_region = record.get('awsRegion')
+                error_code = record.get('errorCode')
+                error_message = record.get('errorMessage')
+                user_agent = record.get('userAgent')
+                request_id = record.get('requestID')
+                event_id = record.get('eventID')
+
+                # Determine status based on errorCode or errorMessage presence
+                status = 'failure' if error_code or error_message else 'success'
+
+                logs.append({
+                    'timestamp': event_time,
+                    'user_id': user_id,
+                    'action': event_name,
+                    'resource': resource_name,
+                    'ip_address': ip_address,
+                    'region': aws_region,
+                    'status': status,
+                    'session_id': request_id, # Using requestID as session_id for CloudTrail
+                    'session_start': event_time, # For simplicity, start and end are eventTime
+                    'session_end': event_time,
+                    'user_agent': user_agent
+                })
+            
+            df = pd.DataFrame(logs)
+            # Convert timestamp to datetime
+            df['timestamp'] = pd.to_datetime(df['timestamp'])
+            df['session_start'] = pd.to_datetime(df['session_start'])
+            df['session_end'] = pd.to_datetime(df['session_end'])
+            
+            print(f"Successfully loaded {len(df)} AWS CloudTrail logs.")
+            return df
+
+        except FileNotFoundError:
+            print(f"Error: File not found at {file_path}")
+            return pd.DataFrame()
+        except json.JSONDecodeError as e:
+            print(f"Error decoding JSON from {file_path}: {e}")
+            return pd.DataFrame()
+        except Exception as e:
+            print(f"An unexpected error occurred while reading AWS CloudTrail logs: {e}")
+            import traceback
+            traceback.print_exc()
+            return pd.DataFrame()
+            
+    def read_azure_activity_logs(self, file_path: str) -> pd.DataFrame:
+        """Reads Azure Activity Logs from a JSON file and flattens them into a DataFrame."""
+        try:
+            with open(file_path, 'r') as f:
+                data = json.load(f)
+
+            logs = []
+            for record in data:
+                event_time = record.get('time')
+                
+                # Extract user_id. Azure uses 'oid' (object ID) or 'name' in claims
+                identity = record.get('identity', {}).get('claims', {})
+                user_id = identity.get('oid') or identity.get('name')
+                
+                operation_name = record.get('operationName')
+                resource_id = record.get('resourceId')
+                caller_ip_address = record.get('callerIpAddress')
+                correlation_id = record.get('correlationId') # Can serve as a session ID
+                result_type = record.get('resultType') # 'Success', 'Failed', etc.
+
+                # Extract resource type/name from resourceId if possible
+                resource_parts = resource_id.split('/') if resource_id else []
+                resource = resource_parts[-1] if len(resource_parts) > 0 else None
+                # A more generic action could be the last part of operationName
+                action = operation_name.split('/')[-1] if operation_name else None
+
+                # Map Azure resultType to a simplified status
+                status = 'success' if result_type and result_type.lower() == 'success' else 'failure'
+
+                logs.append({
+                    'timestamp': event_time,
+                    'user_id': user_id,
+                    'action': action,
+                    'resource': resource,
+                    'ip_address': caller_ip_address,
+                    'region': None, # Azure logs don't directly provide 'region' in this format, set to None
+                    'status': status,
+                    'session_id': correlation_id, # Using correlationId as session_id
+                    'session_start': event_time,
+                    'session_end': event_time,
+                    'user_agent': None # Azure logs don't directly provide 'user_agent' in this format, set to None
+                })
+            
+            df = pd.DataFrame(logs)
+            # Convert timestamp to datetime
+            df['timestamp'] = pd.to_datetime(df['timestamp'])
+            df['session_start'] = pd.to_datetime(df['session_start'])
+            df['session_end'] = pd.to_datetime(df['session_end'])
+
+            print(f"Successfully loaded {len(df)} Azure Activity Logs.")
+            return df
+
+        except FileNotFoundError:
+            print(f"Error: File not found at {file_path}")
+            return pd.DataFrame()
+        except json.JSONDecodeError as e:
+            print(f"Error decoding JSON from {file_path}: {e}")
+            return pd.DataFrame()
+        except Exception as e:
+            print(f"An unexpected error occurred while reading Azure Activity Logs: {e}")
+            import traceback
+            traceback.print_exc()
+            return pd.DataFrame()
+
+    def read_aws_cloudtrail_logs_from_data(self, data: dict) -> pd.DataFrame:
+        """Reads AWS CloudTrail logs from a dictionary (in-memory) and flattens them into a DataFrame."""
+        try:
+            records = data.get('Records', [])
+            logs = []
+            for record in records:
+                event_time = record.get('eventTime')
+                user_identity = record.get('userIdentity', {})
+                user_id = user_identity.get('userName') or user_identity.get('principalId') or user_identity.get('sessionContext', {}).get('sessionIssuer', {}).get('userName') or user_identity.get('arn')
+                event_name = record.get('eventName')
+                event_source = record.get('eventSource')
+                resource_name = record.get('resources',[{}])[0].get('resourceName') if record.get('resources') else None
+                ip_address = record.get('sourceIPAddress')
+                aws_region = record.get('awsRegion')
+                error_code = record.get('errorCode')
+                error_message = record.get('errorMessage')
+                user_agent = record.get('userAgent')
+                request_id = record.get('requestID')
+                
+                status = 'failure' if error_code or error_message else 'success'
+
+                logs.append({
+                    'timestamp': event_time,
+                    'user_id': user_id,
+                    'action': event_name,
+                    'resource': resource_name,
+                    'ip_address': ip_address,
+                    'region': aws_region,
+                    'status': status,
+                    'session_id': request_id, 
+                    'session_start': event_time,
+                    'session_end': event_time,
+                    'user_agent': user_agent
+                })
+            
+            df = pd.DataFrame(logs)
+            df['timestamp'] = pd.to_datetime(df['timestamp'])
+            df['session_start'] = pd.to_datetime(df['session_start'])
+            df['session_end'] = pd.to_datetime(df['session_end'])
+            
+            return df
+
+        except Exception as e:
+            print(f"An unexpected error occurred while reading AWS CloudTrail logs from data: {e}")
+            import traceback
+            traceback.print_exc()
+            return pd.DataFrame()
+            
+    def read_azure_activity_logs_from_data(self, records: List[Dict]) -> pd.DataFrame:
+        """Reads Azure Activity Logs from a list of dictionaries (in-memory) and flattens them into a DataFrame."""
+        try:
+            logs = []
+            for record in records:
+                event_time = record.get('time')
+                identity = record.get('identity', {}).get('claims', {})
+                user_id = identity.get('oid') or identity.get('name')
+                operation_name = record.get('operationName')
+                resource_id = record.get('resourceId')
+                caller_ip_address = record.get('callerIpAddress')
+                correlation_id = record.get('correlationId')
+                result_type = record.get('resultType')
+
+                resource_parts = resource_id.split('/') if resource_id else []
+                resource = resource_parts[-1] if len(resource_parts) > 0 else None
+                action = operation_name.split('/')[-1] if operation_name else None
+                status = 'success' if result_type and result_type.lower() == 'success' else 'failure'
+
+                logs.append({
+                    'timestamp': event_time,
+                    'user_id': user_id,
+                    'action': action,
+                    'resource': resource,
+                    'ip_address': caller_ip_address,
+                    'region': None,
+                    'status': status,
+                    'session_id': correlation_id, 
+                    'session_start': event_time,
+                    'session_end': event_time,
+                    'user_agent': None
+                })
+            
+            df = pd.DataFrame(logs)
+            df['timestamp'] = pd.to_datetime(df['timestamp'])
+            df['session_start'] = pd.to_datetime(df['session_start'])
+            df['session_end'] = pd.to_datetime(df['session_end'])
+
+            return df
+
+        except Exception as e:
+            print(f"An unexpected error occurred while reading Azure Activity Logs from data: {e}")
+            import traceback
+            traceback.print_exc()
+            return pd.DataFrame()
+
+    def read_logs(self, source_type: str, file_path: str = None) -> pd.DataFrame:
+        """Reads logs based on the specified source type."""
+        if source_type == "Synthetic Data":
+            return pd.DataFrame()
+        elif source_type == "AWS CloudTrail Logs":
+            return self.read_aws_cloudtrail_logs(file_path)
+        elif source_type == "Azure Activity Logs":
+            return self.read_azure_activity_logs(file_path)
+        else:
+            print(f"Error: Unknown data source type: {source_type}")
+            return pd.DataFrame()
+
 class AWSCloudTrailReader(IAMLogReader):
     """Reader for AWS CloudTrail logs."""
     
