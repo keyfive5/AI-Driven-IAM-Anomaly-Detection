@@ -9,6 +9,9 @@ from tkinter import ttk, filedialog
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import threading
 import json
+import unittest
+import io
+from contextlib import redirect_stdout
 
 from data_generator import IAMLogGenerator
 from feature_engineering import FeatureEngineer
@@ -203,6 +206,12 @@ class AnomalyDetectionGUI:
 
         # Initial updates content
         self.update_updates_tab("""
+**June 15, 2024:**
+- Implemented a dedicated 'Test Results' tab in the GUI.
+- Added a 'Run Unit Tests' button within the 'Test Results' tab to execute tests directly from the application.
+- Resolved `ModuleNotFoundError` by correctly configuring Python path for test discovery.
+- Began addressing test failures and errors in data generation, feature engineering, and log reading modules.
+
 **June 14, 2024:**
 - Implemented a robust tabbed GUI interface for better navigation.
 - Added a dedicated 'Updates' tab to track project progress.
@@ -221,6 +230,16 @@ class AnomalyDetectionGUI:
 - Exploring more sophisticated feature engineering techniques.
 - Preparing for integration with larger, real-world datasets.
 """)
+
+        # --- Test Results Tab ---
+        self.test_results_tab = ttk.Frame(self.notebook)
+        self.notebook.add(self.test_results_tab, text="Test Results")
+
+        self.test_results_text = tk.Text(self.test_results_tab, wrap=tk.WORD, state='disabled', font=("TkDefaultFont", 10))
+        self.test_results_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+        self.run_tests_button = ttk.Button(self.test_results_tab, text="Run Unit Tests", command=self.run_tests)
+        self.run_tests_button.pack(pady=10)
 
         # --- Data Source Management Tab ---
         self.data_source_tab = ttk.Frame(self.notebook)
@@ -466,38 +485,63 @@ ensuring holistic threat visibility and enhanced accuracy. Define new log source
                     self.root.after(0, self._update_progress_bar, 20, "CyberArk log generation complete!")
                     print(f"DEBUG: main.py - df_local.shape after CyberArk data generation: {df_local.shape}") # Added debug print
 
-                elif selected_source == "AWS CloudTrail Logs" or selected_source == "Azure Activity Logs":
+                elif selected_source == "AWS CloudTrail Logs": # Modified to directly pass string for AWS
                     self.root.after(0, self.update_status, f"Loading {selected_source}... (1/4)")
                     self.root.after(0, self._update_progress_bar, 5, "Initializing log reader...")
                     
                     try:
-                        reader_class = None
-                        if selected_source == "AWS CloudTrail Logs":
-                            reader_class = AWSCloudTrailReader
-                        elif selected_source == "Azure Activity Logs":
-                            reader_class = IAMLogReader # Using generic IAMLogReader for Azure now
+                        log_reader = get_log_reader('aws') # Corrected call: only pass source string
                         
-                        if reader_class and file_path:
-                            log_reader = get_log_reader(reader_class, file_path)
-                            
-                            all_chunks = []
-                            total_records_processed = 0
-                            self.root.after(0, self.update_status, f"Reading logs from {file_path} in chunks...")
-                            for i, chunk_df in enumerate(log_reader.read_logs_in_chunks()):
-                                all_chunks.append(chunk_df)
-                                total_records_processed += len(chunk_df)
-                                self.root.after(0, self.update_status, f"Processing chunk {i+1}... ({len(all_chunks)}/{total_records_processed})")
-                                self.root.after(0, self._update_progress_bar, 5 + int((i+1)/10 * 15))
+                        if file_path:
+                            # Reading logs without chunking, as read_logs_in_chunks is not defined for AWSCloudTrailReader
+                            df_local = log_reader.read_logs(file_path=file_path) # Changed to read_logs
 
-                            if all_chunks:
-                                df_local = pd.concat(all_chunks, ignore_index=True)
-                            else:
-                                df_local = pd.DataFrame()
-                        else: # Handle case where reader_class or file_path is missing
-                            self.update_status("Error: No reader class or file path provided for selected log type.")
+                            if df_local.empty:
+                                self.update_status("Error: No data found in the log file.")
+                                self._update_progress_bar(0)
+                                return
+                            
+                        else: # Handle case where file_path is missing
+                            self.update_status("Error: No file path provided for selected log type.")
                             self._update_progress_bar(0)
                             return
-                                
+                    except FileNotFoundError:
+                        self.update_status(f"Error: File not found at {file_path}")
+                        self._update_progress_bar(0)
+                        return
+                    except json.JSONDecodeError as e:
+                        self.update_status(f"Error decoding JSON from {file_path}: {e}")
+                        import traceback
+                        traceback.print_exc()
+                        self._update_progress_bar(0)
+                        return
+                    except Exception as e:
+                        self.update_status(f"An unexpected error occurred during log reading: {e}")
+                        import traceback
+                        traceback.print_exc()
+                        self._update_progress_bar(0)
+                        return
+
+                elif selected_source == "Azure Activity Logs": # Added separate block for Azure
+                    self.root.after(0, self.update_status, f"Loading {selected_source}... (1/4)")
+                    self.root.after(0, self._update_progress_bar, 5, "Initializing log reader...")
+                    
+                    try:
+                        log_reader = get_log_reader('azure') # Corrected call: only pass source string
+                        
+                        if file_path:
+                            # Reading logs without chunking, as read_logs_in_chunks is not defined for AzureADReader
+                            df_local = log_reader.read_logs(file_path=file_path) # Changed to read_logs
+
+                            if df_local.empty:
+                                self.update_status("Error: No data found in the log file.")
+                                self._update_progress_bar(0)
+                                return
+                            
+                        else: # Handle case where file_path is missing
+                            self.update_status("Error: No file path provided for selected log type.")
+                            self._update_progress_bar(0)
+                            return
                     except FileNotFoundError:
                         self.update_status(f"Error: File not found at {file_path}")
                         self._update_progress_bar(0)
@@ -876,6 +920,42 @@ This comprehensive, AI-driven data flow culminates in unparalleled **Proactive S
         self.experiment_log_text.config(state='normal')
         self.experiment_log_text.insert(tk.END, experiment_log_entry)
         self.experiment_log_text.config(state='disabled')
+
+    def run_tests(self):
+        """Runs all unit tests and displays the results in the test results tab."""
+        self.test_results_text.config(state='normal') # Enable editing
+        self.test_results_text.delete(1.0, tk.END) # Clear previous results
+        self.test_results_text.insert(tk.END, "Running unit tests...\n")
+        self.test_results_text.config(state='disabled') # Disable editing
+        
+        # Run tests in a separate thread to avoid freezing the GUI
+        def test_thread():
+            try:
+                import sys
+                project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+                if project_root not in sys.path:
+                    sys.path.insert(0, project_root)
+
+                # Discover and run tests from the 'tests/unit' directory
+                suite = unittest.TestLoader().discover('tests/unit')
+                # Redirect stdout to capture test results
+                with io.StringIO() as buf, redirect_stdout(buf):
+                    runner = unittest.TextTestRunner(stream=buf, verbosity=2)
+                    result = runner.run(suite)
+                    output = buf.getvalue()
+                
+                # Update the GUI with test results
+                self.root.after(0, lambda: self._display_test_results(output))
+            except Exception as e:
+                self.root.after(0, lambda: self._display_test_results(f"Error running tests: {e}"))
+
+        threading.Thread(target=test_thread).start()
+
+    def _display_test_results(self, results):
+        """Displays the test results in the text widget."""
+        self.test_results_text.config(state='normal')
+        self.test_results_text.insert(tk.END, results)
+        self.test_results_text.config(state='disabled')
 
 def main():
     root = tk.Tk()

@@ -1,12 +1,13 @@
+from abc import ABC, abstractmethod
 import pandas as pd
 import json
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Generator
 from datetime import datetime, timedelta
 import logging
 import uuid
 import numpy as np
 
-class IAMLogReader:
+class IAMLogReader(ABC):
     """Base class for reading IAM logs from different sources."""
     
     def __init__(self):
@@ -34,10 +35,60 @@ class IAMLogReader:
         
         return df[self.standard_columns] # Return DataFrame with standard columns in defined order
 
-    def read_logs(self, file_path: str) -> pd.DataFrame:
-        """Read logs from a file and convert to DataFrame."""
-        raise NotImplementedError("Subclasses must implement read_logs")
-    
+    @abstractmethod
+    def _parse_single_log_record(self, record: Dict) -> Dict:
+        """Abstract method to parse a single raw log record into a standardized format."""
+        pass
+
+    def read_logs_in_chunks(self, file_path: str, chunk_size: int = 10000) -> Generator[pd.DataFrame, None, None]:
+        """Reads logs from a file in chunks and yields DataFrames."""
+        try:
+            with open(file_path, 'r') as f:
+                # For JSON files where the entire content is a list of records (e.g., Azure Activity Logs)
+                # or a dict containing a list (e.g., AWS CloudTrail), we need to load it all first.
+                # This means chunking is done in memory after initial load.
+                # For very large files, a different approach (e.g., iterating lines) would be needed.
+                full_data = json.load(f)
+
+            records = []
+            if isinstance(full_data, dict) and 'Records' in full_data: # AWS CloudTrail format
+                records = full_data['Records']
+            elif isinstance(full_data, list): # Azure Activity Log format
+                records = full_data
+            else:
+                self.logger.error(f"Unsupported log file format: {file_path}")
+                yield pd.DataFrame() # Yield an empty DataFrame
+                return
+
+            self.logger.info(f"Total records to process: {len(records)}")
+            
+            chunk_data = []
+            for i, record in enumerate(records):
+                try:
+                    standardized_record = self._parse_single_log_record(record)
+                    chunk_data.append(standardized_record)
+                except Exception as e:
+                    self.logger.warning(f"Failed to parse record {i+1}: {e}")
+                    continue # Skip problematic record
+
+                if (i + 1) % chunk_size == 0 or (i + 1) == len(records):
+                    df = pd.DataFrame(chunk_data)
+                    df = self._standardize_columns(df) # Standardize and ensure required columns
+                    df = self.clean_logs(df) # Apply generic cleaning
+                    yield df
+                    chunk_data = [] # Reset for next chunk
+
+        except FileNotFoundError:
+            self.logger.error(f"File not found: {file_path}")
+            yield pd.DataFrame()
+        except json.JSONDecodeError as e:
+            self.logger.error(f"Error decoding JSON from {file_path}: {e}")
+            yield pd.DataFrame()
+        except Exception as e:
+            self.logger.error(f"An unexpected error occurred during log reading in chunks: {e}")
+            self.logger.exception("Full traceback:") # Log full traceback
+            yield pd.DataFrame()
+            
     def validate_logs(self, df: pd.DataFrame) -> bool:
         """Validate the structure and content of the logs."""
         # Basic validation: check if essential columns exist and have non-null values
@@ -83,342 +134,94 @@ class IAMLogReader:
             
         return df
 
-    def read_aws_cloudtrail_logs(self, file_path: str) -> pd.DataFrame:
-        """Reads AWS CloudTrail logs from a JSON file and flattens them into a DataFrame."""
-        try:
-            with open(file_path, 'r') as f:
-                data = json.load(f)
-                records = data.get('Records', [])
-
-            logs = []
-            for record in records:
-                event_time = record.get('eventTime')
-                user_identity = record.get('userIdentity', {})
-                user_id = user_identity.get('userName') or user_identity.get('principalId') or user_identity.get('sessionContext', {}).get('sessionIssuer', {}).get('userName') or user_identity.get('arn')
-                
-                event_name = record.get('eventName')
-                event_source = record.get('eventSource')
-                resource_name = record.get('resources',[{}])[0].get('resourceName') if record.get('resources') else None
-                ip_address = record.get('sourceIPAddress')
-                aws_region = record.get('awsRegion')
-                error_code = record.get('errorCode')
-                error_message = record.get('errorMessage')
-                user_agent = record.get('userAgent')
-                request_id = record.get('requestID')
-
-                status = 'failure' if error_code or error_message else 'success'
-
-                logs.append({
-                    'timestamp': event_time,
-                    'user_id': user_id,
-                    'action': event_name,
-                    'resource': resource_name,
-                    'ip_address': ip_address,
-                    'region': aws_region,
-                    'status': status,
-                    'session_id': request_id, 
-                    'session_start': event_time, 
-                    'session_end': event_time,
-                    'user_agent': user_agent
-                })
-            
-            df = pd.DataFrame(logs)
-            return self._standardize_columns(df) # Standardize columns after initial parsing
-
-        except FileNotFoundError:
-            print(f"Error: File not found at {file_path}")
-            return pd.DataFrame()
-        except json.JSONDecodeError as e:
-            print(f"Error decoding JSON from {file_path}: {e}")
-            return pd.DataFrame()
-        except Exception as e:
-            print(f"An unexpected error occurred while reading AWS CloudTrail logs: {e}")
-            import traceback
-            traceback.print_exc()
-            return pd.DataFrame()
-            
-    def read_azure_activity_logs(self, file_path: str) -> pd.DataFrame:
-        """Reads Azure Activity Logs from a JSON file and flattens them into a DataFrame."""
-        try:
-            with open(file_path, 'r') as f:
-                data = json.load(f)
-
-            logs = []
-            for record in data:
-                event_time = record.get('time')
-                
-                identity = record.get('identity', {}).get('claims', {})
-                user_id = identity.get('oid') or identity.get('name')
-                
-                operation_name = record.get('operationName')
-                resource_id = record.get('resourceId')
-                caller_ip_address = record.get('callerIpAddress')
-                correlation_id = record.get('correlationId')
-                result_type = record.get('resultType')
-
-                resource_parts = resource_id.split('/') if resource_id else []
-                resource = resource_parts[-1] if len(resource_parts) > 0 else None
-                action = operation_name.split('/')[-1] if operation_name else None
-
-                status = 'success' if result_type and result_type.lower() == 'success' else 'failure'
-
-                logs.append({
-                    'timestamp': event_time,
-                    'user_id': user_id,
-                    'action': action,
-                    'resource': resource,
-                    'ip_address': caller_ip_address,
-                    'region': None, 
-                    'status': status,
-                    'session_id': correlation_id, 
-                    'session_start': event_time,
-                    'session_end': event_time,
-                    'user_agent': None 
-                })
-            
-            df = pd.DataFrame(logs)
-            return self._standardize_columns(df) # Standardize columns after initial parsing
-
-        except FileNotFoundError:
-            print(f"Error: File not found at {file_path}")
-            return pd.DataFrame()
-        except json.JSONDecodeError as e:
-            print(f"Error decoding JSON from {file_path}: {e}")
-            return pd.DataFrame()
-        except Exception as e:
-            print(f"An unexpected error occurred while reading Azure Activity Logs: {e}")
-            import traceback
-            traceback.print_exc()
-            return pd.DataFrame()
-
-    def read_synthetic_logs(self, file_path: str) -> pd.DataFrame:
-        """Reads synthetic logs from a CSV file."""
-        try:
-            df = pd.read_csv(file_path)
-            # Synthetic data often has 'is_anomaly' column, keep it if present
-            if 'is_anomaly' in df.columns:
-                self.standard_columns.append('is_anomaly')
-            return self._standardize_columns(df)
-        except FileNotFoundError:
-            print(f"Error: File not found at {file_path}")
-            return pd.DataFrame()
-        except Exception as e:
-            print(f"An unexpected error occurred while reading synthetic logs: {e}")
-            import traceback
-            traceback.print_exc()
-            return pd.DataFrame()
-
-    def read_aws_cloudtrail_logs_from_data(self, data: dict) -> pd.DataFrame:
-        """Reads AWS CloudTrail logs from a dictionary (in-memory) and flattens them into a DataFrame."""
-        try:
-            records = data.get('Records', [])
-            logs = []
-            for record in records:
-                event_time = record.get('eventTime')
-                user_identity = record.get('userIdentity', {})
-                user_id = user_identity.get('userName') or user_identity.get('principalId') or user_identity.get('sessionContext', {}).get('sessionIssuer', {}).get('userName') or user_identity.get('arn')
-                event_name = record.get('eventName')
-                event_source = record.get('eventSource')
-                resource_name = record.get('resources',[{}])[0].get('resourceName') if record.get('resources') else None
-                ip_address = record.get('sourceIPAddress')
-                aws_region = record.get('awsRegion')
-                error_code = record.get('errorCode')
-                error_message = record.get('errorMessage')
-                user_agent = record.get('userAgent')
-                request_id = record.get('requestID')
-                
-                status = 'failure' if error_code or error_message else 'success'
-
-                logs.append({
-                    'timestamp': event_time,
-                    'user_id': user_id,
-                    'action': event_name,
-                    'resource': resource_name,
-                    'ip_address': ip_address,
-                    'region': aws_region,
-                    'status': status,
-                    'session_id': request_id, 
-                    'session_start': event_time,
-                    'session_end': event_time,
-                    'user_agent': user_agent
-                })
-            
-            df = pd.DataFrame(logs)
-            return self._standardize_columns(df) # Standardize columns after initial parsing
-
-        except Exception as e:
-            print(f"An unexpected error occurred while reading AWS CloudTrail logs from data: {e}")
-            import traceback
-            traceback.print_exc()
-            return pd.DataFrame()
-            
-    def read_azure_activity_logs_from_data(self, records: List[Dict]) -> pd.DataFrame:
-        """Reads Azure Activity Logs from a list of dictionaries (in-memory) and flattens them into a DataFrame."""
-        try:
-            logs = []
-            for record in records:
-                event_time = record.get('time')
-                identity = record.get('identity', {}).get('claims', {})
-                user_id = identity.get('oid') or identity.get('name')
-                operation_name = record.get('operationName')
-                resource_id = record.get('resourceId')
-                caller_ip_address = record.get('callerIpAddress')
-                correlation_id = record.get('correlationId')
-                result_type = record.get('resultType')
-
-                resource_parts = resource_id.split('/') if resource_id else []
-                resource = resource_parts[-1] if len(resource_parts) > 0 else None
-                action = operation_name.split('/')[-1] if operation_name else None
-                status = 'success' if result_type and result_type.lower() == 'success' else 'failure'
-
-                logs.append({
-                    'timestamp': event_time,
-                    'user_id': user_id,
-                    'action': action,
-                    'resource': resource,
-                    'ip_address': caller_ip_address,
-                    'region': None,
-                    'status': status,
-                    'session_id': correlation_id, 
-                    'session_start': event_time,
-                    'session_end': event_time,
-                    'user_agent': None
-                })
-            
-            df = pd.DataFrame(logs)
-            df['timestamp'] = pd.to_datetime(df['timestamp'])
-            df['session_start'] = pd.to_datetime(df['session_start'])
-            df['session_end'] = pd.to_datetime(df['session_end'])
-
-            return df
-
-        except Exception as e:
-            print(f"An unexpected error occurred while reading Azure Activity Logs from data: {e}")
-            import traceback
-            traceback.print_exc()
-            return pd.DataFrame()
-
-    def read_logs(self, source_type: str, file_path: str = None) -> pd.DataFrame:
-        """Reads logs based on the specified source type."""
-        if source_type == "Synthetic Data":
-            return pd.DataFrame()
-        elif source_type == "AWS CloudTrail Logs":
-            return self.read_aws_cloudtrail_logs(file_path)
-        elif source_type == "Azure Activity Logs":
-            return self.read_azure_activity_logs(file_path)
-        elif source_type == "Synthetic Logs":
-            return self.read_synthetic_logs(file_path)
-        else:
-            print(f"Error: Unknown data source type: {source_type}")
-            return pd.DataFrame()
-
 class AWSCloudTrailReader(IAMLogReader):
-    """Reader for AWS CloudTrail logs."""
-    
-    def read_logs(self, file_path: str) -> pd.DataFrame:
-        """Read AWS CloudTrail logs from a JSON file."""
-        try:
-            with open(file_path, 'r') as f:
-                full_log_content = json.load(f) # Load the entire JSON file
-            
-            # Extract relevant fields
-            records = []
-            if 'Records' in full_log_content:
-                for record in full_log_content['Records']:
-                    records.append({
-                        'timestamp': record.get('eventTime'),
-                        'user_id': (record.get('userIdentity') or {}).get('userName'),
-                        'role': (record.get('userIdentity') or {}).get('arn'),
-                        'action': record.get('eventName'),
-                        'ip_address': record.get('sourceIPAddress'),
-                        'status': 'success' if record.get('errorCode') is None else 'failure',
-                        'resource': (record.get('requestParameters') or {}).get('resourceId'),
-                        'user_agent': record.get('userAgent'),
-                        'region': record.get('awsRegion')
-                    })
-            
-            return pd.DataFrame(records)
-        except Exception as e:
-            self.logger.error(f"Error reading AWS CloudTrail logs: {str(e)}")
-            raise
-    
-    def validate_logs(self, df: pd.DataFrame) -> bool:
-        """Validate AWS CloudTrail log structure."""
-        required_columns = ['timestamp', 'user_id', 'action', 'ip_address']
-        return all(col in df.columns for col in required_columns)
-    
-    def clean_logs(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Clean AWS CloudTrail logs."""
-        # Convert timestamp to datetime
-        df['timestamp'] = pd.to_datetime(df['timestamp'])
+    def _parse_single_log_record(self, record: Dict) -> Dict:
+        event_time = record.get('eventTime')
+        user_identity = record.get('userIdentity', {})
+        user_id = user_identity.get('userName') or user_identity.get('principalId') or user_identity.get('sessionContext', {}).get('sessionIssuer', {}).get('userName') or user_identity.get('arn')
         
-        # Fill missing values
-        df['user_id'] = df['user_id'].fillna('unknown')
-        df['role'] = df['role'].fillna('unknown')
-        df['ip_address'] = df['ip_address'].fillna('0.0.0.0')
-        
-        # Remove invalid timestamps
-        df = df[df['timestamp'].notna()]
-        
-        return df
+        event_name = record.get('eventName')
+        event_source = record.get('eventSource')
+        resource_name = record.get('resources',[{}])[0].get('resourceName') if record.get('resources') else None
+        ip_address = record.get('sourceIPAddress')
+        aws_region = record.get('awsRegion')
+        error_code = record.get('errorCode')
+        error_message = record.get('errorMessage')
+        user_agent = record.get('userAgent')
+        request_id = record.get('requestID')
+
+        status = 'failure' if error_code or error_message else 'success'
+
+        return {
+            'timestamp': event_time,
+            'user_id': user_id,
+            'action': event_name,
+            'resource': resource_name,
+            'ip_address': ip_address,
+            'region': aws_region,
+            'status': status,
+            'session_id': request_id, 
+            'session_start': event_time, 
+            'session_end': event_time,
+            'user_agent': user_agent
+        }
 
 class AzureADReader(IAMLogReader):
-    """Reader for Azure AD audit logs."""
-    
-    def read_logs(self, file_path: str) -> pd.DataFrame:
-        """Read Azure AD audit logs from a CSV file."""
-        try:
-            df = pd.read_csv(file_path)
-            
-            # Map Azure AD fields to our standard format
-            df = df.rename(columns={
-                'TimeGenerated': 'timestamp',
-                'UserPrincipalName': 'user_id',
-                'OperationName': 'action',
-                'IPAddress': 'ip_address',
-                'Result': 'status',
-                'UserAgent': 'user_agent',
-                'ResourceId': 'resource'
-            })
-            
-            return df
-        except Exception as e:
-            self.logger.error(f"Error reading Azure AD logs: {str(e)}")
-            raise
-    
-    def validate_logs(self, df: pd.DataFrame) -> bool:
-        """Validate Azure AD log structure."""
-        required_columns = ['timestamp', 'user_id', 'action', 'ip_address']
-        return all(col in df.columns for col in required_columns)
-    
-    def clean_logs(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Clean Azure AD logs."""
-        # Convert timestamp to datetime
-        df['timestamp'] = pd.to_datetime(df['timestamp'])
+    def _parse_single_log_record(self, record: Dict) -> Dict:
+        event_time = record.get('time')
         
-        # Fill missing values
-        df['user_id'] = df['user_id'].fillna('unknown')
-        df['ip_address'] = df['ip_address'].fillna('0.0.0.0')
+        identity = record.get('identity', {}).get('claims', {})
+        user_id = identity.get('oid') or identity.get('name')
         
-        # Remove invalid timestamps
-        df = df[df['timestamp'].notna()]
-        
-        return df
+        operation_name = record.get('operationName')
+        resource_id = record.get('resourceId')
+        caller_ip_address = record.get('callerIpAddress')
+        correlation_id = record.get('correlationId')
+        result_type = record.get('resultType')
+
+        resource_parts = resource_id.split('/') if resource_id else []
+        resource = resource_parts[-1] if len(resource_parts) > 0 else None
+        action = operation_name.split('/')[-1] if operation_name else None
+
+        status = 'success' if result_type and result_type.lower() == 'success' else 'failure'
+
+        return {
+            'timestamp': event_time,
+            'user_id': user_id,
+            'action': action,
+            'resource': resource,
+            'ip_address': caller_ip_address,
+            'region': None, 
+            'status': status,
+            'session_id': correlation_id, 
+            'session_start': event_time,
+            'session_end': event_time,
+            'user_agent': None 
+        }
 
 class SyntheticLogReader(IAMLogReader):
-    def read_logs(self, file_path: str) -> pd.DataFrame:
-        return self.read_synthetic_logs(file_path)
+    def _parse_single_log_record(self, record: Dict) -> Dict:
+        # For synthetic logs, the record is already in a standardized dictionary format
+        # We just return it as is, or with minimal processing
+        return record
 
-    def validate_logs(self, df: pd.DataFrame) -> bool:
-        return super().validate_logs(df)
-
-    def clean_logs(self, df: pd.DataFrame) -> pd.DataFrame:
-        return super().clean_logs(df)
+    def read_logs_in_chunks(self, file_path: str = None, num_events: int = 1000, anomaly_ratio: float = 0.1, num_privileged_accounts: int = 10) -> Generator[pd.DataFrame, None, None]:
+        """Generates synthetic logs in chunks."""
+        self.logger.info(f"Generating {num_events} synthetic logs...")
+        # Assuming IAMLogGenerator is available globally or imported - will need to be passed or instantiated
+        from data_generator import IAMLogGenerator
+        generator = IAMLogGenerator() 
+        df_full = generator.generate_dataset(n_events=num_events, anomaly_ratio=anomaly_ratio)
+        
+        # Yield in chunks
+        chunk_size = num_events // 10 if num_events // 10 > 0 else 1 # Ensure chunk size is at least 1
+        for i in range(0, len(df_full), chunk_size):
+            chunk_df = df_full.iloc[i:i + chunk_size].copy()
+            yield self._standardize_columns(chunk_df) # Standardize and ensure required columns
 
 class CyberArkLogReader(IAMLogReader):
     def __init__(self):
         super().__init__()
-        # Add CyberArk-specific standard columns if needed, beyond the base ones
         self.standard_columns.extend([
             'privileged_account_used',
             'vault_name',
@@ -428,10 +231,14 @@ class CyberArkLogReader(IAMLogReader):
             'reason_for_access',
             'ticket_id'
         ])
+    
+    def _parse_single_log_record(self, record: Dict) -> Dict:
+        # For CyberArk synthetic logs, the record is already in a standardized dictionary format
+        return record
 
-    def read_logs(self, file_path: str = None, num_events: int = 1000, anomaly_ratio: float = 0.1, num_privileged_accounts: int = 10) -> pd.DataFrame:
-        """Generates synthetic CyberArk-like logs."""
-        print(f"Generating {num_events} synthetic CyberArk logs...")
+    def read_logs_in_chunks(self, file_path: str = None, num_events: int = 1000, anomaly_ratio: float = 0.1, num_privileged_accounts: int = 10) -> Generator[pd.DataFrame, None, None]:
+        """Generates synthetic CyberArk-like logs in chunks."""
+        self.logger.info(f"Generating {num_events} synthetic CyberArk logs in chunks...")
         logs = []
         privileged_accounts = [f'privileged_account_{i}' for i in range(num_privileged_accounts)]
         regular_users = [f'user_{i}' for i in range(50)]
@@ -505,9 +312,14 @@ class CyberArkLogReader(IAMLogReader):
                 'is_anomaly': is_anomaly # Label for supervised learning/evaluation
             })
 
-        df = pd.DataFrame(logs)
-        print(f"Generated {len(df)} synthetic CyberArk logs.")
-        return self._standardize_columns(df)
+        df_full = pd.DataFrame(logs)
+        self.logger.info(f"Generated {len(df_full)} synthetic CyberArk logs.")
+
+        # Yield in chunks
+        chunk_size = num_events // 10 if num_events // 10 > 0 else 1 # Ensure chunk size is at least 1
+        for i in range(0, len(df_full), chunk_size):
+            chunk_df = df_full.iloc[i:i + chunk_size].copy()
+            yield self._standardize_columns(chunk_df) # Standardize and ensure required columns
 
 def get_log_reader(source: str) -> IAMLogReader:
     """Factory function to get the appropriate log reader."""
@@ -530,7 +342,7 @@ if __name__ == "__main__":
     # Test with AWS CloudTrail logs
     try:
         reader = get_log_reader('aws')
-        df = reader.read_logs('path/to/cloudtrail-logs.json')
+        df = reader.read_logs_in_chunks('path/to/cloudtrail-logs.json')
         if reader.validate_logs(df):
             df = reader.clean_logs(df)
             print(f"Successfully processed {len(df)} AWS CloudTrail logs")

@@ -148,7 +148,7 @@ class IAMLogGenerator:
                 'session_id': f"{user}_{session_start.strftime('%Y%m%d%H%M%S')}",
                 'session_start': session_start,
                 'session_end': session_end,
-                'is_anomaly': 1 if is_anomaly else 0
+                'is_anomaly': is_anomaly
             })
             
             current_time = timestamp
@@ -158,27 +158,43 @@ class IAMLogGenerator:
     def generate_normal_log(self, n_events: int) -> pd.DataFrame:
         """Generate normal IAM logs following typical patterns."""
         logs = []
-        n_sessions = n_events // 10  # Approximate number of sessions
-        
-        for _ in range(n_sessions):
+        # Generate sessions until n_events is met
+        current_events = 0
+        while current_events < n_events:
             user = random.choice(self.users)
             session_logs = self.generate_user_session(user, is_anomaly=False)
+            # Ensure we don't exceed n_events significantly
+            if current_events + len(session_logs) > n_events:
+                session_logs = session_logs[:n_events - current_events]
             logs.extend(session_logs)
+            current_events += len(session_logs)
         
-        return pd.DataFrame(logs)
+        df = pd.DataFrame(logs)
+        # Add a unique _temp_row_id at generation time
+        df['_temp_row_id'] = range(len(df)) # Ensure unique, contiguous IDs
+        return df
     
     def inject_anomalies(self, df: pd.DataFrame, anomaly_ratio: float = 0.1) -> pd.DataFrame:
         """Inject various types of anomalies into the logs."""
         n_anomalies = int(len(df) * anomaly_ratio)
-        anomaly_indices = random.sample(range(len(df)), n_anomalies)
+        # Ensure we have enough unique indices to sample from without replacement
+        available_indices = df.index.tolist()
+        if n_anomalies > len(available_indices):
+            n_anomalies = len(available_indices) # Adjust if anomaly_ratio is too high for current df size
+            
+        anomaly_indices = random.sample(available_indices, n_anomalies)
         
         for idx in anomaly_indices:
             anomaly_type = random.choice(['time', 'role', 'ip', 'action', 'session'])
             
             if anomaly_type == 'time':
                 # Anomaly: Access outside working hours
+                # Ensure timestamp is datetime before manipulation
+                original_timestamp = df.at[idx, 'timestamp']
+                if pd.isna(original_timestamp):
+                    continue # Skip if timestamp is invalid
                 hour = random.choice([random.randint(0, 8), random.randint(18, 23)])
-                df.at[idx, 'timestamp'] = df.at[idx, 'timestamp'].replace(hour=hour)
+                df.at[idx, 'timestamp'] = original_timestamp.replace(hour=hour)
                 
             elif anomaly_type == 'role':
                 # Anomaly: Action not permitted for role
@@ -192,23 +208,76 @@ class IAMLogGenerator:
                 df.at[idx, 'ip_address'] = f"203.0.{random.randint(1, 254)}.{random.randint(1, 254)}"
                 
             elif anomaly_type == 'action':
-                # Anomaly: Unusual action frequency
-                df.at[idx, 'action'] = random.choice(self.actions)
+                # Anomaly: Unusual action frequency (by changing the action to a less common one or highly privileged one)
+                # For now, just change to a random action not typically associated with the role for simplicity
+                role = df.at[idx, 'role']
+                all_actions_except_current = [act for act in self.actions if act != df.at[idx, 'action']]
+                if all_actions_except_current:
+                    df.at[idx, 'action'] = random.choice(all_actions_except_current)
                 
             elif anomaly_type == 'session':
                 # Anomaly: Unusually long session
                 session_start = df.at[idx, 'session_start']
+                if pd.isna(session_start):
+                    continue # Skip if session_start is invalid
                 session_end = session_start + timedelta(hours=random.randint(4, 12))
                 df.at[idx, 'session_end'] = session_end
                 
-            df.at[idx, 'is_anomaly'] = 1
+            df.at[idx, 'is_anomaly'] = True # Set to boolean True
             
         return df
     
     def generate_dataset(self, n_events: int = 10000, anomaly_ratio: float = 0.1) -> pd.DataFrame:
         """Generate a complete dataset with normal and anomalous events."""
-        normal_logs = self.generate_normal_log(n_events)
-        return self.inject_anomalies(normal_logs, anomaly_ratio)
+        if n_events <= 0: return pd.DataFrame() # Handle empty case
+
+        # Generate normal logs based on a portion of total events
+        n_normal = int(n_events * (1 - anomaly_ratio))
+        if n_normal <= 0: n_normal = 1 # Ensure at least one normal event if n_events > 0
+        
+        normal_logs = self.generate_normal_log(n_normal)
+        
+        # Generate anomalous logs for the remaining events. These will be added directly and marked as anomalies.
+        n_anomalous = n_events - len(normal_logs) # Remaining events to generate as anomalies
+        
+        anomalous_logs_list = []
+        for _ in range(n_anomalous):
+            user = random.choice(self.users)
+            session_logs = self.generate_user_session(user, is_anomaly=True)
+            anomalous_logs_list.extend(session_logs)
+        
+        if anomalous_logs_list:
+            anomalous_df = pd.DataFrame(anomalous_logs_list)
+            # Add _temp_row_id to anomalous_df as well, ensuring unique IDs across the combined dataset
+            # Start from the max ID of normal_logs to prevent overlap
+            start_id = normal_logs['_temp_row_id'].max() + 1 if '_temp_row_id' in normal_logs.columns and not normal_logs.empty else 0
+            anomalous_df['_temp_row_id'] = range(start_id, start_id + len(anomalous_df))
+            # Set is_anomaly to True for all injected anomalous events
+            anomalous_df['is_anomaly'] = True
+            combined_df = pd.concat([normal_logs, anomalous_df], ignore_index=True)
+        else:
+            combined_df = normal_logs.copy()
+
+        # Ensure the final dataframe has exactly n_events by sampling if needed
+        if len(combined_df) > n_events:
+            combined_df = combined_df.sample(n=n_events, random_state=42).reset_index(drop=True)
+        elif len(combined_df) < n_events: # If we generated less than n_events, generate more normal logs
+            remaining_events = n_events - len(combined_df)
+            additional_normal_logs = self.generate_normal_log(remaining_events) # This will also add _temp_row_id
+            # Adjust _temp_row_id for new logs to be unique
+            start_id = combined_df['_temp_row_id'].max() + 1 if '_temp_row_id' in combined_df.columns and not combined_df.empty else 0
+            additional_normal_logs['_temp_row_id'] = range(start_id, start_id + len(additional_normal_logs))
+            combined_df = pd.concat([combined_df, additional_normal_logs], ignore_index=True)
+        
+        # Final check for is_anomaly dtype, ensure it's boolean
+        combined_df['is_anomaly'] = combined_df['is_anomaly'].astype(bool)
+
+        # Ensure timestamps are strictly increasing within sessions after all manipulations
+        # This requires re-sorting and potentially adjusting timestamps to enforce strict increase
+        # For simplicity in generation, we sort here. More complex scenarios might need iterative adjustment.
+        combined_df = combined_df.sort_values(by=['user_id', 'session_id', 'timestamp']).reset_index(drop=True)
+
+        return combined_df
     
     def save_dataset(self, df: pd.DataFrame, file_path: str):
         """Save the generated dataset to a file."""
