@@ -8,7 +8,11 @@ from src.feature_engineering import FeatureEngineer
 class TestHybridAnomalyDetector(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures before each test method."""
-        self.detector = HybridAnomalyDetector()
+        # Provide a dummy callback for testing purposes
+        def dummy_callback(progress, message):
+            pass
+        
+        self.detector = HybridAnomalyDetector(update_gui_progress_callback=dummy_callback)
         self.generator = IAMLogGenerator()
         self.engineer = FeatureEngineer()
         
@@ -131,7 +135,8 @@ class TestHybridAnomalyDetector(unittest.TestCase):
             max_features_iso_forest=0.5,
             n_estimators_rf=50,
             max_depth_rf=10,
-            min_samples_split_rf=5
+            min_samples_split_rf=5,
+            update_gui_progress_callback=dummy_callback
         )
         
         # Generate and prepare data

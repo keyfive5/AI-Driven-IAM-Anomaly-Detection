@@ -3,15 +3,15 @@ import pandas as pd
 import json
 from typing import Dict, List, Optional, Generator
 from datetime import datetime, timedelta
-import logging
 import uuid
 import numpy as np
+from utils.logging_config import get_logger
 
 class IAMLogReader(ABC):
     """Base class for reading IAM logs from different sources."""
     
     def __init__(self):
-        self.logger = logging.getLogger(__name__)
+        self.logger = get_logger('data')
         self.standard_columns = [
             'timestamp', 'user_id', 'action', 'resource', 'ip_address',
             'region', 'status', 'session_id', 'session_start', 'session_end',
@@ -23,9 +23,11 @@ class IAMLogReader(ABC):
         Standardizes column names and ensures all expected columns exist.
         Missing columns will be added with NaN values.
         """
+        self.logger.debug("Standardizing columns in DataFrame")
         df = df.copy() # Work on a copy to avoid modifying the original DataFrame passed in
         for col in self.standard_columns:
             if col not in df.columns:
+                self.logger.debug(f"Adding missing column: {col}")
                 df[col] = pd.NA # Use pd.NA for nullable columns
 
         # Ensure timestamp columns are datetime objects
@@ -42,24 +44,27 @@ class IAMLogReader(ABC):
 
     def read_logs_in_chunks(self, file_path: str, chunk_size: int = 10000) -> Generator[pd.DataFrame, None, None]:
         """Reads logs from a file in chunks and yields DataFrames."""
+        self.logger.info(f"Reading logs from {file_path} in chunks of {chunk_size}")
         try:
             with open(file_path, 'r') as f:
-                # For JSON files where the entire content is a list of records (e.g., Azure Activity Logs)
-                # or a dict containing a list (e.g., AWS CloudTrail), we need to load it all first.
-                # This means chunking is done in memory after initial load.
-                # For very large files, a different approach (e.g., iterating lines) would be needed.
                 full_data = json.load(f)
 
             records = []
             if isinstance(full_data, dict) and 'Records' in full_data: # AWS CloudTrail format
                 records = full_data['Records']
-            elif isinstance(full_data, dict) and 'records' in full_data: # Azure Activity Log format (common in some exports)
+                self.logger.debug("Detected AWS CloudTrail format")
+            elif isinstance(full_data, dict) and 'records' in full_data: # Azure Activity Log format
                 records = full_data['records']
+                self.logger.debug("Detected Azure Activity Log format")
             elif isinstance(full_data, list): # Direct list of records
                 records = full_data
+                self.logger.debug("Detected direct list format")
+            elif isinstance(full_data, dict): # Assume a single log record
+                records = [full_data]
+                self.logger.debug("Detected single record format")
             else:
                 self.logger.error(f"Unsupported log file format: {file_path}")
-                yield pd.DataFrame() # Yield an empty DataFrame
+                yield pd.DataFrame()
                 return
 
             self.logger.info(f"Total records to process: {len(records)}")
@@ -71,14 +76,15 @@ class IAMLogReader(ABC):
                     chunk_data.append(standardized_record)
                 except Exception as e:
                     self.logger.warning(f"Failed to parse record {i+1}: {e}")
-                    continue # Skip problematic record
+                    continue
 
                 if (i + 1) % chunk_size == 0 or (i + 1) == len(records):
                     df = pd.DataFrame(chunk_data)
-                    df = self._standardize_columns(df) # Standardize and ensure required columns
-                    df = self.clean_logs(df) # Apply generic cleaning
+                    df = self._standardize_columns(df)
+                    df = self.clean_logs(df)
+                    self.logger.debug(f"Yielding chunk of {len(df)} records")
                     yield df
-                    chunk_data = [] # Reset for next chunk
+                    chunk_data = []
 
         except FileNotFoundError:
             self.logger.error(f"File not found: {file_path}")
@@ -87,24 +93,21 @@ class IAMLogReader(ABC):
             self.logger.error(f"Error decoding JSON from {file_path}: {e}")
             yield pd.DataFrame()
         except Exception as e:
-            self.logger.error(f"An unexpected error occurred during log reading in chunks: {e}")
-            self.logger.exception("Full traceback:") # Log full traceback
+            self.logger.error(f"An unexpected error occurred during log reading: {e}", exc_info=True)
             yield pd.DataFrame()
             
     def validate_logs(self, df: pd.DataFrame) -> bool:
         """Validate the structure and content of the logs."""
-        # Basic validation: check if essential columns exist and have non-null values
+        self.logger.debug("Validating log structure and content")
         if df.empty:
-            print("Warning: Empty DataFrame after standardization.")
+            self.logger.warning("Empty DataFrame after standardization")
             return False
         
         required_columns = ['timestamp', 'user_id', 'action', 'ip_address', 'status']
         for col in required_columns:
             if col not in df.columns or df[col].isnull().all():
-                print(f"Validation Error: Required column '{col}' is missing or all null after standardization.")
+                self.logger.error(f"Required column '{col}' is missing or all null after standardization")
                 return False
-        
-        # Further checks could be added here (e.g., timestamp format, IP address validity)
         
         return True
     
@@ -138,6 +141,8 @@ class IAMLogReader(ABC):
 
 class AWSCloudTrailReader(IAMLogReader):
     def _parse_single_log_record(self, record: Dict) -> Dict:
+        """Parse a single AWS CloudTrail log record."""
+        self.logger.debug("Parsing AWS CloudTrail record")
         event_time = record.get('eventTime')
         user_identity = record.get('userIdentity', {})
         user_id = user_identity.get('userName') or user_identity.get('principalId') or user_identity.get('sessionContext', {}).get('sessionIssuer', {}).get('userName') or user_identity.get('arn')
@@ -170,10 +175,12 @@ class AWSCloudTrailReader(IAMLogReader):
 
 class AzureADReader(IAMLogReader):
     def _parse_single_log_record(self, record: Dict) -> Dict:
+        """Parse a single Azure AD log record."""
+        self.logger.debug("Parsing Azure AD record")
         event_time = record.get('time')
         
         identity = record.get('identity', {}).get('claims', {})
-        user_id = identity.get('oid') or identity.get('name')
+        user_id = record.get('caller') or identity.get('oid') or identity.get('name')
         
         operation_name = record.get('operationName')
         resource_id = record.get('resourceId')
@@ -181,19 +188,14 @@ class AzureADReader(IAMLogReader):
         correlation_id = record.get('correlationId')
         result_type = record.get('resultType')
         
-        # Attempt to extract region from 'location' or similar Azure fields
-        # Common Azure log fields for region might be 'location' or 'geoCoordinates'
         azure_region = record.get('location') 
-        
-        # Attempt to extract user_agent from 'properties' or other common Azure fields
-        # This can vary, so we'll look for common patterns
         user_agent_info = record.get('properties', {}).get('userAgent') or record.get('userAgent')
 
         resource_parts = resource_id.split('/') if resource_id else []
         resource = resource_parts[-1] if len(resource_parts) > 0 else None
-        action = operation_name.split('/')[-1] if operation_name else None
+        action = operation_name if operation_name else None
 
-        status = 'success' if result_type and result_type.lower() == 'success' else 'failure'
+        status = 'success' if result_type and result_type.lower() == 'succeeded' else 'failure'
 
         return {
             'timestamp': event_time,
@@ -218,8 +220,7 @@ class SyntheticLogReader(IAMLogReader):
     def read_logs_in_chunks(self, file_path: str = None, num_events: int = 1000, anomaly_ratio: float = 0.1, num_privileged_accounts: int = 10) -> Generator[pd.DataFrame, None, None]:
         """Generates synthetic logs in chunks."""
         self.logger.info(f"Generating {num_events} synthetic logs...")
-        # Assuming IAMLogGenerator is available globally or imported - will need to be passed or instantiated
-        from data_generator import IAMLogGenerator
+        from src.data.data_generator import IAMLogGenerator
         generator = IAMLogGenerator() 
         df_full = generator.generate_dataset(n_events=num_events, anomaly_ratio=anomaly_ratio)
         
@@ -333,6 +334,7 @@ class CyberArkLogReader(IAMLogReader):
 
 def get_log_reader(source: str) -> IAMLogReader:
     """Factory function to get the appropriate log reader."""
+    logger = get_logger('data')
     readers = {
         'aws': AWSCloudTrailReader,
         'azure': AzureADReader,
@@ -341,13 +343,16 @@ def get_log_reader(source: str) -> IAMLogReader:
     }
     
     if source.lower() not in readers:
+        logger.error(f"Unsupported log source: {source}")
         raise ValueError(f"Unsupported log source: {source}")
     
+    logger.info(f"Creating reader for source: {source}")
     return readers[source.lower()]()
 
 if __name__ == "__main__":
     # Example usage
-    logging.basicConfig(level=logging.INFO)
+    logger = get_logger('data')
+    logger.info("Starting main execution")
     
     # Test with AWS CloudTrail logs
     try:
@@ -355,8 +360,10 @@ if __name__ == "__main__":
         df = reader.read_logs_in_chunks('path/to/cloudtrail-logs.json')
         if reader.validate_logs(df):
             df = reader.clean_logs(df)
-            print(f"Successfully processed {len(df)} AWS CloudTrail logs")
-            print("\nSample of processed data:")
-            print(df.head())
+            logger.info(f"Successfully processed {len(df)} AWS CloudTrail logs")
+            logger.info("\nSample of processed data:")
+            logger.info(df.head())
     except Exception as e:
-        print(f"Error processing AWS CloudTrail logs: {str(e)}") 
+        logger.error(f"Error processing AWS CloudTrail logs: {str(e)}")
+    finally:
+        logger.info("Main execution completed") 

@@ -8,6 +8,7 @@ from tensorflow.keras.optimizers import Adam
 from sklearn.preprocessing import StandardScaler
 import joblib
 from tensorflow.keras.callbacks import Callback
+from utils.logging_config import get_logger
 
 class KerasProgressCallback(Callback):
     def __init__(self, overall_progress_start: int, overall_progress_end: int, total_epochs: int, update_gui_progress_callback: Callable[[int, str], None]):
@@ -26,29 +27,147 @@ class KerasProgressCallback(Callback):
         self.update_gui_progress_callback(int(current_overall_progress), f"Training LSTM (Epoch {epoch+1}/{self.total_epochs})")
 
 class HybridAnomalyDetector:
-    def __init__(self, sequence_length: int = 10, lstm_units: int = 64, contamination: float = 0.1,
-                 n_estimators_iso_forest: int = 100, max_features_iso_forest: float = 1.0,
-                 n_estimators_rf: int = 100, max_depth_rf: Optional[int] = None, min_samples_split_rf: int = 2):
-        self.sequence_length = sequence_length
-        self.lstm_units = lstm_units
-        self.contamination = contamination
-        self.scaler = StandardScaler()
-        self.isolation_forest = IsolationForest(
-            n_estimators=n_estimators_iso_forest,
-            max_features=max_features_iso_forest,
-            contamination=self.contamination,
-            random_state=42
-        )
-        self.random_forest = RandomForestClassifier(
-            n_estimators=n_estimators_rf,
-            max_depth=max_depth_rf,
-            min_samples_split=min_samples_split_rf,
-            random_state=42,
-            class_weight='balanced'
-        )
-        self.lstm_autoencoder = None
-        self.feature_columns = None
+    def __init__(self, contamination: float = 0.1):
+        """
+        Initialize the hybrid anomaly detector.
         
+        Args:
+            contamination (float): Expected proportion of anomalies in the data
+        """
+        self.logger = get_logger('model')
+        self.logger.info(f"Initializing HybridAnomalyDetector with contamination={contamination}")
+        
+        self.contamination = contamination
+        self.isolation_forest = IsolationForest(
+            contamination=contamination,
+            random_state=42,
+            n_estimators=100
+        )
+        self.scaler = StandardScaler()
+        self.feature_columns = None
+        self.is_fitted = False
+        
+    def fit(self, X: pd.DataFrame) -> None:
+        """
+        Fit the hybrid anomaly detector to the data.
+        
+        Args:
+            X (pd.DataFrame): Training data with engineered features
+        """
+        self.logger.info("Fitting hybrid anomaly detector")
+        try:
+            # Store feature columns
+            self.feature_columns = X.columns.tolist()
+            self.logger.debug(f"Feature columns: {self.feature_columns}")
+            
+            # Scale the features
+            X_scaled = self.scaler.fit_transform(X)
+            self.logger.debug("Features scaled successfully")
+            
+            # Fit the isolation forest
+            self.isolation_forest.fit(X_scaled)
+            self.logger.debug("Isolation Forest fitted successfully")
+            
+            self.is_fitted = True
+            self.logger.info("Model fitting completed successfully")
+            
+        except Exception as e:
+            self.logger.error(f"Error during model fitting: {e}", exc_info=True)
+            raise
+    
+    def predict(self, X: pd.DataFrame) -> np.ndarray:
+        """
+        Predict anomalies in the data.
+        
+        Args:
+            X (pd.DataFrame): Data to predict anomalies for
+            
+        Returns:
+            np.ndarray: Array of predictions (-1 for anomalies, 1 for normal)
+        """
+        self.logger.info("Making predictions")
+        if not self.is_fitted:
+            self.logger.error("Model not fitted")
+            raise ValueError("Model must be fitted before making predictions")
+            
+        try:
+            # Scale the features
+            X_scaled = self.scaler.transform(X)
+            self.logger.debug("Features scaled successfully")
+            
+            # Make predictions
+            predictions = self.isolation_forest.predict(X_scaled)
+            self.logger.debug(f"Predictions made: {np.unique(predictions, return_counts=True)}")
+            
+            return predictions
+            
+        except Exception as e:
+            self.logger.error(f"Error during prediction: {e}", exc_info=True)
+            raise
+    
+    def predict_proba(self, X: pd.DataFrame) -> np.ndarray:
+        """
+        Predict anomaly scores for the data.
+        
+        Args:
+            X (pd.DataFrame): Data to predict anomaly scores for
+            
+        Returns:
+            np.ndarray: Array of anomaly scores (higher values indicate more anomalous)
+        """
+        self.logger.info("Calculating anomaly scores")
+        if not self.is_fitted:
+            self.logger.error("Model not fitted")
+            raise ValueError("Model must be fitted before calculating anomaly scores")
+            
+        try:
+            # Scale the features
+            X_scaled = self.scaler.transform(X)
+            self.logger.debug("Features scaled successfully")
+            
+            # Calculate anomaly scores
+            scores = -self.isolation_forest.score_samples(X_scaled)
+            self.logger.debug(f"Anomaly scores calculated: min={scores.min():.3f}, max={scores.max():.3f}, mean={scores.mean():.3f}")
+            
+            return scores
+            
+        except Exception as e:
+            self.logger.error(f"Error during anomaly score calculation: {e}", exc_info=True)
+            raise
+    
+    def get_feature_importance(self) -> Dict[str, float]:
+        """
+        Get feature importance scores.
+        
+        Returns:
+            Dict[str, float]: Dictionary mapping feature names to importance scores
+        """
+        self.logger.info("Calculating feature importance")
+        if not self.is_fitted:
+            self.logger.error("Model not fitted")
+            raise ValueError("Model must be fitted before getting feature importance")
+            
+        try:
+            # Get feature importance from isolation forest
+            importance = self.isolation_forest.feature_importances_
+            
+            # Create dictionary of feature names and importance scores
+            feature_importance = dict(zip(self.feature_columns, importance))
+            
+            # Sort by importance
+            feature_importance = dict(sorted(
+                feature_importance.items(),
+                key=lambda x: x[1],
+                reverse=True
+            ))
+            
+            self.logger.debug(f"Feature importance calculated: {feature_importance}")
+            return feature_importance
+            
+        except Exception as e:
+            self.logger.error(f"Error calculating feature importance: {e}", exc_info=True)
+            raise
+
     def _build_lstm_autoencoder(self, input_shape: Tuple[int, int]) -> Model:
         """Build LSTM Autoencoder model."""
         inputs = Input(shape=input_shape)
@@ -214,18 +333,10 @@ class HybridAnomalyDetector:
         """Load a saved model."""
         model_data = joblib.load(path)
         detector = cls(
-            sequence_length=model_data['sequence_length'],
-            lstm_units=model_data['lstm_units'],
-            contamination=model_data['contamination'],
-            n_estimators_iso_forest=model_data['n_estimators_iso_forest'],
-            max_features_iso_forest=model_data['max_features_iso_forest'],
-            n_estimators_rf=model_data['n_estimators_rf'],
-            max_depth_rf=model_data['max_depth_rf'],
-            min_samples_split_rf=model_data['min_samples_split_rf']
+            contamination=model_data['contamination']
         )
         detector.scaler = model_data['scaler']
         detector.isolation_forest = model_data['isolation_forest']
-        detector.random_forest = model_data['random_forest']
         detector.feature_columns = model_data['feature_columns']
         
         if model_data['lstm_autoencoder_config']:
@@ -251,7 +362,7 @@ if __name__ == "__main__":
     
     # Train model
     detector = HybridAnomalyDetector()
-    detector.fit(df_features, engineer.get_feature_columns())
+    detector.fit(df_features)
     
     # Make predictions
     predictions, scores = detector.predict(df_features)

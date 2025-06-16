@@ -17,14 +17,19 @@ from pathlib import Path
 import sys
 sys.path.append(".")
 from simple_detector import SimpleAnomalyDetector
-
 from data_generator import IAMLogGenerator
 from feature_engineering import FeatureEngineer
 from models.hybrid_model import HybridAnomalyDetector
-from data.iam_log_reader import get_log_reader, AWSCloudTrailReader, IAMLogReader # Import necessary reader classes
+from data.iam_log_reader import get_log_reader, AWSCloudTrailReader, IAMLogReader
+from utils.logging_config import setup_logging, get_logger
+
+# Initialize logging
+setup_logging()
+logger = get_logger('gui')
 
 class AnomalyDetectionGUI:
     def __init__(self, root):
+        logger.info("Initializing AnomalyDetectionGUI")
         self.root = root
         self.root.title("IAM Anomaly Detection")
         self.root.geometry("1200x800")
@@ -476,6 +481,8 @@ ensuring holistic threat visibility and enhanced accuracy. Define new log source
         self.canvas.draw()
         
     def run_analysis(self):
+        """Run the anomaly detection analysis."""
+        logger.info("Starting analysis run")
         self.run_button.state(['disabled'])
         self.status_text.delete(1.0, tk.END)
         self.progress_bar['value'] = 0 # Reset progress bar
@@ -494,22 +501,23 @@ ensuring holistic threat visibility and enhanced accuracy. Define new log source
                 selected_source = self.data_source_var.get()
                 file_path = self.file_path_var.get()
 
-                print(f"DEBUG: main.py - Selected Data Source: {selected_source}") # Added debug print
+                logger.debug(f"Selected data source: {selected_source}")
+                logger.debug(f"File path: {file_path}")
 
                 if selected_source == "Synthetic Data":
                     self.root.after(0, self._update_progress_bar, 10, "Generating synthetic dataset...")
                     generator = IAMLogGenerator()
                     df_local = generator.generate_dataset(n_events=int(self.n_events.get()), anomaly_ratio=float(self.contamination_ratio.get()))
                     self.root.after(0, self._update_progress_bar, 20, "Data generation complete!")
-                    print(f"DEBUG: main.py - df_local.shape after data generation: {df_local.shape}")
+                    logger.debug(f"DEBUG: main.py - df_local.shape after data generation: {df_local.shape}")
 
                 elif selected_source == "CyberArk Logs (Synthetic)":
-                    print("DEBUG: main.py - Entering CyberArk Logs (Synthetic) block.") # Added debug print
+                    logger.debug("DEBUG: main.py - Entering CyberArk Logs (Synthetic) block.") # Added debug print
                     self.root.after(0, self._update_progress_bar, 10, "Generating synthetic CyberArk logs...")
                     log_reader = get_log_reader('cyberark') # Get CyberArkLogReader instance
                     df_local = log_reader.read_logs(num_events=int(self.n_events.get()), anomaly_ratio=float(self.contamination_ratio.get()))
                     self.root.after(0, self._update_progress_bar, 20, "CyberArk log generation complete!")
-                    print(f"DEBUG: main.py - df_local.shape after CyberArk data generation: {df_local.shape}") # Added debug print
+                    logger.debug(f"DEBUG: main.py - df_local.shape after CyberArk data generation: {df_local.shape}") # Added debug print
 
                 elif selected_source == "AWS CloudTrail Logs": # Modified to directly pass string for AWS
                     self.root.after(0, self.update_status, f"Loading {selected_source}... (1/4)")
@@ -596,11 +604,11 @@ ensuring holistic threat visibility and enhanced accuracy. Define new log source
                 self.root.after(0, self.update_status, "Logs loaded and cleaned! (1/4)")
 
                 # Debug print: Check columns after log reading
-                print(f"DEBUG: main.py - Columns after log_reader.read_logs: {df_local.columns.tolist()}")
-                print(f"DEBUG: main.py - 'timestamp' column exists after read: {'timestamp' in df_local.columns}")
+                logger.debug(f"DEBUG: main.py - Columns after log_reader.read_logs: {df_local.columns.tolist()}")
+                logger.debug(f"DEBUG: main.py - 'timestamp' column exists after read: {'timestamp' in df_local.columns}")
                 if 'timestamp' in df_local.columns:
-                    print(f"DEBUG: main.py - 'timestamp' column dtype after read: {df_local['timestamp'].dtype}")
-                    print(f"DEBUG: main.py - First 5 timestamp values after read: {df_local['timestamp'].head()}")
+                    logger.debug(f"DEBUG: main.py - 'timestamp' column dtype after read: {df_local['timestamp'].dtype}")
+                    logger.debug(f"DEBUG: main.py - First 5 timestamp values after read: {df_local['timestamp'].head()}")
 
                 # Extract features (20-40% progress)
                 self.root.after(0, self.update_status, "Extracting features... (2/4)")
@@ -608,14 +616,14 @@ ensuring holistic threat visibility and enhanced accuracy. Define new log source
                 feature_engineer = FeatureEngineer()
 
                 # Debug print: Check columns before feature engineering
-                print(f"DEBUG: main.py - Columns before feature_engineer.engineer_features: {df_local.columns.tolist()}")
-                print(f"DEBUG: main.py - 'timestamp' column exists before engineer: {'timestamp' in df_local.columns}")
+                logger.debug(f"DEBUG: main.py - Columns before feature_engineer.engineer_features: {df_local.columns.tolist()}")
+                logger.debug(f"DEBUG: main.py - 'timestamp' column exists before engineer: {'timestamp' in df_local.columns}")
                 if 'timestamp' in df_local.columns:
-                    print(f"DEBUG: main.py - 'timestamp' column dtype before engineer: {df_local['timestamp'].dtype}")
-                    print(f"DEBUG: main.py - First 5 timestamp values before engineer: {df_local['timestamp'].head()}")
+                    logger.debug(f"DEBUG: main.py - 'timestamp' column dtype before engineer: {df_local['timestamp'].dtype}")
+                    logger.debug(f"DEBUG: main.py - First 5 timestamp values before engineer: {df_local['timestamp'].head()}")
 
                 # Pass a progress callback to the feature engineer
-                def feature_engineering_progress(current_step, total_steps, message):
+                def feature_engineering_progress(current_step, total_steps, message=""):
                     base_progress = 25 # Start of feature engineering progress
                     progress_range = 40 - base_progress # Total range for feature engineering
                     step_progress = int(base_progress + (current_step / total_steps) * progress_range)
@@ -624,13 +632,13 @@ ensuring holistic threat visibility and enhanced accuracy. Define new log source
                 df_local = feature_engineer.engineer_features(df_local, feature_engineering_progress)
                 self.feature_columns = feature_engineer.get_feature_columns()
                 self.root.after(0, self._update_progress_bar, 40, "Feature extraction complete!")
-                print(f"DEBUG: main.py - df_local.shape after feature engineering: {df_local.shape}")
+                logger.debug(f"DEBUG: main.py - df_local.shape after feature engineering: {df_local.shape}")
 
                 # After feature engineering, if synthetic data, extract true labels from the potentially reduced df_local
                 if selected_source == "Synthetic Data" and 'is_anomaly' in df_local.columns:
                     true_labels = df_local['is_anomaly'].values
                     true_anomalies_exist = True
-                    print(f"DEBUG: main.py - len(true_labels) after feature engineering: {len(true_labels)}")
+                    logger.debug(f"DEBUG: main.py - len(true_labels) after feature engineering: {len(true_labels)}")
                 else:
                     true_anomalies_exist = False # Ensure this is False for real logs
 
@@ -685,10 +693,9 @@ ensuring holistic threat visibility and enhanced accuracy. Define new log source
                 self.root.after(0, self.update_reporting_tab, len(self.df), int(self.predictions.sum()), None, self.df, self.predictions)
                 
             except Exception as e:
-                import traceback
-                traceback.print_exc()
-                self.root.after(0, self.update_status, f"An error occurred during analysis: {e}")
-                self.root.after(0, self._update_progress_bar, self.progress_bar['value'], "Error!") # Update progress label with Error!
+                logger.error(f"Error during analysis: {str(e)}", exc_info=True)
+                self.root.after(0, self.update_status, f"An error occurred: {str(e)}")
+                self._update_progress_bar(0)
             finally:
                 self.root.after(0, lambda: self.run_button.state(['!disabled'])) # Re-enable run button
         
@@ -852,11 +859,13 @@ This comprehensive, AI-driven data flow culminates in unparalleled **Proactive S
         self.value_prop_text.config(state='disabled')
 
     def browse_file(self):
+        """Open file browser dialog."""
         file_selected = filedialog.askopenfilename(
             title="Select Log File",
-            filetypes=(("JSON files", "*.json"), ("All files", "*.*" ))
+            filetypes=(("JSON files", "*.json"), ("All files", "*.*"))
         )
         if file_selected:
+            logger.info(f"Selected file: {file_selected}")
             self.file_path_var.set(file_selected)
 
     def browse_schema_file(self):
@@ -871,11 +880,13 @@ This comprehensive, AI-driven data flow culminates in unparalleled **Proactive S
         
         status_message = f"Saving configuration for: {source_name} (Type: {source_type}, Schema: {schema_path})\n(Note: This is a placeholder for future backend integration)"
         self.update_status(status_message)
-        print(status_message) # For debugging/console visibility
+        logger.info(status_message) # For debugging/console visibility
 
-    def log_experiment_result(self, result_description):
+    def log_experiment_result(self, result_description: str):
+        """Log experiment results to the experiment log tab."""
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         experiment_log_entry = f"{current_time} - {result_description}\n"
+        logger.info(f"Experiment result: {result_description}")
         self.experiment_log_text.config(state='normal')
         self.experiment_log_text.insert(tk.END, experiment_log_entry)
         self.experiment_log_text.config(state='disabled')
@@ -941,9 +952,11 @@ This comprehensive, AI-driven data flow culminates in unparalleled **Proactive S
         threading.Thread(target=detection_thread, daemon=True).start()
 
 def main():
+    logger.info("Starting IAM Anomaly Detection application")
     root = tk.Tk()
     app = AnomalyDetectionGUI(root)
     root.mainloop()
+    logger.info("Application closed")
 
 if __name__ == "__main__":
     main() 

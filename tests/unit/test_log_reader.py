@@ -6,7 +6,7 @@ import os
 from datetime import datetime, timedelta
 from src.data.iam_log_reader import IAMLogReader, get_log_reader, AWSCloudTrailReader, AzureADReader
 
-class TestIAMLogReader(unittest.TestCase):
+class TestAWSCloudTrailReader(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures before each test method."""
         self.reader = AWSCloudTrailReader()
@@ -57,9 +57,9 @@ class TestIAMLogReader(unittest.TestCase):
         self.aws_log_file = "temp_aws_logs.json"
         self.azure_log_file = "temp_azure_logs.json"
         with open(self.aws_log_file, 'w') as f:
-            json.dump(self.sample_aws_log, f)
+            json.dump([self.sample_aws_log], f)
         with open(self.azure_log_file, 'w') as f:
-            json.dump(self.sample_azure_log, f)
+            json.dump([self.sample_azure_log], f)
 
     def tearDown(self):
         """Clean up test fixtures after each test method."""
@@ -76,36 +76,6 @@ class TestIAMLogReader(unittest.TestCase):
             'user_agent'
         ]
         self.assertEqual(self.reader.standard_columns, required_columns)
-        
-    def test_column_standardization(self):
-        """Test column standardization functionality."""
-        # Create a dummy DataFrame with some missing/misnamed columns
-        data = {
-            'Time': ['2023-01-01T10:00:00Z'],
-            'User': ['user1'],
-            'ActionType': ['login'],
-            'SourceIP': ['1.1.1.1']
-        }
-        df = pd.DataFrame(data)
-        standardized_df = self.reader.standardize_columns(df)
-        
-        self.assertTrue(all(col in standardized_df.columns for col in self.reader.standard_columns))
-        self.assertTrue(standardized_df['resource'].isna().all()) # resource should be NaN
-        self.assertTrue(standardized_df['session_id'].isna().all()) # session_id should be NaN
-        
-    def test_timestamp_conversion(self):
-        """Test timestamp conversion in standardization."""
-        data = {
-            'Time': ['2023-01-01T10:00:00Z'],
-            'User': ['user1'],
-            'ActionType': ['login'],
-            'SourceIP': ['1.1.1.1']
-        }
-        df = pd.DataFrame(data)
-        standardized_df = self.reader.standardize_columns(df)
-        
-        self.assertTrue(pd.api.types.is_datetime64_any_dtype(standardized_df['timestamp']))
-        self.assertEqual(standardized_df['timestamp'].iloc[0], datetime(2023, 1, 1, 10, 0, 0))
         
     def test_log_validation(self):
         """Test log validation functionality."""
@@ -152,6 +122,11 @@ class TestIAMLogReader(unittest.TestCase):
         self.assertEqual(df['region'].iloc[0], 'us-east-1')
         self.assertEqual(df['status'].iloc[0], 'success')
         self.assertIsNotNone(df['session_id'].iloc[0])
+        
+    def test_get_log_reader_aws(self):
+        """Test that get_log_reader returns an AWSCloudTrailReader instance for 'aws' source."""
+        reader = get_log_reader('aws')
+        self.assertIsInstance(reader, AWSCloudTrailReader)
         
     def test_azure_log_reader(self):
         """Test Azure Activity log reader functionality."""

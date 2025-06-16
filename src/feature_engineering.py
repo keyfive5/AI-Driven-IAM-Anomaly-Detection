@@ -5,9 +5,11 @@ from datetime import datetime, timedelta
 import ipaddress
 from collections import defaultdict
 from sklearn.preprocessing import StandardScaler
+from utils.logging_config import get_logger
 
 class FeatureEngineer:
     def __init__(self):
+        self.logger = get_logger('analysis')
         self.feature_columns = []
         self.categorical_columns = []
         self.numerical_columns = []
@@ -106,6 +108,7 @@ class FeatureEngineer:
     
     def extract_behavioral_features(self, df: pd.DataFrame) -> pd.DataFrame:
         """Extract behavioral features based on user actions."""
+        self.logger.debug("Extracting behavioral features")
         print(f"DEBUG extract_behavioral_features: Columns at start: {df.columns.tolist()}")
         print(f"DEBUG extract_behavioral_features: '_temp_row_id' in df.columns at start: {'_temp_row_id' in df.columns}")
         print(f"DEBUG: extract_behavioral_features - df.index.is_unique at start: {df.index.is_unique}") # DEBUG PRINT
@@ -207,6 +210,7 @@ class FeatureEngineer:
     
     def extract_session_features(self, df: pd.DataFrame) -> pd.DataFrame:
         """Extract session-based features."""
+        self.logger.debug("Extracting session features")
         print(f"DEBUG extract_session_features: DF columns at start: {df.columns.tolist()}")
         print(f"DEBUG extract_session_features: DF index at start: {df.index.name}")
         print(f"DEBUG extract_session_features: '_temp_row_id' in DF columns at start: {'_temp_row_id' in df.columns}")
@@ -269,6 +273,7 @@ class FeatureEngineer:
     
     def extract_region_features(self, df: pd.DataFrame) -> pd.DataFrame:
         """Extract features based on regions."""
+        self.logger.debug("Extracting region features")
         print(f"DEBUG extract_region_features: DF columns at start: {df.columns.tolist()}")
         print(f"DEBUG extract_region_features: DF index at start: {df.index.name}")
         print(f"DEBUG extract_region_features: '_temp_row_id' in DF columns at start: {'_temp_row_id' in df.columns}")
@@ -313,6 +318,7 @@ class FeatureEngineer:
     
     def extract_user_agent_features(self, df: pd.DataFrame) -> pd.DataFrame:
         """Extract features from user agents."""
+        self.logger.debug("Extracting user agent features")
         print(f"DEBUG extract_user_agent_features: DF columns at start: {df.columns.tolist()}")
         print(f"DEBUG extract_user_agent_features: DF index at start: {df.index.name}")
         print(f"DEBUG extract_user_agent_features: '_temp_row_id' in DF columns at start: {'_temp_row_id' in df.columns}")
@@ -408,6 +414,7 @@ class FeatureEngineer:
 
     def extract_sequence_features(self, df: pd.DataFrame) -> pd.DataFrame:
         """Extract sequence-based features to detect unusual patterns of actions."""
+        self.logger.debug("Extracting sequence features")
         print(f"DEBUG extract_sequence_features: DF columns at start: {df.columns.tolist()}")
         print(f"DEBUG extract_sequence_features: DF index at start: {df.index.name}")
         print(f"DEBUG extract_sequence_features: '_temp_row_id' in DF columns at start: {'_temp_row_id' in df.columns}")
@@ -466,6 +473,7 @@ class FeatureEngineer:
 
     def extract_advanced_behavioral_features(self, df: pd.DataFrame) -> pd.DataFrame:
         """Extract advanced behavioral features focusing on unusual patterns."""
+        self.logger.debug("Extracting advanced behavioral features")
         print(f"DEBUG extract_advanced_behavioral_features: DF columns at start: {df.columns.tolist()}")
         print(f"DEBUG extract_advanced_behavioral_features: DF index at start: {df.index.name}")
         print(f"DEBUG extract_advanced_behavioral_features: '_temp_row_id' in DF columns at start: {'_temp_row_id' in df.columns}")
@@ -539,6 +547,7 @@ class FeatureEngineer:
 
     def extract_temporal_pattern_features(self, df: pd.DataFrame) -> pd.DataFrame:
         """Extract advanced temporal pattern features."""
+        self.logger.debug("Extracting temporal pattern features")
         print(f"DEBUG extract_temporal_pattern_features: DF columns at start: {df.columns.tolist()}")
         print(f"DEBUG extract_temporal_pattern_features: DF index at start: {df.index.name}")
         print(f"DEBUG extract_temporal_pattern_features: '_temp_row_id' in DF columns at start: {'_temp_row_id' in df.columns}")
@@ -602,6 +611,7 @@ class FeatureEngineer:
 
     def extract_cyberark_features(self, df: pd.DataFrame) -> pd.DataFrame:
         """Extract features specific to CyberArk logs."""
+        self.logger.debug("Extracting cyberark features")
         print(f"DEBUG extract_cyberark_features: DF columns at start: {df.columns.tolist()}")
         print(f"DEBUG extract_cyberark_features: DF index at start: {df.index.name}")
         print(f"DEBUG extract_cyberark_features: '_temp_row_id' in DF columns at start: {'_temp_row_id' in df.columns}")
@@ -721,137 +731,83 @@ class FeatureEngineer:
         return df
 
     def engineer_features(self, df: pd.DataFrame, progress_callback: Optional[Callable[[int, int, str], None]] = None) -> pd.DataFrame:
-        """Engineer a comprehensive set of features from the raw IAM logs."""
-        # Ensure _temp_row_id is always available and unique for merges across functions
-        if '_temp_row_id' not in df.columns:
-            df['_temp_row_id'] = range(len(df))
-        df = df.reset_index(drop=True) # Ensure default integer index for robustness
-        df['_temp_row_id'] = range(len(df)) # Re-generate unique _temp_row_id after reset, just in case
-        print(f"DEBUG engineer_features: Initial DF columns: {df.columns.tolist()}")
-        print(f"DEBUG engineer_features: Initial DF index: {df.index.name}")
-        print(f"DEBUG engineer_features: '_temp_row_id' in DF columns: {'_temp_row_id' in df.columns}")
-
+        """
+        Engineer features from the IAM logs.
+        
+        Args:
+            df (pd.DataFrame): Input DataFrame with raw log data
+            progress_callback (callable, optional): Function to report progress
+            
+        Returns:
+            pd.DataFrame: DataFrame with engineered features
+        """
+        self.logger.info("Starting feature engineering")
+        if df.empty:
+            self.logger.warning("Empty DataFrame received for feature engineering")
+            return df
+            
+        # Store original columns for reference
+        original_columns = df.columns.tolist()
+        self.logger.debug(f"Original columns: {original_columns}")
+        
+        # Create a copy to avoid modifying the original
+        df_features = df.copy()
+        
+        # 1. Time-based features
         if progress_callback:
-            progress_callback(1, 6, "Extracting time features...")
-        df = self.extract_time_features(df)
-        print(f"DEBUG engineer_features: After extract_time_features: Columns={df.columns.tolist()}, Index={df.index.name}, _temp_row_id in columns={'_temp_row_id' in df.columns}")
+            progress_callback(1, 7, "Extracting time features...")
+        df_features = self.extract_time_features(df_features)
+        self.logger.debug(f"DEBUG: engineer_features - After time features, columns: {df_features.columns.tolist()}")
 
+        # 2. IP-based features
         if progress_callback:
-            progress_callback(2, 6, "Extracting IP features...")
-        df = self.extract_ip_features(df)
-        print(f"DEBUG engineer_features: After extract_ip_features: Columns={df.columns.tolist()}, Index={df.index.name}, _temp_row_id in columns={'_temp_row_id' in df.columns}")
+            progress_callback(2, 7, "Extracting IP features...")
+        df_features = self.extract_ip_features(df_features)
+        self.logger.debug(f"DEBUG: engineer_features - After IP features, columns: {df_features.columns.tolist()}")
 
+        # 3. Behavioral features
         if progress_callback:
-            progress_callback(3, 6, "Extracting behavioral features...")
-        df = self.extract_behavioral_features(df)
-        print(f"DEBUG engineer_features: After extract_behavioral_features: Columns={df.columns.tolist()}, Index={df.index.name}, _temp_row_id in columns={'_temp_row_id' in df.columns}")
+            progress_callback(3, 7, "Extracting behavioral features...")
+        df_features = self.extract_behavioral_features(df_features)
+        self.logger.debug(f"DEBUG: engineer_features - After behavioral features, columns: {df_features.columns.tolist()}")
 
+        # 4. Session features
         if progress_callback:
-            progress_callback(4, 6, "Extracting session features...")
-        df = self.extract_session_features(df)
-        print(f"DEBUG engineer_features: After extract_session_features: Columns={df.columns.tolist()}, Index={df.index.name}, _temp_row_id in columns={'_temp_row_id' in df.columns}")
+            progress_callback(4, 7, "Extracting session features...")
+        df_features = self.extract_session_features(df_features)
+        self.logger.debug(f"DEBUG: engineer_features - After session features, columns: {df_features.columns.tolist()}")
+
+        # 5. Region features
+        if progress_callback:
+            progress_callback(5, 7, "Extracting region features...")
+        df_features = self.extract_region_features(df_features)
+        self.logger.debug(f"DEBUG: engineer_features - After region features, columns: {df_features.columns.tolist()}")
+
+        # 6. User Agent features
+        if progress_callback:
+            progress_callback(6, 7, "Extracting user agent features...")
+        df_features = self.extract_user_agent_features(df_features)
+        self.logger.debug(f"DEBUG: engineer_features - After user agent features, columns: {df_features.columns.tolist()}")
+
+        # 7. CyberArk specific features (if applicable, based on 'log_type' which should be in raw logs)
+        if progress_callback:
+            progress_callback(7, 7, "Extracting CyberArk specific features...")
+        df_features = self.extract_cyberark_features(df_features) # Handles if log_type is not present
+        self.logger.debug(f"DEBUG: engineer_features - After CyberArk features, columns: {df_features.columns.tolist()}")
+
+        # Store the feature columns
+        self.feature_columns = [col for col in df_features.columns if col not in original_columns]
+        self.logger.info(f"Generated {len(self.feature_columns)} features")
+        self.logger.debug(f"Feature columns: {self.feature_columns}")
         
         if progress_callback:
-            progress_callback(5, 6, "Extracting region features...")
-        df = self.extract_region_features(df)
-        print(f"DEBUG engineer_features: After extract_region_features: Columns={df.columns.tolist()}, Index={df.index.name}, _temp_row_id in columns={'_temp_row_id' in df.columns}")
-
-        if progress_callback:
-            progress_callback(6, 6, "Extracting user agent features...")
-        df = self.extract_user_agent_features(df)
-        print(f"DEBUG engineer_features: After extract_user_agent_features: Columns={df.columns.tolist()}, Index={df.index.name}, _temp_row_id in columns={'_temp_row_id' in df.columns}")
-
-        if progress_callback:
-            progress_callback(7, 6, "Extracting sequence features...")
-        df = self.extract_sequence_features(df)
-        print(f"DEBUG engineer_features: After extract_sequence_features: Columns={df.columns.tolist()}, Index={df.index.name}, _temp_row_id in columns={'_temp_row_id' in df.columns}")
-
-        if progress_callback:
-            progress_callback(8, 6, "Extracting advanced behavioral features...")
-        df = self.extract_advanced_behavioral_features(df)
-        print(f"DEBUG engineer_features: After extract_advanced_behavioral_features: Columns={df.columns.tolist()}, Index={df.index.name}, _temp_row_id in columns={'_temp_row_id' in df.columns}")
-        
-        if progress_callback:
-            progress_callback(9, 6, "Extracting temporal pattern features...")
-        df = self.extract_temporal_pattern_features(df)
-        print(f"DEBUG engineer_features: After extract_temporal_pattern_features: Columns={df.columns.tolist()}, Index={df.index.name}, _temp_row_id in columns={'_temp_row_id' in df.columns}")
-
-        if progress_callback:
-            progress_callback(10, 6, "Extracting cyberark features...")
-        df = self.extract_cyberark_features(df)
-        print(f"DEBUG engineer_features: After extract_cyberark_features: Columns={df.columns.tolist()}, Index={df.index.name}, _temp_row_id in columns={'_temp_row_id' in df.columns}")
-
-        # One-hot encode categorical features
-        if progress_callback:
-            progress_callback(11, 6, "One-hot encoding categorical features...")
-        # Filter out categorical columns that might have all 'unknown' or very few unique values if not intended for encoding
-        # Ensure categorical columns exist in the DataFrame before attempting to encode
-        categorical_cols_to_encode = [col for col in self.categorical_columns if col in df.columns and df[col].nunique() > 1]
-
-        if categorical_cols_to_encode:
-            try:
-                df_encoded = pd.get_dummies(df[categorical_cols_to_encode], prefix=categorical_cols_to_encode)
-                # Add new encoded columns to numerical_columns. They are essentially numerical.
-                self.numerical_columns.extend(df_encoded.columns.tolist())
-                df = pd.concat([df.drop(columns=categorical_cols_to_encode), df_encoded], axis=1)
-            except Exception as e:
-                print(f"Error during one-hot encoding: {e}")
-                import traceback
-                traceback.print_exc()
-        
-        # Ensure all numerical columns are indeed numeric and fill any remaining NaNs after feature engineering
-        final_numerical_columns = []
-        for col in self.numerical_columns:
-            if col in df.columns:
-                # Attempt to convert to numeric, coercing errors to NaN
-                df[col] = pd.to_numeric(df[col], errors='coerce')
-                df[col] = df[col].fillna(0) # Fill remaining NaNs with 0
-                final_numerical_columns.append(col)
-
-        self.numerical_columns = final_numerical_columns # Update numerical columns list
-
-        # Scale numerical features
-        if progress_callback:
-            progress_callback(12, 6, "Scaling features...")
-        df = self._scale_features(df)
-        
-        # Update feature columns list - this should be done after all transformations
-        # self.feature_columns should only contain column names that are actually in df after processing
-        # and are intended to be used as features.
-        
-        # Collect all potential feature columns that are now numerical (either originally or one-hot encoded)
-        all_current_numerical_features = list(set(self.numerical_columns + [col for col in df.columns if col.startswith('pair_')]))
-
-        # Exclude original identifier columns, datetime columns, and any temporary columns
-        exclude_cols = [
-            'timestamp', 'session_start', 'session_end', 'user_id', 'action', 'resource',
-            'ip_address', 'region', 'status', 'session_id', 'user_agent',
-            'ip_address_str', 'session_id_filled', 'user_id_filled', # Temporary columns
-            'time_diff', 'rolling_velocity', 'velocity_std', 'action_resource_pair', 'action_resource_pair_reduced', # Intermediate calculation columns
-            'user_mean_hour', 'user_std_hour', '_temp_row_id', # Exclude the temporary row ID as it's not a feature
-            'region_str', 'user_agent_str', # Temporary string columns for features
-            'action_code', 'resource_code' # Temporary numerical codes
-        ]
-        # Filter out original categorical columns that are now one-hot encoded, and any duplicates
-        exclude_cols.extend(categorical_cols_to_encode)
-
-        self.feature_columns = [col for col in all_current_numerical_features if col in df.columns and col not in exclude_cols]
-        
-        # Remove duplicates while preserving order
-        self.feature_columns = list(dict.fromkeys(self.feature_columns)) 
-
-        # If 'is_anomaly' exists, ensure it's not treated as a feature but is kept in the DataFrame
-        if 'is_anomaly' in df.columns and 'is_anomaly' in self.feature_columns:
-            self.feature_columns.remove('is_anomaly')
-
-        if progress_callback:
-            progress_callback(13, 6, "Feature engineering complete.")
-        
-        return df
+            progress_callback(7, 7, "Feature engineering complete!")
+            
+        return df_features
 
     def get_feature_columns(self) -> List[str]:
-        """Return the list of engineered feature columns."""
-        return self.numerical_columns
+        """Get the list of engineered feature columns."""
+        return self.feature_columns
 
 if __name__ == "__main__":
     # Example usage
