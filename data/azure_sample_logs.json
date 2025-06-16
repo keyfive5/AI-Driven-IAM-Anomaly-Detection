@@ -1,0 +1,80 @@
+{
+    "records": [
+        {
+            "time": "2024-01-21T10:00:00.0000000Z",
+            "resourceId": "/subscriptions/s1/resourceGroups/TestRG/providers/Microsoft.Compute/virtualMachines/TestVM",
+            "operationName": "Microsoft.Compute/virtualMachines/start/action",
+            "category": "Action",
+            "resultType": "Success",
+            "resultSignature": "Succeeded.Start",
+            "durationMs": 1500,
+            "callerIpAddress": "20.123.45.67",
+            "correlationId": "aaaa0000-bb11-2222-33cc-444444dddddd",
+            "identity": {
+                "authorization": {
+                    "scope": "/subscriptions/s1/resourceGroups/TestRG/providers/Microsoft.Compute/virtualMachines/TestVM",
+                    "action": "Microsoft.Compute/virtualMachines/start/action",
+                    "evidence": {
+                        "role": "Virtual Machine Contributor"
+                    }
+                },
+                "claims": {
+                    "aud": "https://management.core.windows.net/",
+                    "iss": "https://sts.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/",
+                    "iat": "1705824000",
+                    "nbf": "1705824000",
+                    "exp": "1705827600",
+                    "http://schemas.microsoft.com/identity/claims/tenantid": "ffffffff-eeee-dddd-cccc-bbbbbbbbbbb0",
+                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn": "user1@contoso.com",
+                    "name": "User One",
+                    "oid": "12345678-abcd-efgh-ijkl-9876543210ab"
+                }
+            },
+            "level": "Informational",
+            "location": "eastus",
+            "properties": {
+                "statusCode": "OK",
+                "serviceRequestId": "50d5cddb-8ca0-47ad-9b80-6cde2207f97c",
+                "userAgent": "Azure-CLI/2.0.0"
+            }
+        },
+        {
+            "time": "2024-01-21T10:05:30.0000000Z",
+            "resourceId": "/subscriptions/s1/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/teststorage",
+            "operationName": "Microsoft.Storage/storageAccounts/listKeys/action",
+            "category": "Action",
+            "resultType": "Failure",
+            "resultSignature": "Forbidden",
+            "durationMs": 500,
+            "callerIpAddress": "198.51.100.10",
+            "correlationId": "bbbb0000-cc11-3333-44dd-555555eeeeee",
+            "identity": {
+                "authorization": {
+                    "scope": "/subscriptions/s1/resourceGroups/TestRG/providers/Microsoft.Storage/storageAccounts/teststorage",
+                    "action": "Microsoft.Storage/storageAccounts/listKeys/action",
+                    "evidence": {
+                        "role": "Reader"
+                    }
+                },
+                "claims": {
+                    "aud": "https://management.core.windows.net/",
+                    "iss": "https://sts.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/",
+                    "iat": "1705824330",
+                    "nbf": "1705824330",
+                    "exp": "1705827930",
+                    "http://schemas.microsoft.com/identity/claims/tenantid": "ffffffff-eeee-dddd-cccc-bbbbbbbbbbb0",
+                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn": "user2@contoso.com",
+                    "name": "User Two",
+                    "oid": "23456789-bcde-fghi-jklm-0987654321ab"
+                }
+            },
+            "level": "Error",
+            "location": "westus2",
+            "properties": {
+                "statusCode": "Forbidden",
+                "serviceRequestId": "60e6dffc-9bd1-48be-abb2-7d0e3318g08d",
+                "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36"
+            }
+        }
+    ]
+} 

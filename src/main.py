@@ -12,6 +12,11 @@ import json
 import unittest
 import io
 from contextlib import redirect_stdout
+import webbrowser
+from pathlib import Path
+import sys
+sys.path.append(".")
+from simple_detector import SimpleAnomalyDetector
 
 from data_generator import IAMLogGenerator
 from feature_engineering import FeatureEngineer
@@ -89,12 +94,25 @@ class AnomalyDetectionGUI:
         self.n_actions.grid(row=current_row, column=1, sticky="ew", pady=5, padx=5)
         current_row += 1
         
+        # --- Contamination Ratio Controls (moved from synthetic data section) ---
         self.contamination_ratio_label = ttk.Label(self.control_frame, text="Contamination Ratio:")
         self.contamination_ratio_label.grid(row=current_row, column=0, sticky="w", pady=5, padx=5)
         self.contamination_ratio = ttk.Spinbox(self.control_frame, from_=0.01, to=0.5, increment=0.01, width=10, format="%.2f")
-        self.contamination_ratio.set(0.35) # Default from HybridAnomalyDetector
+        self.contamination_ratio.set(0.10) # Set default to 0.1 for testing
         self.contamination_ratio.grid(row=current_row, column=1, sticky="ew", pady=5, padx=5)
-        current_row += 1
+
+        current_row += 1 # Move to the next row for the buttons
+
+        # Add quick buttons for contamination ratio
+        contamination_button_frame = ttk.Frame(self.control_frame)
+        contamination_button_frame.grid(row=current_row, column=0, columnspan=2, sticky="ew", padx=5, pady=(0, 5)) # Place under spinbox, spanning both columns for centering
+
+        for val in [0.01, 0.05, 0.1, 0.2]:
+            btn = ttk.Button(contamination_button_frame, text=f"{val:.2f}", command=lambda v=val: self.contamination_ratio.set(v), width=4)
+            btn.pack(side=tk.LEFT, padx=1)
+        
+        current_row += 1 # Increment current_row after adding the button frame
+        # --- End Contamination Ratio Controls ---
         
         # --- Hyperparameter Tuning Controls ---
         self.if_estimators_label = ttk.Label(self.control_frame, text="IF Estimators (n):")
@@ -139,12 +157,14 @@ class AnomalyDetectionGUI:
             self.num_events_label, self.n_events,
             self.num_users_label, self.n_users,
             self.num_roles_label, self.n_roles,
-            self.num_actions_label, self.n_actions,
-            self.contamination_ratio_label, self.contamination_ratio
+            self.num_actions_label, self.n_actions
+            # Contamination ratio related controls are moved to model_tuning_controls
         ]
 
         # List of widgets for model tuning controls
         self.model_tuning_controls = [
+            self.contamination_ratio_label, self.contamination_ratio, # Moved here
+            contamination_button_frame, # Add the button frame to model tuning controls
             self.if_estimators_label, self.n_estimators_iso_forest,
             self.if_max_features_label, self.max_features_iso_forest,
             self.rf_estimators_label, self.n_estimators_rf,
@@ -155,6 +175,11 @@ class AnomalyDetectionGUI:
         # Add run button
         self.run_button = ttk.Button(self.control_frame, text="Run Analysis", command=self.run_analysis)
         self.run_button.grid(row=current_row, column=0, columnspan=2, pady=20)
+        current_row += 1
+
+        # Simple Detection Button
+        self.simple_detect_button = ttk.Button(self.control_frame, text="Run Simple Detection & Visualize", command=self.run_simple_detection)
+        self.simple_detect_button.grid(row=current_row, column=0, columnspan=2, pady=5)
         current_row += 1
 
         # --- Dedicated Status and Progress Area (using grid internally) ---
@@ -383,10 +408,11 @@ ensuring holistic threat visibility and enhanced accuracy. Define new log source
     
     def _update_progress_bar(self, value, message=""):
         self.progress_bar['value'] = value
-        self.progress_label.config(text=f"Progress: {value}%")
-        if message: # Optionally update status text with progress message
-            self.update_status(message)
-        self.root.update_idletasks() # Force GUI update
+        if message:
+            self.progress_label.config(text=f"Progress: {value}% - {message}")
+        else:
+            self.progress_label.config(text=f"Progress: {value}%")
+        self.root.update_idletasks() # Update GUI immediately
 
     def update_visualization(self):
         self.figure.clear()
@@ -527,11 +553,14 @@ ensuring holistic threat visibility and enhanced accuracy. Define new log source
                     self.root.after(0, self._update_progress_bar, 5, "Initializing log reader...")
                     
                     try:
-                        log_reader = get_log_reader('azure') # Corrected call: only pass source string
+                        log_reader = get_log_reader('azure') # Get AzureADReader instance
                         
                         if file_path:
-                            # Reading logs without chunking, as read_logs_in_chunks is not defined for AzureADReader
-                            df_local = log_reader.read_logs(file_path=file_path) # Changed to read_logs
+                            # Reading logs in chunks and concatenating for Azure
+                            all_chunks = []
+                            for chunk_df in log_reader.read_logs_in_chunks(file_path=file_path):
+                                all_chunks.append(chunk_df)
+                            df_local = pd.concat(all_chunks, ignore_index=True) if all_chunks else pd.DataFrame()
 
                             if df_local.empty:
                                 self.update_status("Error: No data found in the log file.")
@@ -564,7 +593,7 @@ ensuring holistic threat visibility and enhanced accuracy. Define new log source
                     self.root.after(0, lambda: self.run_button.state(['!disabled']))
                     return
                 
-                self.root.after(0, self.update_status, "Logs loaded and cleaned!")
+                self.root.after(0, self.update_status, "Logs loaded and cleaned! (1/4)")
 
                 # Debug print: Check columns after log reading
                 print(f"DEBUG: main.py - Columns after log_reader.read_logs: {df_local.columns.tolist()}")
@@ -645,93 +674,23 @@ ensuring holistic threat visibility and enhanced accuracy. Define new log source
                 predictions, scores = hybrid_detector.predict(df_local)
                 self.root.after(0, self._update_progress_bar, 95, "Prediction complete!")
 
-                self.df = df_local # Store the DataFrame for visualization
-                self.predictions = predictions
                 self.scores = scores
+                self.predictions = predictions
+                self.df = df_local # Store the processed dataframe for visualization and simple detector
 
-                self.root.after(0, self.update_status, "Calculating performance metrics...")
-                print(f"DEBUG: main.py - len(true_labels) before precision_score: {len(true_labels)}")
-                print(f"DEBUG: main.py - len(predictions) before precision_score: {len(predictions)}")
-                if true_anomalies_exist:
-                    from sklearn.metrics import precision_score, recall_score, f1_score
-                    precision = precision_score(true_labels, predictions)
-                    recall = recall_score(true_labels, predictions)
-                    f1 = f1_score(true_labels, predictions)
-                    self.root.after(0, self.update_status, "\nModel Performance:")
-                    self.root.after(0, self.update_status, f"Contamination Ratio: {self.contamination_ratio.get()}")
-                    self.root.after(0, self.update_status, f"Precision: {precision:.3f}")
-                    self.root.after(0, self.update_status, f"Recall: {recall:.3f}")
-                    self.root.after(0, self.update_status, f"F1 Score: {f1:.3f}")
-                    
-                    experiment_result = f"Data Source: {selected_source}, IF_Estimators: {n_estimators_iso_forest}, IF_Max_Features: {max_features_iso_forest}, RF_Estimators: {n_estimators_rf}, RF_Max_Depth: {max_depth_rf}, RF_Min_Samples_Split: {min_samples_split_rf}, Contamination: {self.contamination_ratio.get()}, Precision: {precision:.3f}, Recall: {recall:.3f}, F1: {f1:.3f}, Detected Anomalies: {np.sum(predictions)}"
-                    self.root.after(0, self.log_experiment_result, experiment_result)
-
-                else:
-                    self.root.after(0, self.update_status, "\nModel Performance: (Note: Metrics not applicable for unlabeled real logs)")
-                    self.root.after(0, self.update_status, f"Contamination Ratio: {self.contamination_ratio.get()}")
-                    experiment_result = f"Data Source: {selected_source}, IF_Estimators: {n_estimators_iso_forest}, IF_Max_Features: {max_features_iso_forest}, RF_Estimators: {n_estimators_rf}, RF_Max_Depth: {max_depth_rf}, RF_Min_Samples_Split: {min_samples_split_rf}, Contamination: {self.contamination_ratio.get()}, Detected Anomalies: {np.sum(predictions)} (Metrics N/A)"
-                    self.root.after(0, self.log_experiment_result, experiment_result)
+                self.root.after(0, self.update_status, "Model training and prediction complete!")
+                self.root.after(0, self._update_progress_bar, 90, "Generating visualization...")
+                self.root.after(0, self.update_visualization) # Update main visualization area
+                self.root.after(0, self._update_progress_bar, 100, "Analysis complete!")
+                self.root.after(0, self.update_reporting_tab, len(self.df), int(self.predictions.sum()), None, self.df, self.predictions)
                 
-                self.root.after(0, self.update_status, f"Detected Anomalies: {np.sum(predictions)}")
-
-                # Store total events and detected anomalies
-                self.total_events_processed = len(df_local)
-                self.detected_anomalies_count = np.sum(predictions)
-
-                # Get top anomalous users (pass the Series, not a string)
-                top_anomalous_users_series = None
-                anomalous_df = df_local[predictions == 1]
-                if not anomalous_df.empty and 'user_id' in anomalous_df.columns: # Changed from 'userIdentity' to 'user_id' for consistency
-                    top_anomalous_users_series = anomalous_df['user_id'].value_counts().head(5)
-
-                # Anomaly Explanation
-                anomalous_indices = np.where(predictions == 1)[0]
-                if len(anomalous_indices) > 0:
-                    self.root.after(0, self.update_status, "\nAnomaly Explanations (Top 5 features for first 3 anomalies):")
-                    for i, idx in enumerate(anomalous_indices):
-                        if i >= 3: # Limit to first 3 anomalies for explanation in GUI
-                            break
-                        anomaly_data_row = df_local.iloc[[idx]]
-                        explanation = hybrid_detector.explain_anomaly(anomaly_data_row) # Pass the single row DataFrame
-
-                        if "error" not in explanation:
-                            self.root.after(0, self.update_status, f"  Anomaly {i+1} (Original Index: {idx}):")
-                            top_features = list(explanation.items())[:5] # Get top 5 features
-                            for feature, importance in top_features:
-                                self.root.after(0, self.update_status, f"    - {feature}: {importance:.4f}")
-                        else:
-                            self.root.after(0, self.update_status, f"    Error explaining anomaly {idx}: {explanation['error']}")
-                else:
-                    self.root.after(0, self.update_status, "\nNo anomalies detected.")
-
-                self.root.after(0, self.update_status, "Saving results...")
-                output_dir = "output"
-                os.makedirs(output_dir, exist_ok=True)
-                output_path = os.path.join(output_dir, 'anomaly_results.csv')
-                # Ensure 'is_anomaly' column is present before saving if it exists
-                output_df = self.df.copy()
-                output_df['is_anomaly_predicted'] = self.predictions # Add predicted anomalies
-                output_df['anomaly_score'] = self.scores # Add anomaly scores
-
-                # If original data had true anomalies, include them
-                if true_anomalies_exist and 'is_anomaly' in self.df.columns: # Check df.columns not df_local.columns
-                    output_df['is_anomaly_true'] = true_labels
-                
-                output_df.to_csv(output_path, index=False)
-                self.root.after(0, self.update_status, f"Results saved to '{output_path}'")
-
-                # Update the Reporting Tab with current results
-                self.root.after(0, self.update_reporting_tab, self.total_events_processed, self.detected_anomalies_count, top_anomalous_users_series, df_local, predictions)
-
-                self.root.after(0, self.update_status, "\nAnalysis complete!")
-                self.root.after(0, self._update_progress_bar, 100, "Done!") # Final update
-                self.root.after(0, self.update_visualization)
             except Exception as e:
-                self.root.after(0, self.update_status, f"An error occurred during analysis: {e}")
                 import traceback
                 traceback.print_exc()
+                self.root.after(0, self.update_status, f"An error occurred during analysis: {e}")
+                self.root.after(0, self._update_progress_bar, self.progress_bar['value'], "Error!") # Update progress label with Error!
             finally:
-                self.root.after(0, lambda: self.run_button.state(['!disabled']))
+                self.root.after(0, lambda: self.run_button.state(['!disabled'])) # Re-enable run button
         
         # Run the analysis in a separate thread to keep the GUI responsive
         threading.Thread(target=analysis_thread).start()
@@ -956,6 +915,30 @@ This comprehensive, AI-driven data flow culminates in unparalleled **Proactive S
         self.test_results_text.config(state='normal')
         self.test_results_text.insert(tk.END, results)
         self.test_results_text.config(state='disabled')
+
+    def run_simple_detection(self):
+        def detection_thread():
+            self.update_status("Running simple anomaly detection...")
+            try:
+                # Use current loaded dataframe or synthetic if not loaded
+                if self.df is None:
+                    self.update_status("No data loaded. Please run analysis or load data first.")
+                    return
+                detector = SimpleAnomalyDetector()
+                anomalies = detector.detect_anomalies(self.df)
+                summary = f"Found {len(anomalies)} anomalous sessions\n"
+                for i, anomaly in enumerate(anomalies, 1):
+                    summary += f"\nAnomaly #{i}: User: {anomaly['user_id']}, Session: {anomaly['session_id']}, Reasons: {', '.join(anomaly['reasons'])}"
+                self.update_status(summary)
+                # Generate visualization
+                from visualize_anomalies import create_visualizations
+                create_visualizations(self.df, anomalies)
+                viz_path = Path("anomaly_visualization.html").absolute().as_uri()
+                webbrowser.open(viz_path)
+                self.update_status(summary + "\nVisualization opened in browser.")
+            except Exception as e:
+                self.update_status(f"Error during simple detection: {e}")
+        threading.Thread(target=detection_thread, daemon=True).start()
 
 def main():
     root = tk.Tk()

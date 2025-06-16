@@ -53,7 +53,9 @@ class IAMLogReader(ABC):
             records = []
             if isinstance(full_data, dict) and 'Records' in full_data: # AWS CloudTrail format
                 records = full_data['Records']
-            elif isinstance(full_data, list): # Azure Activity Log format
+            elif isinstance(full_data, dict) and 'records' in full_data: # Azure Activity Log format (common in some exports)
+                records = full_data['records']
+            elif isinstance(full_data, list): # Direct list of records
                 records = full_data
             else:
                 self.logger.error(f"Unsupported log file format: {file_path}")
@@ -178,6 +180,14 @@ class AzureADReader(IAMLogReader):
         caller_ip_address = record.get('callerIpAddress')
         correlation_id = record.get('correlationId')
         result_type = record.get('resultType')
+        
+        # Attempt to extract region from 'location' or similar Azure fields
+        # Common Azure log fields for region might be 'location' or 'geoCoordinates'
+        azure_region = record.get('location') 
+        
+        # Attempt to extract user_agent from 'properties' or other common Azure fields
+        # This can vary, so we'll look for common patterns
+        user_agent_info = record.get('properties', {}).get('userAgent') or record.get('userAgent')
 
         resource_parts = resource_id.split('/') if resource_id else []
         resource = resource_parts[-1] if len(resource_parts) > 0 else None
@@ -191,12 +201,12 @@ class AzureADReader(IAMLogReader):
             'action': action,
             'resource': resource,
             'ip_address': caller_ip_address,
-            'region': None, 
+            'region': azure_region, 
             'status': status,
             'session_id': correlation_id, 
             'session_start': event_time,
             'session_end': event_time,
-            'user_agent': None 
+            'user_agent': user_agent_info 
         }
 
 class SyntheticLogReader(IAMLogReader):
