@@ -5,7 +5,7 @@ from datetime import datetime
 import os
 from typing import Tuple, List
 import tkinter as tk
-from tkinter import ttk, filedialog
+from tkinter import ttk, filedialog, scrolledtext
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import threading
 import json
@@ -481,55 +481,39 @@ ensuring holistic threat visibility and enhanced accuracy. Define new log source
         self.canvas.draw()
         
     def run_analysis(self):
-        """Run the anomaly detection analysis."""
-        logger.info("Starting analysis run")
-        self.run_button.state(['disabled'])
-        self.status_text.delete(1.0, tk.END)
-        self.progress_bar['value'] = 0 # Reset progress bar
-        self.progress_label.config(text="Progress: 0%") # Reset label
-        self.root.update() # Force an immediate update to show reset progress bar and label
-        
-        # This function will run in a separate thread
+        # Disable run button to prevent multiple runs
+        self.run_button.config(state=tk.DISABLED)
+
         def analysis_thread():
             try:
-                # Data Loading (1/4)
-                self.root.after(0, self.update_status, "Data Loading... (1/4)")
-                df_local = None # Initialize df_local
-                true_labels = None
-                true_anomalies_exist = False
-
+                self.root.after(0, self._update_progress_bar, 5, "Initializing...")
+                
                 selected_source = self.data_source_var.get()
                 file_path = self.file_path_var.get()
+                df_local = None
+                
+                self.root.after(0, self.update_status, f"Loading {selected_source}... (1/4)")
 
-                logger.debug(f"Selected data source: {selected_source}")
-                logger.debug(f"File path: {file_path}")
-
-                if selected_source == "Synthetic Data":
-                    self.root.after(0, self._update_progress_bar, 10, "Generating synthetic dataset...")
-                    generator = IAMLogGenerator()
-                    df_local = generator.generate_dataset(n_events=int(self.n_events.get()), anomaly_ratio=float(self.contamination_ratio.get()))
-                    self.root.after(0, self._update_progress_bar, 20, "Data generation complete!")
-                    logger.debug(f"DEBUG: main.py - df_local.shape after data generation: {df_local.shape}")
-
-                elif selected_source == "CyberArk Logs (Synthetic)":
-                    logger.debug("DEBUG: main.py - Entering CyberArk Logs (Synthetic) block.") # Added debug print
-                    self.root.after(0, self._update_progress_bar, 10, "Generating synthetic CyberArk logs...")
-                    log_reader = get_log_reader('cyberark') # Get CyberArkLogReader instance
-                    df_local = log_reader.read_logs(num_events=int(self.n_events.get()), anomaly_ratio=float(self.contamination_ratio.get()))
-                    self.root.after(0, self._update_progress_bar, 20, "CyberArk log generation complete!")
-                    logger.debug(f"DEBUG: main.py - df_local.shape after CyberArk data generation: {df_local.shape}") # Added debug print
-
-                elif selected_source == "AWS CloudTrail Logs": # Modified to directly pass string for AWS
+                # --- Corrected Data Loading Logic ---
+                if "Synthetic" in selected_source:
+                    source_type = 'cyberark' if 'CyberArk' in selected_source else 'synthetic'
+                    log_reader = get_log_reader(source=source_type)
+                    # Synthetic readers generate data directly
+                    df_chunks = list(log_reader.read_logs_in_chunks(num_events=int(self.n_events.get()), anomaly_ratio=float(self.contamination_ratio.get())))
+                elif selected_source == "AWS CloudTrail Logs":
                     self.root.after(0, self.update_status, f"Loading {selected_source}... (1/4)")
                     self.root.after(0, self._update_progress_bar, 5, "Initializing log reader...")
                     
                     try:
-                        log_reader = get_log_reader('aws') # Corrected call: only pass source string
+                        log_reader = get_log_reader('aws')
                         
                         if file_path:
-                            # Reading logs without chunking, as read_logs_in_chunks is not defined for AWSCloudTrailReader
-                            df_local = log_reader.read_logs(file_path=file_path) # Changed to read_logs
-
+                            # Corrected: Use read_logs_in_chunks and concat the results
+                            df_chunks = list(log_reader.read_logs_in_chunks(file_path=file_path))
+                            if not df_chunks:
+                                raise ValueError("Log reader returned no data.")
+                            df_local = pd.concat(df_chunks, ignore_index=True)
+ 
                             if df_local.empty:
                                 self.update_status("Error: No data found in the log file.")
                                 self._update_progress_bar(0)
@@ -556,111 +540,33 @@ ensuring holistic threat visibility and enhanced accuracy. Define new log source
                         self._update_progress_bar(0)
                         return
 
-                elif selected_source == "Azure Activity Logs": # Added separate block for Azure
-                    self.root.after(0, self.update_status, f"Loading {selected_source}... (1/4)")
-                    self.root.after(0, self._update_progress_bar, 5, "Initializing log reader...")
-                    
-                    try:
-                        log_reader = get_log_reader('azure') # Get AzureADReader instance
-                        
-                        if file_path:
-                            # Reading logs in chunks and concatenating for Azure
-                            all_chunks = []
-                            for chunk_df in log_reader.read_logs_in_chunks(file_path=file_path):
-                                all_chunks.append(chunk_df)
-                            df_local = pd.concat(all_chunks, ignore_index=True) if all_chunks else pd.DataFrame()
-
-                            if df_local.empty:
-                                self.update_status("Error: No data found in the log file.")
-                                self._update_progress_bar(0)
-                                return
-                            
-                        else: # Handle case where file_path is missing
-                            self.update_status("Error: No file path provided for selected log type.")
-                            self._update_progress_bar(0)
-                            return
-                    except FileNotFoundError:
-                        self.update_status(f"Error: File not found at {file_path}")
-                        self._update_progress_bar(0)
-                        return
-                    except json.JSONDecodeError as e:
-                        self.update_status(f"Error decoding JSON from {file_path}: {e}")
-                        import traceback
-                        traceback.print_exc()
-                        self._update_progress_bar(0)
-                        return
-                    except Exception as e:
-                        self.update_status(f"An unexpected error occurred during log reading: {e}")
-                        import traceback
-                        traceback.print_exc()
-                        self._update_progress_bar(0)
-                        return
-
-                if df_local is None or df_local.empty:
-                    self.root.after(0, self.update_status, "Error: No data to process.")
-                    self.root.after(0, lambda: self.run_button.state(['!disabled']))
-                    return
+                if not df_local:
+                    raise ValueError("Log reader returned no data.")
+                df_local = pd.concat(df_chunks, ignore_index=True)
                 
                 self.root.after(0, self.update_status, "Logs loaded and cleaned! (1/4)")
+                self.root.after(0, self._update_progress_bar, 20, "Log processing complete.")
+                # --- End of Corrected Data Loading Logic ---
 
-                # Debug print: Check columns after log reading
-                logger.debug(f"DEBUG: main.py - Columns after log_reader.read_logs: {df_local.columns.tolist()}")
-                logger.debug(f"DEBUG: main.py - 'timestamp' column exists after read: {'timestamp' in df_local.columns}")
-                if 'timestamp' in df_local.columns:
-                    logger.debug(f"DEBUG: main.py - 'timestamp' column dtype after read: {df_local['timestamp'].dtype}")
-                    logger.debug(f"DEBUG: main.py - First 5 timestamp values after read: {df_local['timestamp'].head()}")
+                true_anomalies_exist = 'is_anomaly' in df_local.columns
+                if true_anomalies_exist:
+                    self.true_labels = df_local['is_anomaly']
 
-                # Extract features (20-40% progress)
+                # --- Feature Engineering ---
                 self.root.after(0, self.update_status, "Extracting features... (2/4)")
-                self.root.after(0, self._update_progress_bar, 25, "Initializing feature engineer...")
                 feature_engineer = FeatureEngineer()
-
-                # Debug print: Check columns before feature engineering
-                logger.debug(f"DEBUG: main.py - Columns before feature_engineer.engineer_features: {df_local.columns.tolist()}")
-                logger.debug(f"DEBUG: main.py - 'timestamp' column exists before engineer: {'timestamp' in df_local.columns}")
-                if 'timestamp' in df_local.columns:
-                    logger.debug(f"DEBUG: main.py - 'timestamp' column dtype before engineer: {df_local['timestamp'].dtype}")
-                    logger.debug(f"DEBUG: main.py - First 5 timestamp values before engineer: {df_local['timestamp'].head()}")
-
-                # Pass a progress callback to the feature engineer
-                def feature_engineering_progress(current_step, total_steps, message=""):
-                    base_progress = 25 # Start of feature engineering progress
-                    progress_range = 40 - base_progress # Total range for feature engineering
-                    step_progress = int(base_progress + (current_step / total_steps) * progress_range)
-                    self.root.after(0, self._update_progress_bar, step_progress, message)
-
-                df_local = feature_engineer.engineer_features(df_local, feature_engineering_progress)
+                df_local = feature_engineer.engineer_features(df_local, progress_callback=lambda step, total, msg: self.root.after(0, self._update_progress_bar, 20 + int(60 * (step/total)), msg)))
                 self.feature_columns = feature_engineer.get_feature_columns()
-                self.root.after(0, self._update_progress_bar, 40, "Feature extraction complete!")
-                logger.debug(f"DEBUG: main.py - df_local.shape after feature engineering: {df_local.shape}")
+                self.root.after(0, self._update_progress_bar, 80, "Feature engineering complete.")
 
-                # After feature engineering, if synthetic data, extract true labels from the potentially reduced df_local
-                if selected_source == "Synthetic Data" and 'is_anomaly' in df_local.columns:
-                    true_labels = df_local['is_anomaly'].values
-                    true_anomalies_exist = True
-                    logger.debug(f"DEBUG: main.py - len(true_labels) after feature engineering: {len(true_labels)}")
-                else:
-                    true_anomalies_exist = False # Ensure this is False for real logs
-
-                # Train model (40-85% progress)
-                self.root.after(0, self.update_status, "Training hybrid anomaly detection model... (3/4)")
-                self.root.after(0, self._update_progress_bar, 45, "Initializing hybrid model...")
-
-                # Get hyperparameters from GUI
+                # --- Model Training ---
+                self.root.after(0, self.update_status, "Training model... (3/4)")
                 n_estimators_iso_forest = int(self.n_estimators_iso_forest.get())
                 max_features_iso_forest = float(self.max_features_iso_forest.get())
                 n_estimators_rf = int(self.n_estimators_rf.get())
                 max_depth_rf_val = self.max_depth_rf_var.get()
                 max_depth_rf = int(max_depth_rf_val) if max_depth_rf_val != "None" else None
                 min_samples_split_rf = int(self.min_samples_split_rf.get())
-
-                # Display current hyperparameters
-                self.root.after(0, self.update_status, f"Current Hyperparameters:")
-                self.root.after(0, self.update_status, f"  IF Estimators: {n_estimators_iso_forest}")
-                self.root.after(0, self.update_status, f"  IF Max Features: {max_features_iso_forest}")
-                self.root.after(0, self.update_status, f"  RF Estimators: {n_estimators_rf}")
-                self.root.after(0, self.update_status, f"  RF Max Depth: {max_depth_rf}")
-                self.root.after(0, self.update_status, f"  RF Min Samples Split: {min_samples_split_rf}")
 
                 hybrid_detector = HybridAnomalyDetector(
                     contamination=float(self.contamination_ratio.get()),
@@ -670,34 +576,35 @@ ensuring holistic threat visibility and enhanced accuracy. Define new log source
                     max_depth_rf=max_depth_rf,
                     min_samples_split_rf=min_samples_split_rf
                 )
+                
+                hybrid_detector.fit(df_local, self.feature_columns, progress_callback=lambda val, msg: self.root.after(0, self._update_progress_bar, val, msg))
+                self.root.after(0, self._update_progress_bar, 90, "Model trained.")
 
-                # Adjust progress range for model training within hybrid_model.py
-                # hybrid_detector.fit will update progress from 45% to 85%
-                hybrid_detector.fit(df_local[self.feature_columns], self.feature_columns, self._update_progress_bar)
-                self.root.after(0, self._update_progress_bar, 85, "Model trained.") # Adjusted percentage
-
-                # Making predictions (85-95% progress)
+                # --- Prediction & Visualization ---
                 self.root.after(0, self.update_status, "Making predictions... (4/4)")
-                self.root.after(0, self._update_progress_bar, 90, "Generating predictions...")
                 predictions, scores = hybrid_detector.predict(df_local)
-                self.root.after(0, self._update_progress_bar, 95, "Prediction complete!")
-
                 self.scores = scores
                 self.predictions = predictions
-                self.df = df_local # Store the processed dataframe for visualization and simple detector
+                df_local['anomaly_score'] = scores
+                df_local['is_anomaly_predicted'] = predictions
+                self.df = df_local
 
-                self.root.after(0, self.update_status, "Model training and prediction complete!")
-                self.root.after(0, self._update_progress_bar, 90, "Generating visualization...")
-                self.root.after(0, self.update_visualization) # Update main visualization area
-                self.root.after(0, self._update_progress_bar, 100, "Analysis complete!")
-                self.root.after(0, self.update_reporting_tab, len(self.df), int(self.predictions.sum()), None, self.df, self.predictions)
+                self.root.after(0, self.update_status, "Analysis complete! Updating visualizations...")
+                self.root.after(0, self.update_visualization)
                 
+                if true_anomalies_exist:
+                    self.root.after(0, self.update_reporting_tab, len(self.df), int(self.predictions.sum()), self.df, self.predictions, self.true_labels)
+                else:
+                    self.root.after(0, self.update_reporting_tab, len(self.df), int(self.predictions.sum()), self.df, self.predictions, None)
+
+                self.root.after(0, self._update_progress_bar, 100, "Done!")
+
             except Exception as e:
                 logger.error(f"Error during analysis: {str(e)}", exc_info=True)
                 self.root.after(0, self.update_status, f"An error occurred: {str(e)}")
-                self._update_progress_bar(0)
+                self.root.after(0, self._update_progress_bar, 0, "Error")
             finally:
-                self.root.after(0, lambda: self.run_button.state(['!disabled'])) # Re-enable run button
+                self.root.after(0, lambda: self.run_button.config(state=tk.NORMAL))
         
         # Run the analysis in a separate thread to keep the GUI responsive
         threading.Thread(target=analysis_thread).start()
@@ -931,25 +838,39 @@ This comprehensive, AI-driven data flow culminates in unparalleled **Proactive S
         def detection_thread():
             self.update_status("Running simple anomaly detection...")
             try:
-                # Use current loaded dataframe or synthetic if not loaded
                 if self.df is None:
                     self.update_status("No data loaded. Please run analysis or load data first.")
                     return
                 detector = SimpleAnomalyDetector()
                 anomalies = detector.detect_anomalies(self.df)
-                summary = f"Found {len(anomalies)} anomalous sessions\n"
-                for i, anomaly in enumerate(anomalies, 1):
-                    summary += f"\nAnomaly #{i}: User: {anomaly['user_id']}, Session: {anomaly['session_id']}, Reasons: {', '.join(anomaly['reasons'])}"
-                self.update_status(summary)
-                # Generate visualization
-                from visualize_anomalies import create_visualizations
-                create_visualizations(self.df, anomalies)
-                viz_path = Path("anomaly_visualization.html").absolute().as_uri()
-                webbrowser.open(viz_path)
-                self.update_status(summary + "\nVisualization opened in browser.")
+                self._display_simple_detection_results(anomalies)
+
             except Exception as e:
                 self.update_status(f"Error during simple detection: {e}")
         threading.Thread(target=detection_thread, daemon=True).start()
+
+    def _display_simple_detection_results(self, anomalies):
+        # Create a new top-level window to display the results
+        results_window = tk.Toplevel(self.root)
+        results_window.title("Simple Detection Results")
+        results_window.geometry("800x600")
+
+        text_area = scrolledtext.ScrolledText(results_window, wrap=tk.WORD, width=100, height=30)
+        text_area.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+
+        summary = f"Found {len(anomalies)} anomalous sessions\n\n"
+        for i, anomaly in enumerate(anomalies, 1):
+            summary += f"--- Anomaly #{i} ---\n"
+            summary += f"User: {anomaly.get('user_id', 'N/A')}\n"
+            summary += f"Session ID: {anomaly.get('session_id', 'N/A')}\n"
+            summary += f"Start Time: {anomaly.get('start_time', 'N/A')}\n"
+            summary += f"Reasons:\n"
+            for reason in anomaly.get('reasons', []):
+                summary += f"  - {reason}\n"
+            summary += "\n"
+        
+        text_area.insert(tk.END, summary)
+        text_area.config(state=tk.DISABLED)
 
 def main():
     logger.info("Starting IAM Anomaly Detection application")

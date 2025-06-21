@@ -21,7 +21,6 @@ class FeatureEngineer:
         df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
         
         # Basic time features
-        # Use original df directly as _temp_row_id is already set
         df_temp = df.dropna(subset=['timestamp']).copy()
 
         df['hour'] = df_temp['timestamp'].dt.hour
@@ -33,8 +32,11 @@ class FeatureEngineer:
         df['hour_sin'] = np.sin(2 * np.pi * df['hour'].fillna(0)/24)
         df['hour_cos'] = np.cos(2 * np.pi * df['hour'].fillna(0)/24)
         
-        # Time since last access for each user - ensure sorting includes _temp_row_id
-        df = df.sort_values(['user_id', 'timestamp', '_temp_row_id'])
+        # Time since last access for each user - ensure sorting includes _temp_row_id if present
+        sort_cols = ['user_id', 'timestamp']
+        if '_temp_row_id' in df.columns:
+            sort_cols.append('_temp_row_id')
+        df = df.sort_values(sort_cols)
         # Ensure user_id is not NA for groupby. Fill with a placeholder string if needed
         df['user_id_filled'] = df['user_id'].fillna('unknown_user')
         df['time_since_last_access'] = df.groupby('user_id_filled')['timestamp'].diff().dt.total_seconds()
@@ -42,11 +44,9 @@ class FeatureEngineer:
         df.drop(columns=['user_id_filled'], inplace=True)
 
         # Session-based features - 'session_start' and 'session_end' are now guaranteed to exist
-        # and are datetime objects or NaT from IAMLogReader. Fill NaT values for calculation.
         df['session_duration'] = (df['session_end'].fillna(df['timestamp']) - df['session_start'].fillna(df['timestamp'])).dt.total_seconds()
-        df['session_duration'] = df['session_duration'].fillna(0) # Fill NaN from NaT difference with 0
-            
-        # Add to feature columns
+        df['session_duration'] = df['session_duration'].fillna(0)
+        
         self.numerical_columns.extend([
             'hour', 'day_of_week', 'is_weekend', 'is_working_hour',
             'time_since_last_access', 'hour_sin', 'hour_cos', 'session_duration'
@@ -58,52 +58,41 @@ class FeatureEngineer:
         """Extract features from IP addresses."""
         def is_private_ip(ip):
             try:
-                # Only attempt conversion if ip is a string and not 'unknown' or empty
                 if isinstance(ip, str) and ip not in ('unknown', ''):
                     return ipaddress.ip_address(ip).is_private
-                return False # Treat non-IPs or 'unknown' as not private
-            except ValueError: # Catches invalid IP formats
+                return False
+            except ValueError:
                 return False
             except Exception as e:
-                # Log other unexpected errors but return False
-                # print(f"Error checking private IP for {ip}: {e}") # Temporarily remove debug print
                 return False
         
-        # IP type features - apply only to non-null and non-'unknown' IP addresses
-        # Convert to string and fillna, then apply.
         df['ip_address_str'] = df['ip_address'].astype(str).fillna('unknown')
         df['is_private_ip'] = df['ip_address_str'].apply(is_private_ip).astype(int)
-        
-        # IP frequency features
-        # Value counts will include 'unknown' which is acceptable for frequency
         ip_counts = df['ip_address_str'].value_counts()
-        df['ip_frequency'] = df['ip_address_str'].map(ip_counts).fillna(0) # Fillna for IPs not in counts (shouldn't happen if all are in df)
-
-        # Top N IP addresses as categorical features
-        # Ensure 'ip_address_str' is used here as well
-        top_n_ips = ip_counts.head(20).index.tolist() # Consider top 20 IPs
+        df['ip_frequency'] = df['ip_address_str'].map(ip_counts).fillna(0)
+        top_n_ips = ip_counts.head(20).index.tolist()
         df['top_ip'] = df['ip_address_str'].apply(lambda x: x if x in top_n_ips else 'other_ip')
-        
-        # IP changes per session - 'session_id' and 'ip_address' are now guaranteed to exist.
-        # Ensure 'session_id' is not NA for groupby. Fill with a placeholder string if needed
-        df_temp = df.dropna(subset=['session_id', 'ip_address_str', '_temp_row_id']).sort_values(by=['session_id', 'timestamp', '_temp_row_id']).copy()
-        # Do not set index here; keep _temp_row_id as a column for merging
+        # Patch: Only use columns that exist for dropna/sort
+        subset_cols = ['session_id', 'ip_address_str']
+        sort_cols = ['session_id', 'timestamp']
+        if '_temp_row_id' in df.columns:
+            subset_cols.append('_temp_row_id')
+            sort_cols.append('_temp_row_id')
+        df_temp = df.dropna(subset=subset_cols).sort_values(by=sort_cols).copy()
         df_temp['session_id_filled'] = df_temp['session_id'].fillna('unknown_session')
         ip_changes_in_session_rolled = df_temp.groupby('session_id_filled')['ip_address_str'].transform('nunique')
-        # Assign directly to df_temp using _temp_row_id as index for alignment
-        df_temp = df_temp.set_index('_temp_row_id')
-        df_temp['ip_changes_in_session'] = ip_changes_in_session_rolled
-        df_temp['ip_changes_in_session'] = df_temp['ip_changes_in_session'].fillna(0) # Fill NaN from transform with 0
-        
-        df = df.merge(df_temp.reset_index()[['_temp_row_id', 'ip_changes_in_session']], on='_temp_row_id', how='left').fillna({'ip_changes_in_session': 0})
-
-        # Add to feature columns
+        if '_temp_row_id' in df_temp.columns:
+            df_temp = df_temp.set_index('_temp_row_id')
+            df_temp['ip_changes_in_session'] = ip_changes_in_session_rolled
+            df_temp['ip_changes_in_session'] = df_temp['ip_changes_in_session'].fillna(0)
+            df = df.merge(df_temp.reset_index()[['_temp_row_id', 'ip_changes_in_session']], on='_temp_row_id', how='left').fillna({'ip_changes_in_session': 0})
+        else:
+            df_temp['ip_changes_in_session'] = ip_changes_in_session_rolled
+            df_temp['ip_changes_in_session'] = df_temp['ip_changes_in_session'].fillna(0)
+            df = df.merge(df_temp[['session_id', 'ip_changes_in_session']], on='session_id', how='left').fillna({'ip_changes_in_session': 0})
         self.numerical_columns.extend(['is_private_ip', 'ip_frequency', 'ip_changes_in_session'])
         self.categorical_columns.append('top_ip')
-        
-        # Drop the temporary column
         df.drop(columns=['ip_address_str'], inplace=True)
-        
         return df
     
     def extract_behavioral_features(self, df: pd.DataFrame) -> pd.DataFrame:

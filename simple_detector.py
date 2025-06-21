@@ -1,5 +1,6 @@
 import pandas as pd
 from datetime import datetime, time
+import numpy as np
 
 class SimpleAnomalyDetector:
     def __init__(self):
