@@ -97,6 +97,9 @@ class FeatureEngineer:
     
     def extract_behavioral_features(self, df: pd.DataFrame) -> pd.DataFrame:
         """Extract behavioral features based on user actions."""
+        # Ensure _temp_row_id exists for all downstream operations
+        if '_temp_row_id' not in df.columns:
+            df['_temp_row_id'] = range(len(df))
         self.logger.debug("Extracting behavioral features")
         print(f"DEBUG extract_behavioral_features: Columns at start: {df.columns.tolist()}")
         print(f"DEBUG extract_behavioral_features: '_temp_row_id' in df.columns at start: {'_temp_row_id' in df.columns}")

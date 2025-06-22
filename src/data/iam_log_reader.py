@@ -6,6 +6,8 @@ from datetime import datetime, timedelta
 import uuid
 import numpy as np
 from utils.logging_config import get_logger
+#from src.data.data_generator import IAMLogGenerator
+from src.data_generator import IAMLogGenerator
 
 class IAMLogReader(ABC):
     """Base class for reading IAM logs from different sources."""
@@ -220,7 +222,6 @@ class SyntheticLogReader(IAMLogReader):
     def read_logs_in_chunks(self, file_path: str = None, num_events: int = 1000, anomaly_ratio: float = 0.1, num_privileged_accounts: int = 10) -> Generator[pd.DataFrame, None, None]:
         """Generates synthetic logs in chunks."""
         self.logger.info(f"Generating {num_events} synthetic logs...")
-        from src.data.data_generator import IAMLogGenerator
         generator = IAMLogGenerator() 
         df_full = generator.generate_dataset(n_events=num_events, anomaly_ratio=anomaly_ratio)
         
