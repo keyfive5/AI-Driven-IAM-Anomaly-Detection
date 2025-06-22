@@ -48,9 +48,6 @@ class ComprehensiveTestSuite:
         print("  - Generating normal behavior data...")
         normal_data = generator.generate_dataset(
             n_events=5000, 
-            n_users=50, 
-            n_roles=5, 
-            n_actions=10,
             anomaly_ratio=0.0  # No anomalies
         )
         datasets.append(normal_data)
@@ -59,11 +56,7 @@ class ComprehensiveTestSuite:
         print("  - Generating privilege escalation data...")
         escalation_data = generator.generate_dataset(
             n_events=2000,
-            n_users=20,
-            n_roles=5,
-            n_actions=10,
-            anomaly_ratio=0.15,
-            anomaly_types=['privilege_escalation']
+            anomaly_ratio=0.15
         )
         datasets.append(escalation_data)
         
@@ -71,11 +64,7 @@ class ComprehensiveTestSuite:
         print("  - Generating unusual access pattern data...")
         access_data = generator.generate_dataset(
             n_events=2000,
-            n_users=20,
-            n_roles=5,
-            n_actions=10,
-            anomaly_ratio=0.12,
-            anomaly_types=['unusual_access']
+            anomaly_ratio=0.12
         )
         datasets.append(access_data)
         
@@ -83,11 +72,7 @@ class ComprehensiveTestSuite:
         print("  - Generating geographic anomaly data...")
         geo_data = generator.generate_dataset(
             n_events=1500,
-            n_users=15,
-            n_roles=5,
-            n_actions=10,
-            anomaly_ratio=0.10,
-            anomaly_types=['geographic_anomaly']
+            anomaly_ratio=0.10
         )
         datasets.append(geo_data)
         
