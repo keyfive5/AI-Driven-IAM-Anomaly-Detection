@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ARGUS — test suite</title>
+<link rel="stylesheet" href="assets/app.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧪</text></svg>">
+<style>
+  body { display: block; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 30px 22px 60px; }
+  .result { display: flex; align-items: baseline; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--line-soft); font-size: 13px; }
+  .result .mark { width: 16px; font-family: var(--mono); }
+  .result.pass .mark { color: var(--ok); }
+  .result.fail .mark { color: var(--critical); }
+  .result .time { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--text-faint); }
+  .result .why { flex-basis: 100%; color: var(--critical); font-family: var(--mono); font-size: 11.5px; padding-left: 26px; }
+  .summary { font-family: var(--mono); font-size: 22px; margin: 18px 0 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 style="font-size:20px">ARGUS test suite</h1>
+  <p class="dim small">Runs the detection engine's tests in this browser — no install, no test
+    runner. The same file runs under Node with <code class="mono">node web/tests/run.mjs</code>.</p>
+
+  <div class="panel">
+    <div id="summary" class="summary dim">running…</div>
+    <div id="summarySub" class="small faint"></div>
+  </div>
+
+  <div class="panel mt" id="results"></div>
+
+  <p class="small faint mt">
+    <a href="index.html">← back to the console</a>
+  </p>
+</div>
+
+<script type="module">
+import { runTests } from './tests/tests.js';
+
+const results = document.getElementById('results');
+const summary = document.getElementById('summary');
+const summarySub = document.getElementById('summarySub');
+
+const started = performance.now();
+const { total, passed, failures } = await runTests((r) => {
+  const row = document.createElement('div');
+  row.className = `result ${r.ok ? 'pass' : 'fail'}`;
+  row.innerHTML = `<span class="mark">${r.ok ? '✓' : '✗'}</span>
+    <span>${r.name.replace(/[<>&]/g, '')}</span>
+    <span class="time">${r.ms.toFixed(0)}ms</span>
+    ${r.ok ? '' : `<span class="why">${String(r.error).replace(/[<>&]/g, '')}</span>`}`;
+  results.appendChild(row);
+});
+
+const ok = failures.length === 0;
+summary.textContent = `${passed}/${total} passed`;
+summary.className = `summary ${ok ? 'ok' : 'crit'}`;
+summary.style.color = ok ? 'var(--ok)' : 'var(--critical)';
+summarySub.textContent = `${((performance.now() - started) / 1000).toFixed(1)}s · ${ok ? 'engine behaving as specified' : `${failures.length} failing`}`;
+</script>
+</body>
+</html>
