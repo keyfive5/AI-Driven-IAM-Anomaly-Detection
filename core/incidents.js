@@ -11,8 +11,7 @@
  * catches an operator pivoting from a compromised identity onto a second one.
  */
 
-import { TACTIC_ORDER } from './schema.js';
-import { severityFromRisk } from './schema.js';
+import { TACTIC_ORDER, severityFromRisk } from './schema.js';
 
 const DEFAULT_GAP = 45 * 60_000;
 

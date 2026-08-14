@@ -54,10 +54,6 @@ const REGION_GEO = {
 let seq = 0;
 const nextId = () => `e${(++seq).toString(36)}`;
 
-export function resetIds() {
-  seq = 0;
-}
-
 function toEpoch(value) {
   if (value === null || value === undefined) return NaN;
   if (typeof value === 'number') return value < 1e12 ? value * 1000 : value;

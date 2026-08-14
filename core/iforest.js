@@ -83,9 +83,13 @@ function buildTree(matrix, D, rows, depth, maxDepth, rng) {
  */
 export function trainIsolationForest(matrix, n, D, opts = {}) {
   const trees = opts.trees ?? 120;
-  const psi = Math.max(8, Math.min(opts.sampleSize ?? 256, n));
+  // The subsample can never exceed the corpus. Clamping the other way round
+  // (a floor of 8 on a 2-event file) walks the shuffle past the end of the
+  // pool; typed arrays swallow those writes silently, which is exactly the
+  // kind of accident that survives until it does not.
+  const psi = Math.max(1, Math.min(opts.sampleSize ?? 256, n));
   const rng = makeRng(opts.seed ?? 7);
-  const maxDepth = Math.ceil(Math.log2(psi)) + 1;
+  const maxDepth = Math.ceil(Math.log2(Math.max(2, psi))) + 1;
 
   const forest = [];
   const pool = new Int32Array(n);

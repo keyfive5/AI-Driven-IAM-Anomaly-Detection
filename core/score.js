@@ -42,7 +42,7 @@
  * `cloudtrail:StopLogging` cannot be allowed to shrug at it.
  */
 
-import { FEATURES, FEATURE_KEYS, D } from './features.js';
+import { FEATURES, D } from './features.js';
 import { severityFromRisk } from './schema.js';
 
 /** Trust factor applied to each detector's tail depth. */
@@ -167,13 +167,17 @@ export function explainEvent({ event, ctx, matrix, index, zRow, attribution, hit
   });
 
   const top = factors.slice(0, 6);
+  // Two headlines: the one shown now, and the one to fall back on if the
+  // analyst mutes the rule that produced it. Without the second, muting a rule
+  // leaves the alert still captioned with the name of the muted rule.
+  const headlineModel = top[0]?.label
+    ? `Behaviour inconsistent with ${event.actor}'s baseline`
+    : 'Statistical outlier';
   const headline = hits.length
     ? hits.slice().sort((a, b) => b.risk - a.risk)[0].name
-    : top[0]?.label
-      ? `Behaviour inconsistent with ${event.actor}'s baseline`
-      : 'Statistical outlier';
+    : headlineModel;
 
-  return { headline, factors: top, allFactors: factors.length };
+  return { headline, headlineModel, factors: top, allFactors: factors.length };
 }
 
 export function buildAlert({ event, index, risk, hits, explanation, detectors }) {
@@ -201,6 +205,7 @@ export function buildAlert({ event, index, risk, hits, explanation, detectors })
     technique: primaryRule?.technique || null,
     rules: hits,
     headline: explanation.headline,
+    headlineModel: explanation.headlineModel,
     factors: explanation.factors,
     detectors,
     label: event.label,
@@ -223,5 +228,3 @@ function inferTactic(event, explanation) {
   if (explanation.factors.some((f) => f.key === 'travel_kmh' || f.key === 'country_new')) return 'Initial Access';
   return 'Discovery';
 }
-
-export { FEATURE_KEYS };
