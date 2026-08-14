@@ -20,3 +20,9 @@ output/
 
 # Jupyter Notebook files
 .ipynb_checkpoints/ 
+# --- ARGUS rebuild -----------------------------------------------------------
+# The blanket *.json rule above was aimed at generated output, but the rebuild
+# ships sample corpora and a launch config that must be tracked.
+!web/data/*.json
+!web/**/*.json
+.claude/

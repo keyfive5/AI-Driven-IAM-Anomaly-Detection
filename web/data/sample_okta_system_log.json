@@ -1,0 +1,5907 @@
+[
+ {
+  "uuid": "okta-000022",
+  "published": "2026-08-03T14:10:00.000Z",
+  "eventType": "application.user_membership.add",
+  "displayMessage": "Add user to app",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.20.30",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess660400"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000015",
+  "published": "2026-08-03T14:24:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.64",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess506321"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000012",
+  "published": "2026-08-03T15:13:00.000Z",
+  "eventType": "application.user_membership.add",
+  "displayMessage": "Add user to app",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.61",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess683443"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000020",
+  "published": "2026-08-03T16:36:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.20.99",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess548780"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000002",
+  "published": "2026-08-03T16:40:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.8",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess838800"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000001",
+  "published": "2026-08-03T16:59:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.172",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess644261"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000005",
+  "published": "2026-08-03T17:15:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.90",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess107331"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000004",
+  "published": "2026-08-03T17:55:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.59",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess208758"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000021",
+  "published": "2026-08-03T18:13:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.20.145",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess114156"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000008",
+  "published": "2026-08-03T18:41:00.000Z",
+  "eventType": "application.user_membership.add",
+  "displayMessage": "Add user to app",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.213",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess454246"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000010",
+  "published": "2026-08-03T18:58:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.185",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess294300"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000016",
+  "published": "2026-08-03T19:04:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.89",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess192583"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000007",
+  "published": "2026-08-03T19:37:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.188",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess566355"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000014",
+  "published": "2026-08-03T19:47:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.200",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess606539"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000019",
+  "published": "2026-08-03T20:56:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.20.140",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess413179"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000003",
+  "published": "2026-08-03T21:05:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.118",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess556093"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000013",
+  "published": "2026-08-03T22:12:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.217",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess548901"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000009",
+  "published": "2026-08-03T22:26:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.10",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess415165"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000017",
+  "published": "2026-08-03T23:00:00.000Z",
+  "eventType": "application.user_membership.add",
+  "displayMessage": "Add user to app",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.91",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess152961"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000018",
+  "published": "2026-08-04T00:22:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.76",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess994854"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000011",
+  "published": "2026-08-04T00:28:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.122",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess766561"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000006",
+  "published": "2026-08-04T01:35:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.95",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess719914"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000024",
+  "published": "2026-08-04T14:04:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.14",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess830477"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000046",
+  "published": "2026-08-04T14:23:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.170",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess864773"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000031",
+  "published": "2026-08-04T15:42:00.000Z",
+  "eventType": "application.user_membership.add",
+  "displayMessage": "Add user to app",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.218",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess516950"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000033",
+  "published": "2026-08-04T15:50:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.182",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess863664"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000023",
+  "published": "2026-08-04T16:18:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.101",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess571990"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000037",
+  "published": "2026-08-04T16:22:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.9",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess112197"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000035",
+  "published": "2026-08-04T16:25:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.221",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess661212"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000041",
+  "published": "2026-08-04T16:31:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.20",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess765728"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000026",
+  "published": "2026-08-04T16:36:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.232",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess427620"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000025",
+  "published": "2026-08-04T17:17:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.247",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess751624"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000047",
+  "published": "2026-08-04T17:30:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.20.112",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess270764"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000045",
+  "published": "2026-08-04T19:15:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.23",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess998842"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000032",
+  "published": "2026-08-04T19:46:00.000Z",
+  "eventType": "application.user_membership.add",
+  "displayMessage": "Add user to app",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.228",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess541854"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000030",
+  "published": "2026-08-04T20:05:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.195",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess262185"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000038",
+  "published": "2026-08-04T20:32:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.98",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess890066"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000027",
+  "published": "2026-08-04T21:10:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.46",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess531030"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000028",
+  "published": "2026-08-04T21:10:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.8",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess625218"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000043",
+  "published": "2026-08-04T21:13:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.73",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess900427"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000044",
+  "published": "2026-08-04T21:59:00.000Z",
+  "eventType": "application.user_membership.add",
+  "displayMessage": "Add user to app",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.190",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess962954"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000036",
+  "published": "2026-08-04T22:07:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.100",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess653440"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000040",
+  "published": "2026-08-04T22:21:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.146",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess729315"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000034",
+  "published": "2026-08-04T22:33:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.31",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess723366"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000039",
+  "published": "2026-08-04T23:20:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.144",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess173766"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000042",
+  "published": "2026-08-04T23:52:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.150",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess429236"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000050",
+  "published": "2026-08-04T23:52:00.000Z",
+  "eventType": "application.user_membership.add",
+  "displayMessage": "Add user to app",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.20.89",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess667106"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000029",
+  "published": "2026-08-05T00:05:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.72",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess141184"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000048",
+  "published": "2026-08-05T00:14:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.20.248",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess485773"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000049",
+  "published": "2026-08-05T01:27:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.20.150",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess358644"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000055",
+  "published": "2026-08-05T14:37:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.160",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess208063"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000051",
+  "published": "2026-08-05T15:16:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.59",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess186907"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000060",
+  "published": "2026-08-05T16:54:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.117",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess420436"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000070",
+  "published": "2026-08-05T17:25:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.20.213",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess846920"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000056",
+  "published": "2026-08-05T18:09:00.000Z",
+  "eventType": "application.user_membership.add",
+  "displayMessage": "Add user to app",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.119",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess101053"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000067",
+  "published": "2026-08-05T18:13:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.20.56",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess451824"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000054",
+  "published": "2026-08-05T20:03:00.000Z",
+  "eventType": "application.user_membership.add",
+  "displayMessage": "Add user to app",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.206",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess946712"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000066",
+  "published": "2026-08-05T20:42:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.130",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess120387"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000063",
+  "published": "2026-08-05T21:09:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.143",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess243182"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000068",
+  "published": "2026-08-05T21:40:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.20.73",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess868329"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000061",
+  "published": "2026-08-05T21:42:00.000Z",
+  "eventType": "application.user_membership.add",
+  "displayMessage": "Add user to app",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.146",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess208461"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000052",
+  "published": "2026-08-05T22:03:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.22",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess976008"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000053",
+  "published": "2026-08-05T22:17:00.000Z",
+  "eventType": "application.user_membership.add",
+  "displayMessage": "Add user to app",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.89",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess546064"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000064",
+  "published": "2026-08-05T23:08:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.28",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess947833"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000065",
+  "published": "2026-08-05T23:15:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.244",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess649887"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000057",
+  "published": "2026-08-05T23:28:00.000Z",
+  "eventType": "application.user_membership.add",
+  "displayMessage": "Add user to app",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.47",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess159942"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000059",
+  "published": "2026-08-05T23:28:00.000Z",
+  "eventType": "application.user_membership.add",
+  "displayMessage": "Add user to app",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.187",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess138720"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000062",
+  "published": "2026-08-05T23:33:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.60",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess508140"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000058",
+  "published": "2026-08-06T01:13:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.61",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess786528"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000069",
+  "published": "2026-08-06T01:32:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.20.24",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess671484"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000123",
+  "published": "2026-08-06T08:14:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in failed",
+  "severity": "WARN",
+  "outcome": {
+   "result": "FAILURE",
+   "reason": "INVALID_CREDENTIALS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "curl/8.4.0",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "45.132.192.77",
+   "geographicalContext": {
+    "city": "Amsterdam",
+    "country": "Netherlands",
+    "state": "",
+    "geolocation": {
+     "lat": 52.37,
+     "lon": 4.89
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess459731"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000124",
+  "published": "2026-08-06T08:14:20.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in failed",
+  "severity": "WARN",
+  "outcome": {
+   "result": "FAILURE",
+   "reason": "INVALID_CREDENTIALS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "curl/8.4.0",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "45.132.192.77",
+   "geographicalContext": {
+    "city": "Amsterdam",
+    "country": "Netherlands",
+    "state": "",
+    "geolocation": {
+     "lat": 52.37,
+     "lon": 4.89
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess670182"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000125",
+  "published": "2026-08-06T08:14:40.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in failed",
+  "severity": "WARN",
+  "outcome": {
+   "result": "FAILURE",
+   "reason": "INVALID_CREDENTIALS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "curl/8.4.0",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "45.132.192.77",
+   "geographicalContext": {
+    "city": "Amsterdam",
+    "country": "Netherlands",
+    "state": "",
+    "geolocation": {
+     "lat": 52.37,
+     "lon": 4.89
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess932267"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000126",
+  "published": "2026-08-06T08:14:57.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in failed",
+  "severity": "WARN",
+  "outcome": {
+   "result": "FAILURE",
+   "reason": "INVALID_CREDENTIALS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "curl/8.4.0",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "45.132.192.77",
+   "geographicalContext": {
+    "city": "Amsterdam",
+    "country": "Netherlands",
+    "state": "",
+    "geolocation": {
+     "lat": 52.37,
+     "lon": 4.89
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess564658"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000127",
+  "published": "2026-08-06T08:15:03.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in failed",
+  "severity": "WARN",
+  "outcome": {
+   "result": "FAILURE",
+   "reason": "INVALID_CREDENTIALS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "curl/8.4.0",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "45.132.192.77",
+   "geographicalContext": {
+    "city": "Amsterdam",
+    "country": "Netherlands",
+    "state": "",
+    "geolocation": {
+     "lat": 52.37,
+     "lon": 4.89
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess548615"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000128",
+  "published": "2026-08-06T08:15:25.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in failed",
+  "severity": "WARN",
+  "outcome": {
+   "result": "FAILURE",
+   "reason": "INVALID_CREDENTIALS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "curl/8.4.0",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "45.132.192.77",
+   "geographicalContext": {
+    "city": "Amsterdam",
+    "country": "Netherlands",
+    "state": "",
+    "geolocation": {
+     "lat": 52.37,
+     "lon": 4.89
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess602965"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000129",
+  "published": "2026-08-06T08:15:47.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in failed",
+  "severity": "WARN",
+  "outcome": {
+   "result": "FAILURE",
+   "reason": "INVALID_CREDENTIALS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "curl/8.4.0",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "45.132.192.77",
+   "geographicalContext": {
+    "city": "Amsterdam",
+    "country": "Netherlands",
+    "state": "",
+    "geolocation": {
+     "lat": 52.37,
+     "lon": 4.89
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess625215"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000130",
+  "published": "2026-08-06T08:15:59.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in failed",
+  "severity": "WARN",
+  "outcome": {
+   "result": "FAILURE",
+   "reason": "INVALID_CREDENTIALS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "curl/8.4.0",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "45.132.192.77",
+   "geographicalContext": {
+    "city": "Amsterdam",
+    "country": "Netherlands",
+    "state": "",
+    "geolocation": {
+     "lat": 52.37,
+     "lon": 4.89
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess268086"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000131",
+  "published": "2026-08-06T08:16:06.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in failed",
+  "severity": "WARN",
+  "outcome": {
+   "result": "FAILURE",
+   "reason": "INVALID_CREDENTIALS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "curl/8.4.0",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "45.132.192.77",
+   "geographicalContext": {
+    "city": "Amsterdam",
+    "country": "Netherlands",
+    "state": "",
+    "geolocation": {
+     "lat": 52.37,
+     "lon": 4.89
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess423037"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000132",
+  "published": "2026-08-06T08:16:46.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "curl/8.4.0",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "45.132.192.77",
+   "geographicalContext": {
+    "city": "Amsterdam",
+    "country": "Netherlands",
+    "state": "",
+    "geolocation": {
+     "lat": 52.37,
+     "lon": 4.89
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess818860"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000133",
+  "published": "2026-08-06T08:19:16.000Z",
+  "eventType": "user.account.privilege.grant",
+  "displayMessage": "Grant user privilege",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "curl/8.4.0",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "45.132.192.77",
+   "geographicalContext": {
+    "city": "Amsterdam",
+    "country": "Netherlands",
+    "state": "",
+    "geolocation": {
+     "lat": 52.37,
+     "lon": 4.89
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess884436"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Super Administrator",
+    "displayName": "Super Administrator"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000134",
+  "published": "2026-08-06T08:22:16.000Z",
+  "eventType": "user.mfa.factor.deactivate",
+  "displayMessage": "Deactivate MFA factor",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "curl/8.4.0",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "45.132.192.77",
+   "geographicalContext": {
+    "city": "Amsterdam",
+    "country": "Netherlands",
+    "state": "",
+    "geolocation": {
+     "lat": 52.37,
+     "lon": 4.89
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess838276"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Okta Verify",
+    "displayName": "Okta Verify"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000093",
+  "published": "2026-08-06T14:33:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.20.192",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess363193"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000091",
+  "published": "2026-08-06T15:14:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.20.148",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess649398"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000075",
+  "published": "2026-08-06T15:43:00.000Z",
+  "eventType": "application.user_membership.add",
+  "displayMessage": "Add user to app",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.211",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess756208"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000087",
+  "published": "2026-08-06T16:01:00.000Z",
+  "eventType": "application.user_membership.add",
+  "displayMessage": "Add user to app",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.124",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess393201"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000076",
+  "published": "2026-08-06T16:37:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.57",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess954204"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000092",
+  "published": "2026-08-06T17:24:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.20.88",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess953769"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000094",
+  "published": "2026-08-06T17:51:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.20.138",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess713819"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000082",
+  "published": "2026-08-06T18:02:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.102",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess525013"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000090",
+  "published": "2026-08-06T18:11:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.20.7",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess515758"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000071",
+  "published": "2026-08-06T18:14:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.108",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess370782"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000083",
+  "published": "2026-08-06T19:17:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.213",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess747158"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000086",
+  "published": "2026-08-06T20:11:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.83",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess699778"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000080",
+  "published": "2026-08-06T20:32:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.130",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess152464"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000085",
+  "published": "2026-08-06T20:32:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.118",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess368599"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000078",
+  "published": "2026-08-06T20:59:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.66",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess149456"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000081",
+  "published": "2026-08-06T21:25:00.000Z",
+  "eventType": "application.user_membership.add",
+  "displayMessage": "Add user to app",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.27",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess322262"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000074",
+  "published": "2026-08-06T21:28:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.228",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess679424"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000084",
+  "published": "2026-08-06T21:54:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.95",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess617044"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000073",
+  "published": "2026-08-06T22:15:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.35",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess983085"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000079",
+  "published": "2026-08-06T22:25:00.000Z",
+  "eventType": "application.user_membership.add",
+  "displayMessage": "Add user to app",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.195",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess893647"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000089",
+  "published": "2026-08-06T22:26:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.20.245",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess945453"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000072",
+  "published": "2026-08-06T22:50:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.129",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess980830"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000088",
+  "published": "2026-08-06T23:26:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.77",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess360607"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000077",
+  "published": "2026-08-07T00:14:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.98",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess713202"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000115",
+  "published": "2026-08-07T14:08:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.89",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess262902"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000106",
+  "published": "2026-08-07T14:16:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.30",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess226829"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000118",
+  "published": "2026-08-07T14:23:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.20.69",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess587746"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000098",
+  "published": "2026-08-07T15:01:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.48",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess982073"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000121",
+  "published": "2026-08-07T15:17:00.000Z",
+  "eventType": "application.user_membership.add",
+  "displayMessage": "Add user to app",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.20.111",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess338408"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000102",
+  "published": "2026-08-07T16:57:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.215",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess623208"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000099",
+  "published": "2026-08-07T17:21:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.68",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess879981"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000113",
+  "published": "2026-08-07T17:24:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.10",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess375116"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000120",
+  "published": "2026-08-07T18:19:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.20.234",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess712249"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000097",
+  "published": "2026-08-07T18:50:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.78",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess926572"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000103",
+  "published": "2026-08-07T19:16:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.163",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess658780"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000122",
+  "published": "2026-08-07T19:16:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.20.119",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess833294"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000101",
+  "published": "2026-08-07T19:43:00.000Z",
+  "eventType": "application.user_membership.add",
+  "displayMessage": "Add user to app",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.9",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess819237"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000100",
+  "published": "2026-08-07T19:54:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.13",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess989707"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000109",
+  "published": "2026-08-07T20:40:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.48",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess242075"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000112",
+  "published": "2026-08-07T20:47:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.121",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess909958"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000105",
+  "published": "2026-08-07T21:55:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.205",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess175501"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000108",
+  "published": "2026-08-07T21:58:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.30",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess513931"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000111",
+  "published": "2026-08-07T22:11:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.19",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess868265"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000095",
+  "published": "2026-08-07T22:29:00.000Z",
+  "eventType": "application.user_membership.add",
+  "displayMessage": "Add user to app",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.207",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess912226"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000119",
+  "published": "2026-08-07T22:52:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.20.71",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess875265"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000114",
+  "published": "2026-08-07T23:27:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.227",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess500550"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000096",
+  "published": "2026-08-07T23:32:00.000Z",
+  "eventType": "application.user_membership.add",
+  "displayMessage": "Add user to app",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u1a2b3c4",
+   "type": "User",
+   "alternateId": "dana.whitfield@northgate.example",
+   "displayName": "Dana Whitfield"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.18.184",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess130669"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000110",
+  "published": "2026-08-07T23:36:00.000Z",
+  "eventType": "user.session.start",
+  "displayMessage": "Sign-in successful",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.66",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess851112"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000107",
+  "published": "2026-08-07T23:51:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.16",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess603002"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000116",
+  "published": "2026-08-08T00:36:00.000Z",
+  "eventType": "user.authentication.auth_via_mfa",
+  "displayMessage": "Authenticate via MFA",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u9h0i1j2",
+   "type": "User",
+   "alternateId": "kate.osei@northgate.example",
+   "displayName": "Kate Osei"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "81.132.44.201",
+   "geographicalContext": {
+    "city": "London",
+    "country": "United Kingdom",
+    "state": "",
+    "geolocation": {
+     "lat": 51.51,
+     "lon": -0.13
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess337077"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000104",
+  "published": "2026-08-08T00:49:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00u5e6f7g8",
+   "type": "User",
+   "alternateId": "raul.mendes@northgate.example",
+   "displayName": "Raul Mendes"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "177.54.90.83",
+   "geographicalContext": {
+    "city": "Sao Paulo",
+    "country": "Brazil",
+    "state": "",
+    "geolocation": {
+     "lat": -23.55,
+     "lon": -46.63
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess700294"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ },
+ {
+  "uuid": "okta-000117",
+  "published": "2026-08-08T01:37:00.000Z",
+  "eventType": "user.session.end",
+  "displayMessage": "Sign-out",
+  "severity": "INFO",
+  "outcome": {
+   "result": "SUCCESS"
+  },
+  "actor": {
+   "id": "00uadm00x1",
+   "type": "User",
+   "alternateId": "it.admin@northgate.example",
+   "displayName": "IT Admin"
+  },
+  "client": {
+   "userAgent": {
+    "rawUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/126.0 Safari/537.36",
+    "os": "Mac OS X",
+    "browser": "CHROME"
+   },
+   "ipAddress": "99.242.20.131",
+   "geographicalContext": {
+    "city": "Toronto",
+    "country": "Canada",
+    "state": "",
+    "geolocation": {
+     "lat": 43.65,
+     "lon": -79.38
+    }
+   }
+  },
+  "authenticationContext": {
+   "externalSessionId": "sess689034"
+  },
+  "target": [
+   {
+    "id": "app-0",
+    "type": "AppInstance",
+    "alternateId": "Salesforce",
+    "displayName": "Salesforce"
+   }
+  ]
+ }
+]

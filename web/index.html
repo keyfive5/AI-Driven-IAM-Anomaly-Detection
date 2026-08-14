@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ARGUS — Identity Threat Detection Console</title>
+<meta name="description" content="Client-side IAM anomaly detection: parses CloudTrail, Entra ID, Okta, GCP and CyberArk logs, scores every event with an Isolation Forest ensemble plus a rule pack, and correlates the results into incidents. No server, no upload.">
+<link rel="stylesheet" href="assets/app.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+</head>
+<body>
+<div id="app" class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+        <path d="M16 2 4 7v9c0 7.2 5 12.5 12 14 7-1.5 12-6.8 12-14V7Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        <circle cx="16" cy="15" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/>
+        <circle cx="16" cy="15" r="1.6" fill="currentColor"/>
+      </svg>
+      <div class="brand-text">
+        <strong>ARGUS</strong>
+        <span>Identity Threat Detection</span>
+      </div>
+    </div>
+
+    <div class="topbar-meta" id="datasetMeta"></div>
+
+    <div class="topbar-actions">
+      <button class="btn btn-ghost" id="btnDocs" title="How the engine works">Engine</button>
+      <button class="btn btn-primary" id="btnRun">Re-run analysis</button>
+    </div>
+  </header>
+
+  <nav class="rail" id="rail">
+    <button class="rail-item is-active" data-view="overview"><span class="rail-icon">◈</span><span>Overview</span></button>
+    <button class="rail-item" data-view="alerts"><span class="rail-icon">▲</span><span>Alerts</span><em class="rail-badge" id="badgeAlerts"></em></button>
+    <button class="rail-item" data-view="incidents"><span class="rail-icon">⛓</span><span>Incidents</span><em class="rail-badge" id="badgeIncidents"></em></button>
+    <button class="rail-item" data-view="identities"><span class="rail-icon">☿</span><span>Identities</span></button>
+    <button class="rail-item" data-view="explore"><span class="rail-icon">≣</span><span>Events</span></button>
+    <button class="rail-item" data-view="evaluate"><span class="rail-icon">∿</span><span>Evaluate</span></button>
+    <button class="rail-item" data-view="data"><span class="rail-icon">⬓</span><span>Data &amp; tuning</span></button>
+    <div class="rail-spacer"></div>
+    <a class="rail-item rail-link" href="https://github.com/keyfive5/AI-Driven-IAM-Anomaly-Detection" target="_blank" rel="noopener">
+      <span class="rail-icon">↗</span><span>Source</span>
+    </a>
+    <div class="rail-foot">
+      <span class="dot dot-ok"></span> runs entirely in this browser
+    </div>
+  </nav>
+
+  <main class="stage" id="stage"></main>
+
+  <div class="progress-shade" id="progress" hidden>
+    <div class="progress-card">
+      <div class="progress-title" id="progressTitle">Analysing…</div>
+      <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+      <div class="progress-note" id="progressNote"></div>
+    </div>
+  </div>
+
+  <div class="toast-stack" id="toasts"></div>
+</div>
+
+<script type="module" src="ui/app.js"></script>
+<noscript>
+  <p style="padding:2rem;font:16px system-ui">ARGUS runs its detection engine in your browser, so JavaScript is required.</p>
+</noscript>
+</body>
+</html>
