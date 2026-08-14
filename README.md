@@ -140,7 +140,7 @@ creating a user at 11:00 from the office on an MFA session is doing their job; t
 
 ---
 
-## Five things that turned out to matter
+## Seven things that turned out to matter
 
 Each of these was found by measurement, not by design instinct, and each is written up in the
 source at the point where it applies.
@@ -177,6 +177,22 @@ There is also a plain bug worth recording: the generator anchored days to `Date.
 midnight, so every persona's "9am" landed at whatever hour the corpus happened to be generated. The
 diurnal structure the off-hours rules depend on simply was not there. Fixing it cut off-hours rule
 firings by two thirds and more than doubled their true-positive rate.
+
+**6. A progress bar with no exit is a trap.** The generator's day and identity counts are persisted,
+and at the top of their range the estate is ~330,000 events — 26 seconds of arithmetic and 600 MB on
+a *fast* desktop, minutes on a phone. Because the setting is saved, every reload reproduced it, and
+the overlay offered no elapsed time, no cancel and no diagnosis. It now shows the projected corpus
+size *before* you commit to it, reports elapsed time, and offers an escape that resets to a
+known-good default. Cancellation reaches the pipeline itself rather than just hiding the dialog —
+otherwise the abandoned run keeps competing for the main thread and can still overwrite the result
+you asked for. ([`app.js`](web/ui/app.js), [`pipeline.js`](web/core/pipeline.js))
+
+**7. The fix for a stall can cause a stall.** Slicing the heavy loops so the bar keeps moving added
+a yield between slices — and browsers clamp `setTimeout` to one second in a background tab, so
+switching away turned a 2-second analysis into a 13-second one. Yields now go through a
+MessageChannel, which is a task rather than a timer and is not throttled, and slices size themselves
+by measuring the first one: work that will finish inside 200 ms runs straight through, because
+yielding cost more than the work it was interrupting. ([`pipeline.js`](web/core/pipeline.js))
 
 ---
 

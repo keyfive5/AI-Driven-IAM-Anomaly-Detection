@@ -11,8 +11,8 @@
  */
 
 import { buildFeatures, FEATURE_KEYS, D } from './features.js';
-import { trainIsolationForest, scoreIsolationForest, attributeIsolation } from './iforest.js';
-import { robustZScores, rankNormalise, columnStats, robustZRow } from './stats.js';
+import { trainIsolationForest, scoreIsolationForestRange, attributeIsolation } from './iforest.js';
+import { rankNormalise, columnStatsRange, robustZScoreRange, robustZRow } from './stats.js';
 import { evaluateRules } from './rules.js';
 import { fuseTailMax, depthToRisk, applyRules, explainEvent, buildAlert, DEFAULT_WEIGHTS, FEATURE_DIRS, RISK_DECADES } from './score.js';
 import { buildIncidents } from './incidents.js';
@@ -20,7 +20,83 @@ import { evaluateScores, ablation, campaignDetection } from './evaluate.js';
 import { severityFromRisk } from './schema.js';
 
 const IDX = Object.fromEntries(FEATURE_KEYS.map((k, i) => [k, i]));
-const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+/**
+ * Yield to the event loop without `setTimeout`.
+ *
+ * Browsers clamp `setTimeout` to one second in a background tab. Yielding a few
+ * dozen times to keep the UI alive therefore turned a two-second analysis into
+ * a fourteen-second one the moment the user switched tabs — the fix for one
+ * stall causing another. A MessageChannel round-trip is a task, not a timer, so
+ * it is not throttled.
+ */
+const tick = () => new Promise((resolve) => {
+  if (typeof MessageChannel === 'undefined') { setTimeout(resolve, 0); return; }
+  const channel = new MessageChannel();
+  channel.port1.onmessage = () => { channel.port1.close(); resolve(); };
+  channel.port2.postMessage(null);
+});
+
+/** How long a slice may block the thread before yielding, in milliseconds. */
+const FRAME_BUDGET = 24;
+/** Below this, running straight through costs less than the yields would. */
+const SYNC_BUDGET = 200;
+
+/**
+ * Run `work` over [0, total) in adaptive slices, yielding between them and
+ * reporting progress across the [fromPct, toPct] band.
+ *
+ * Slice size is measured, not guessed: the first slice times itself and the
+ * rest are sized to the frame budget. If the whole loop looks like it will
+ * finish inside `SYNC_BUDGET` it runs in one go, because on a small corpus the
+ * yields cost more than the work they were meant to interrupt.
+ */
+async function inSlices(total, probeSize, work, onProgress, fromPct, toPct, label, signal) {
+  throwIfAborted(signal);
+  const probe = Math.min(total, probeSize);
+  const t0 = performance.now();
+  work(0, probe);
+  const probeMs = performance.now() - t0;
+
+  if (probe >= total) return;
+
+  const perItem = probeMs / Math.max(1, probe);
+  if (perItem * total < SYNC_BUDGET) {
+    work(probe, total);            // cheap enough to finish without yielding
+    return;
+  }
+
+  const slice = Math.max(500, Math.round(FRAME_BUDGET / Math.max(perItem, 1e-6)));
+  for (let start = probe; start < total; start += slice) {
+    throwIfAborted(signal);
+    const end = Math.min(total, start + slice);
+    work(start, end);
+    if (end < total) {
+      const pct = fromPct + (toPct - fromPct) * (end / total);
+      onProgress(Math.round(pct), `${label} — ${Math.round((end / total) * 100)}%`);
+      await tick();
+    }
+  }
+}
+
+export class AnalysisCancelled extends Error {
+  constructor() {
+    super('Analysis cancelled');
+    this.name = 'AnalysisCancelled';
+  }
+}
+
+/**
+ * Cancellation has to reach the pipeline, not just the overlay.
+ *
+ * Hiding the progress dialog while the run continues leaves the old analysis
+ * competing for the main thread with its replacement, and whichever finishes
+ * last wins — so cancelling a large run could hand you its results anyway.
+ * The token is checked at every yield point.
+ */
+function throwIfAborted(signal) {
+  if (signal?.aborted) throw new AnalysisCancelled();
+}
 
 export const DEFAULT_OPTIONS = {
   threshold: 60,          // ≈ the 8 oddest events per thousand, see score.js
@@ -32,6 +108,7 @@ export const DEFAULT_OPTIONS = {
   enabledRules: null,
   incidentGapMinutes: 45,
   maxAlerts: 4000,
+  retainInternals: false,
 };
 
 /**
@@ -50,6 +127,7 @@ export async function analyse(events, options = {}, onProgress = () => {}) {
   // --- 1. Features + rules, one streaming pass -----------------------------
   onProgress(6, 'Building behavioural baselines…');
   await tick();
+  throwIfAborted(opts.signal);
 
   const ruleHits = new Array(n);
   const enabled = opts.enabledRules ? new Set(opts.enabledRules) : null;
@@ -60,21 +138,38 @@ export async function analyse(events, options = {}, onProgress = () => {}) {
   // --- 2. Isolation Forest -------------------------------------------------
   onProgress(30, `Growing ${opts.trees} isolation trees…`);
   await tick();
+  throwIfAborted(opts.signal);
   const forest = trainIsolationForest(matrix, n, D, {
     trees: opts.trees,
     sampleSize: opts.sampleSize,
     seed: opts.seed,
   });
-  const ifScores = scoreIsolationForest(forest, matrix, n);
+
+  onProgress(34, 'Scoring events against the forest…');
+  await tick();
+  throwIfAborted(opts.signal);
+  const ifScores = new Float64Array(n);
+  await inSlices(n, 2500,
+    (from, to) => scoreIsolationForestRange(forest, matrix, ifScores, from, to),
+    onProgress, 34, 50, 'Scoring events against the forest', opts.signal);
 
   // --- 3. Robust z ---------------------------------------------------------
   onProgress(52, 'Measuring deviation from robust baselines…');
   await tick();
-  const { scores: zScores, stats: colStats } = robustZScores(matrix, n, D, FEATURE_DIRS);
+  throwIfAborted(opts.signal);
+  const colStats = { med: new Float64Array(D), mad: new Float64Array(D) };
+  await inSlices(D, 4,
+    (from, to) => columnStatsRange(matrix, n, D, colStats, from, to),
+    onProgress, 52, 60, 'Measuring robust baselines', opts.signal);
+  const zScores = new Float64Array(n);
+  await inSlices(n, 8000,
+    (from, to) => robustZScoreRange(matrix, n, D, FEATURE_DIRS, colStats, zScores, from, to),
+    onProgress, 60, 66, 'Comparing against baselines', opts.signal);
 
   // --- 4. Behavioural surprisal -------------------------------------------
   onProgress(66, 'Scoring behavioural surprisal…');
   await tick();
+  throwIfAborted(opts.signal);
   const baseScores = new Float64Array(n);
   for (let i = 0; i < n; i++) {
     const off = i * D;
@@ -87,6 +182,7 @@ export async function analyse(events, options = {}, onProgress = () => {}) {
   // --- 5. Fusion -----------------------------------------------------------
   onProgress(74, 'Fusing detector opinions…');
   await tick();
+  throwIfAborted(opts.signal);
   const ifRank = rankNormalise(ifScores);
   const zRank = rankNormalise(zScores);
   const baseRank = rankNormalise(baseScores);
@@ -105,6 +201,7 @@ export async function analyse(events, options = {}, onProgress = () => {}) {
   // --- 6. Alerts -----------------------------------------------------------
   onProgress(84, 'Explaining findings…');
   await tick();
+  throwIfAborted(opts.signal);
   const candidates = [];
   for (let i = 0; i < n; i++) {
     const hits = ruleHits[i] || [];
@@ -143,11 +240,13 @@ export async function analyse(events, options = {}, onProgress = () => {}) {
   // --- 7. Correlation ------------------------------------------------------
   onProgress(92, 'Correlating alerts into incidents…');
   await tick();
+  throwIfAborted(opts.signal);
   const incidents = buildIncidents(alerts, { gap: opts.incidentGapMinutes * 60_000 });
 
   // --- 8. Summaries and evaluation ----------------------------------------
   onProgress(97, 'Compiling report…');
   await tick();
+  throwIfAborted(opts.signal);
   const identities = summariseIdentities(data, risk, alerts, profiles);
   const summary = summarise(data, risk, alerts, incidents, ruleHits);
   const labels = data.map((e) => e.label || 0);
@@ -172,14 +271,19 @@ export async function analyse(events, options = {}, onProgress = () => {}) {
   }
 
   onProgress(100, 'Done');
+
+  // The feature matrix, per-event context, forest and profiles are working
+  // memory — roughly 35 MB on a 20k-event corpus, none of which the interface
+  // reads once the alerts are built. Holding them meant every re-run stacked
+  // another copy on the heap for no reason. Callers that genuinely need them
+  // (experiments, tests) ask explicitly.
+  const internals = opts.retainInternals
+    ? { matrix, ctx, profiles, priors, forest, colStats }
+    : {};
+
   return {
     events: data,
-    matrix,
-    ctx,
-    profiles,
-    priors,
-    forest,
-    colStats,
+    ...internals,
     risk,
     modelRisk,
     ruleRisk,

@@ -25,6 +25,14 @@ const STORAGE_KEY = 'argus.settings';
  */
 const SETTINGS_VERSION = 2;
 
+/**
+ * Sized so the first analysis finishes quickly on a modest laptop or phone.
+ * The estate is still large enough for baselines to mean something; the Data
+ * tab raises it for anyone who wants a heavier run, and it is what the
+ * progress overlay's escape hatch resets to.
+ */
+export const DEFAULT_GENERATOR = { seed: 20260813, days: 10, users: 30 };
+
 export const state = {
   view: 'overview',
   events: [],
@@ -33,7 +41,7 @@ export const state = {
   running: false,
   error: null,
   options: { ...DEFAULT_OPTIONS },
-  generator: { seed: 20260813, days: 14, users: 40, campaigns: [...CAMPAIGN_IDS] },
+  generator: { ...DEFAULT_GENERATOR, campaigns: [...CAMPAIGN_IDS] },
   suppressions: [],
   selection: { alertId: null, incidentId: null, identity: null },
   filters: {
@@ -92,15 +100,30 @@ export function loadSynthetic() {
   return { events, meta };
 }
 
+/**
+ * Above this the analysis is minutes of arithmetic and hundreds of megabytes
+ * in the tab. A real export can be far larger, so take the most recent window
+ * and say so — silently analysing a slice, or silently wedging the browser,
+ * are both worse than a clear statement.
+ */
+export const MAX_EVENTS = 200_000;
+
 export function loadEvents(events, meta) {
-  state.events = events;
-  state.meta = meta;
+  let loaded = events;
+  let truncated = 0;
+  if (events.length > MAX_EVENTS) {
+    truncated = events.length - MAX_EVENTS;
+    loaded = events.slice(-MAX_EVENTS);   // events arrive time-ordered
+  }
+  state.events = loaded;
+  state.meta = { ...meta, truncated };
   state.selection = { alertId: null, incidentId: null, identity: null };
+  return { loaded: loaded.length, truncated };
 }
 
 /* --------------------------------------------------------------- analysis -- */
 
-export async function run(onProgress) {
+export async function run(onProgress, signal) {
   if (!state.events.length) throw new Error('Load a dataset first.');
   state.running = true;
   state.error = null;
@@ -108,6 +131,7 @@ export async function run(onProgress) {
   try {
     state.result = await analyse(state.events, {
       ...state.options,
+      signal,
       campaigns: state.meta?.campaigns || [],
     }, onProgress);
     applySuppressions();
