@@ -49,15 +49,6 @@ export function duration(ms) {
   return `${h}h ${m % 60}m`;
 }
 
-export function relTime(ms) {
-  const diff = Date.now() - ms;
-  const mins = Math.round(diff / 60000);
-  if (Math.abs(mins) < 60) return `${mins}m ago`;
-  const hours = Math.round(mins / 60);
-  if (Math.abs(hours) < 48) return `${hours}h ago`;
-  return `${Math.round(hours / 24)}d ago`;
-}
-
 /** Truncate for table cells without breaking the layout. */
 export const clip = (s, n = 40) => {
   const str = String(s ?? '');

@@ -120,18 +120,3 @@ export function rankNormalise(scores) {
   return out;
 }
 
-export function mean(values) {
-  if (!values.length) return 0;
-  let s = 0;
-  for (const v of values) s += v;
-  return s / values.length;
-}
-
-export function stdev(values) {
-  const n = values.length;
-  if (n < 2) return 0;
-  const m = mean(values);
-  let s = 0;
-  for (const v of values) s += (v - m) ** 2;
-  return Math.sqrt(s / (n - 1));
-}
