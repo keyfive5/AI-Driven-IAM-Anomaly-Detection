@@ -23,7 +23,10 @@ const STORAGE_KEY = 'argus.settings';
  * old values silently ran a badly mis-scaled engine and every metric on screen
  * was wrong, with nothing to indicate why. Stored settings are an API.
  */
-const SETTINGS_VERSION = 2;
+// v3: the persisted corpus size is what trapped users behind a stuck progress
+// bar, so stored generator settings from before the size guard are discarded
+// rather than silently re-applied on the next load.
+const SETTINGS_VERSION = 3;
 
 /**
  * Sized so the first analysis finishes quickly on a modest laptop or phone.
