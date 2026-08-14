@@ -51,12 +51,15 @@
 
   <main class="stage" id="stage"></main>
 
-  <div class="progress-shade" id="progress" hidden>
-    <div class="progress-card">
-      <div class="progress-title" id="progressTitle">Analysing…</div>
-      <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
-      <div class="progress-note" id="progressNote"></div>
-      <div class="progress-escape" id="progressEscape" hidden></div>
+  <!-- Non-blocking run status. The engine works in a worker, so the console
+       stays fully usable while an analysis is in flight. -->
+  <div class="runbar" id="progress" hidden>
+    <div class="runbar-track"><div class="runbar-bar" id="progressBar"></div></div>
+    <div class="runbar-body">
+      <span class="runbar-pulse" aria-hidden="true"></span>
+      <strong id="progressTitle">Analysing…</strong>
+      <span class="runbar-note" id="progressNote"></span>
+      <span class="runbar-actions" id="progressEscape"></span>
     </div>
   </div>
 

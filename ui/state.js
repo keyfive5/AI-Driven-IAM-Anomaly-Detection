@@ -95,19 +95,11 @@ export function saveSettings() {
 
 /* ---------------------------------------------------------------- loading -- */
 
-export function loadSynthetic() {
-  const { events, meta } = generateCorpus({ ...state.generator });
-  state.events = events;
-  state.meta = meta;
-  state.selection = { alertId: null, incidentId: null, identity: null };
-  return { events, meta };
-}
-
 /**
- * Above this the analysis is minutes of arithmetic and hundreds of megabytes
- * in the tab. A real export can be far larger, so take the most recent window
- * and say so — silently analysing a slice, or silently wedging the browser,
- * are both worse than a clear statement.
+ * Above this the analysis is minutes of arithmetic and hundreds of megabytes.
+ * A real export can be far larger, so take the most recent window and say so —
+ * silently analysing a slice, or silently wedging the browser, are both worse
+ * than a clear statement.
  */
 export const MAX_EVENTS = 200_000;
 
@@ -126,26 +118,121 @@ export function loadEvents(events, meta) {
 
 /* --------------------------------------------------------------- analysis -- */
 
-export async function run(onProgress, signal) {
-  if (!state.events.length) throw new Error('Load a dataset first.');
+let activeWorker = null;
+
+/** Stop whatever is running. In worker mode this is immediate and total. */
+export function cancelRun() {
+  if (activeWorker) {
+    activeWorker.terminate();
+    activeWorker = null;
+  }
+  state.running = false;
+}
+
+/**
+ * Analyse the loaded corpus, off the main thread when the browser allows it.
+ *
+ * `generate` asks the worker to build the synthetic estate itself, which keeps
+ * another multi-second synchronous block off the interface thread and avoids
+ * cloning the corpus across the boundary twice.
+ */
+export async function run(onProgress, { generate = false } = {}) {
+  if (!generate && !state.events.length) throw new Error('Load a dataset first.');
+  cancelRun();
   state.running = true;
   state.error = null;
   notify();
+
   try {
-    state.result = await analyse(state.events, {
-      ...state.options,
-      signal,
-      campaigns: state.meta?.campaigns || [],
-    }, onProgress);
+    const payload = {
+      type: 'analyse',
+      options: { ...state.options },
+      meta: state.meta,
+      ...(generate
+        ? { generator: { ...state.generator } }
+        : { events: state.events }),
+    };
+
+    const { result, meta } = await runInWorker(payload, onProgress)
+      // A browser without module workers still has to work — it just blocks
+      // while it runs, exactly as before.
+      .catch((err) => (err?.name === 'NoWorker' ? runOnMainThread(payload, onProgress) : Promise.reject(err)));
+
+    if (meta) state.meta = meta;
+    if (generate) state.events = result.events;
+    state.result = result;
     applySuppressions();
   } catch (err) {
     state.error = err;
     throw err;
   } finally {
     state.running = false;
+    activeWorker = null;
     notify();
   }
   return state.result;
+}
+
+function runInWorker(payload, onProgress) {
+  return new Promise((resolve, reject) => {
+    let worker;
+    try {
+      worker = new Worker(new URL('../core/worker.js', import.meta.url), { type: 'module' });
+    } catch {
+      const err = new Error('Module workers unavailable');
+      err.name = 'NoWorker';
+      reject(err);
+      return;
+    }
+    activeWorker = worker;
+
+    // A worker that fails to load reports an error event rather than throwing
+    // at construction, so the fallback has to be reachable from here too.
+    let started = false;
+    worker.onerror = () => {
+      worker.terminate();
+      if (activeWorker === worker) activeWorker = null;
+      if (started) { reject(new Error('Analysis worker failed')); return; }
+      const err = new Error('Module workers unavailable');
+      err.name = 'NoWorker';
+      reject(err);
+    };
+
+    worker.onmessage = (ev) => {
+      const msg = ev.data || {};
+      if (msg.type === 'progress') {
+        started = true;
+        onProgress(msg.pct, msg.message);
+      } else if (msg.type === 'done') {
+        worker.terminate();
+        if (activeWorker === worker) activeWorker = null;
+        resolve({ result: msg.result, meta: msg.meta });
+      } else if (msg.type === 'error') {
+        worker.terminate();
+        if (activeWorker === worker) activeWorker = null;
+        reject(new Error(msg.message));
+      }
+    };
+
+    worker.postMessage(payload);
+  });
+}
+
+async function runOnMainThread(payload, onProgress) {
+  let events = payload.events;
+  let meta = payload.meta;
+  if (!events && payload.generator) {
+    onProgress(2, 'Generating synthetic estate…');
+    await new Promise((r) => setTimeout(r, 0));
+    const built = generateCorpus(payload.generator);
+    events = built.events;
+    meta = built.meta;
+  }
+  const result = await analyse(events, {
+    ...payload.options,
+    campaigns: meta?.campaigns || [],
+  }, onProgress);
+  return { result, meta };
 }
 
 /* ----------------------------------------------------------- suppressions -- */
