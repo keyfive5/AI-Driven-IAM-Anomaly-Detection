@@ -2,7 +2,7 @@ import { esc, num, ts, duration, on, toast } from '../dom.js';
 import { ingest, FORMAT_LABELS } from '../../core/parse.js';
 import { CAMPAIGN_IDS, campaignInfo } from '../../core/generate.js';
 import { RULES } from '../../core/rules.js';
-import { state, loadSynthetic, loadEvents, saveSettings, removeSuppression } from '../state.js';
+import { state, loadSynthetic, loadEvents, saveSettings, removeSuppression, MAX_EVENTS } from '../state.js';
 
 const SAMPLES = [
   { file: 'sample_aws_cloudtrail.json', name: 'AWS CloudTrail', note: 'Real-shaped management events: IAM, EC2, console sign-ins.' },
@@ -43,6 +43,7 @@ export function render(s) {
           <label>Days<input type="number" id="genDays" min="3" max="60" value="${s.generator.days}" style="width:100%"></label>
           <label>Identities<input type="number" id="genUsers" min="8" max="200" value="${s.generator.users}" style="width:100%"></label>
         </div>
+        <div id="genEstimate">${estimateNote(s.generator.days, s.generator.users)}</div>
 
         <h3 style="margin-top:14px">Campaigns to inject</h3>
         <div class="switchlist">
@@ -152,10 +153,32 @@ export function render(s) {
             ${meta.seed !== undefined ? `<dt>Seed</dt><dd>${esc(meta.seed)}</dd>` : ''}
             ${meta.campaigns ? `<dt>Campaigns</dt><dd>${num(meta.campaigns.length)}</dd>` : ''}
             ${meta.skipped ? `<dt>Skipped</dt><dd>${num(meta.skipped)} unparseable records</dd>` : ''}
+            ${meta.truncated ? `<dt>Truncated</dt><dd style="color:var(--high)">${num(meta.truncated)} older events dropped (${num(MAX_EVENTS)} cap)</dd>` : ''}
           </dl>
         </div>` : ''}
       </div>
     </div>
+  </div>`;
+}
+
+/**
+ * Projected corpus size, so the cost of a setting is visible before it is paid.
+ *
+ * These inputs are persisted, and a heavy choice therefore re-applies on every
+ * reload: at the top of the range the estate is ~330,000 events, which is half
+ * a minute of arithmetic on a fast desktop and minutes on a phone. Showing the
+ * number turns a trap into a decision.
+ */
+const estimateEvents = (days, users) => Math.round(days * (468 + users * 26));
+
+function estimateNote(days, users) {
+  const n = estimateEvents(days, users);
+  const heavy = n > 60000;
+  const veryHeavy = n > 150000;
+  return `<div class="small ${veryHeavy ? '' : 'faint'}" style="margin-top:8px${veryHeavy ? ';color:var(--high)' : ''}">
+    ≈ <strong class="mono">${num(n)}</strong> events
+    ${heavy ? `· ${veryHeavy ? 'this will take a while and use significant memory on a modest machine'
+      : 'noticeably slower to analyse on a modest machine'}` : '· analyses in a second or two'}
   </div>`;
 }
 
@@ -171,12 +194,29 @@ export function mount(root, ctx) {
   const gen = {
     genSeed: 'seed', genDays: 'days', genUsers: 'users',
   };
+  const refreshEstimate = () => {
+    const host = root.querySelector('#genEstimate');
+    if (host) host.innerHTML = estimateNote(state.generator.days, state.generator.users);
+  };
   for (const [id, key] of Object.entries(gen)) {
     const el = root.querySelector(`#${id}`);
-    if (el) el.addEventListener('change', () => {
-      state.generator[key] = Number(el.value);
+    if (!el) continue;
+    const apply = () => {
+      const value = Number(el.value);
+      if (!Number.isFinite(value)) return;
+      // Clamp to the input's own bounds: typing past them otherwise persists a
+      // setting the UI never offered.
+      const min = Number(el.min);
+      const max = Number(el.max);
+      state.generator[key] = el.min !== '' && el.max !== ''
+        ? Math.min(max, Math.max(min, value))
+        : value;
+      el.value = state.generator[key];
       saveSettings();
-    });
+      refreshEstimate();
+    };
+    el.addEventListener('change', apply);
+    el.addEventListener('input', apply);
   }
 
   on(root, 'change', '[data-campaign]', (ev, el) => {
@@ -273,7 +313,7 @@ async function consume(text, name, ctx) {
   try {
     const { events, format, skipped, total } = ingest(text);
     if (!events.length) throw new Error('No events could be parsed from that file.');
-    loadEvents(events, {
+    const { loaded, truncated } = loadEvents(events, {
       source: format,
       name,
       skipped,
@@ -281,7 +321,10 @@ async function consume(text, name, ctx) {
       labelled: events.some((e) => e.label === 1),
       campaigns: [],
     });
-    toast(`${name}: ${events.length} events parsed as ${FORMAT_LABELS[format] || format}${skipped ? ` (${skipped} skipped)` : ''}`);
+    toast(`${name}: ${loaded} events parsed as ${FORMAT_LABELS[format] || format}${skipped ? ` (${skipped} skipped)` : ''}`);
+    if (truncated) {
+      toast(`File held ${num(events.length)} events — analysing the most recent ${num(loaded)}.`, 'err');
+    }
     await ctx.runAnalysis();
     ctx.setView('overview');
   } catch (err) {

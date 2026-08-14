@@ -120,18 +120,29 @@ function pathLength(node, matrix, off, attribution) {
   return depth + cFactor(cur.size);
 }
 
-/** Anomaly score in (0,1] for every row. Higher = more isolated. */
-export function scoreIsolationForest(model, matrix, n) {
-  const out = new Float64Array(n);
+/**
+ * Score rows [from, to) into `out`.
+ *
+ * Scoring is the single most expensive step — n × trees tree descents — and on
+ * a large corpus doing it in one call freezes the tab for tens of seconds with
+ * no way to tell whether it is working or wedged. Exposing a range lets the
+ * caller run it in slices and yield to the event loop between them.
+ */
+export function scoreIsolationForestRange(model, matrix, out, from, to) {
   const { trees, D, c } = model;
   const t = trees.length;
-  for (let i = 0; i < n; i++) {
+  for (let i = from; i < to; i++) {
     const off = i * D;
     let sum = 0;
     for (let k = 0; k < t; k++) sum += pathLength(trees[k], matrix, off, null);
     out[i] = Math.pow(2, -(sum / t) / c);
   }
   return out;
+}
+
+/** Anomaly score in (0,1] for every row. Higher = more isolated. */
+export function scoreIsolationForest(model, matrix, n) {
+  return scoreIsolationForestRange(model, matrix, new Float64Array(n), 0, n);
 }
 
 /**

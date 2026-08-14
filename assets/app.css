@@ -457,7 +457,13 @@ pre.code {
 .progress-title { font-size: 13.5px; margin-bottom: 12px; }
 .progress-track { height: 4px; background: var(--bg-raise); border-radius: 3px; overflow: hidden; }
 .progress-bar { height: 100%; width: 0; background: linear-gradient(90deg, var(--accent-dim), var(--accent)); transition: width .2s; }
-.progress-note { font-family: var(--mono); font-size: 11px; color: var(--text-faint); margin-top: 9px; min-height: 15px; }
+.progress-note { font-family: var(--mono); font-size: 11px; color: var(--text-faint); margin-top: 9px; min-height: 15px; line-height: 1.5; }
+.progress-escape { margin-top: 13px; }
+.progress-shade.is-stalled .progress-bar { background: linear-gradient(90deg, #7a5a1e, var(--high)); }
+.progress-shade.is-stalled .progress-note { color: var(--high); }
+.progress-shade.is-error .progress-bar { background: var(--critical); width: 100% !important; }
+.progress-shade.is-error .progress-title { color: var(--critical); }
+.progress-shade.is-error .progress-note { color: var(--critical); }
 
 .toast-stack { position: fixed; right: 18px; bottom: 18px; display: flex; flex-direction: column; gap: 8px; z-index: 50; }
 .toast {

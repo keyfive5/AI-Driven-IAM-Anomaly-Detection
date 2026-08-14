@@ -30,12 +30,16 @@ export function quantile(sorted, q) {
   return lo === hi ? sorted[lo] : sorted[lo] + (sorted[hi] - sorted[lo]) * (pos - lo);
 }
 
-/** Median and MAD for each column of a packed matrix. */
-export function columnStats(matrix, n, D) {
-  const med = new Float64Array(D);
-  const mad = new Float64Array(D);
+/**
+ * Median and MAD for columns [fromCol, toCol) written into `out`.
+ * Column-ranged so a large corpus can be processed in slices with the event
+ * loop given a chance to breathe between them — two full sorts per column over
+ * hundreds of thousands of rows is seconds of blocking work otherwise.
+ */
+export function columnStatsRange(matrix, n, D, out, fromCol, toCol) {
+  const { med, mad } = out;
   const col = new Float64Array(n);
-  for (let f = 0; f < D; f++) {
+  for (let f = fromCol; f < toCol; f++) {
     for (let i = 0; i < n; i++) col[i] = matrix[i * D + f];
     const sorted = Float64Array.from(col).sort();
     const m = median(sorted);
@@ -51,7 +55,13 @@ export function columnStats(matrix, n, D) {
     }
     mad[f] = d;
   }
-  return { med, mad };
+  return out;
+}
+
+/** Median and MAD for every column of a packed matrix. */
+export function columnStats(matrix, n, D) {
+  const out = { med: new Float64Array(D), mad: new Float64Array(D) };
+  return columnStatsRange(matrix, n, D, out, 0, D);
 }
 
 /**
@@ -75,12 +85,10 @@ export function robustZRow(matrix, i, D, stats, dirs, out) {
   return out;
 }
 
-/** Aggregate robust-z anomaly score for every row: mean of the top-3 z values. */
-export function robustZScores(matrix, n, D, dirs) {
-  const stats = columnStats(matrix, n, D);
-  const scores = new Float64Array(n);
+/** Aggregate robust-z score for rows [from, to): mean of the top-3 z values. */
+export function robustZScoreRange(matrix, n, D, dirs, stats, scores, from, to) {
   const z = new Float64Array(D);
-  for (let i = 0; i < n; i++) {
+  for (let i = from; i < to; i++) {
     robustZRow(matrix, i, D, stats, dirs, z);
     let a = -Infinity;
     let b = -Infinity;
@@ -94,6 +102,14 @@ export function robustZScores(matrix, n, D, dirs) {
     const top = [a, b, c].filter((v) => Number.isFinite(v));
     scores[i] = top.length ? Math.max(0, top.reduce((s, v) => s + v, 0) / top.length) : 0;
   }
+  return scores;
+}
+
+/** Aggregate robust-z anomaly score for every row. */
+export function robustZScores(matrix, n, D, dirs) {
+  const stats = columnStats(matrix, n, D);
+  const scores = new Float64Array(n);
+  robustZScoreRange(matrix, n, D, dirs, stats, scores, 0, n);
   return { scores, stats };
 }
 
