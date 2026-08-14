@@ -4,7 +4,7 @@
  * which keeps every screen re-derivable from state alone.
  */
 
-import { state, subscribe, loadSettings, saveSettings, loadSynthetic, run, setView, DEFAULT_GENERATOR } from './state.js';
+import { state, subscribe, loadSettings, saveSettings, run, cancelRun, setView, DEFAULT_GENERATOR } from './state.js';
 import { $, num, duration, toast, esc } from './dom.js';
 import * as overview from './views/overview.js';
 import * as alerts from './views/alerts.js';
@@ -26,11 +26,23 @@ const progressTitle = $('#progressTitle');
 const ctx = {
   rerender: () => renderView(),
   setView,
-  runAnalysis: () => runAnalysis(),
+  runAnalysis: (opts) => runAnalysis(opts),
 };
 
 function renderView() {
   const view = VIEWS[state.view] || overview;
+  // Before the first result exists there is no dashboard to show, but the rail,
+  // the Data tab and the engine documentation all work — so show a placeholder
+  // for the data-driven views rather than locking the whole console.
+  const needsResult = ['overview', 'alerts', 'incidents', 'identities', 'explore', 'evaluate'];
+  if (!state.result && state.running && needsResult.includes(state.view)) {
+    stage.innerHTML = bootingPlaceholder();
+    renderChrome();
+    for (const el of document.querySelectorAll('.rail-item[data-view]')) {
+      el.classList.toggle('is-active', el.dataset.view === state.view);
+    }
+    return;
+  }
   stage.innerHTML = view.render(state);
   view.mount?.(stage, ctx);
   stage.scrollTop = state.view === 'incidents' && state.selection.incidentId ? stage.scrollTop : 0;
@@ -39,6 +51,18 @@ function renderView() {
     el.classList.toggle('is-active', el.dataset.view === state.view);
   }
   renderChrome();
+}
+
+function bootingPlaceholder() {
+  return `<div class="view"><div class="panel booting">
+    <div class="skeleton" style="width:34%"></div>
+    <div class="skeleton" style="width:52%"></div>
+    <div class="skeleton" style="width:22%"></div>
+    <p class="dim" style="margin-top:20px">Building the first analysis. The console is already
+      usable — <button class="btn btn-sm btn-ghost" data-goto="data">Data &amp; tuning</button>
+      and <button class="btn btn-sm btn-ghost" data-goto="engine">Engine</button> work now, and the
+      status bar above can cancel this run at any time.</p>
+  </div></div>`;
 }
 
 function renderChrome() {
@@ -64,21 +88,17 @@ function renderChrome() {
 }
 
 /**
- * Run the pipeline behind the progress overlay.
+ * Run the pipeline and report on it.
  *
- * The overlay must never become a dead end. Analysis is arithmetic on the main
- * thread, so a slow device, a huge upload or an outright bug all present the
- * same way — a bar that stops moving — and the first version offered no way
- * out of that state and no clue what was happening. So:
- *
- *   - a watchdog reports which stage stalled, and after that offers an escape;
- *   - Cancel always dismisses the overlay and leaves the previous result usable;
- *   - failures are shown *in* the overlay with a retry, not as a toast that
- *     disappears while the page is still blank.
+ * The engine runs in a worker, so this function only ever touches the DOM:
+ * the console stays interactive for the whole run, cancelling is immediate,
+ * and the status strip never covers anything. The earlier design blocked the
+ * page behind a modal for the duration, which meant a slow corpus and a broken
+ * one were indistinguishable and neither left the analyst anywhere to go.
  */
 let analysisRunning = false;
 
-async function runAnalysis() {
+async function runAnalysis({ generate = false } = {}) {
   if (analysisRunning) return;
   analysisRunning = true;
 
@@ -86,119 +106,110 @@ async function runAnalysis() {
   let lastStage = 'starting';
   let lastTick = performance.now();
   let cancelled = false;
-  const controller = new AbortController();
 
   progress.hidden = false;
   progress.classList.remove('is-stalled', 'is-error');
-  progressTitle.textContent = 'Analysing corpus…';
+  progressTitle.textContent = 'Analysing…';
   progressBar.style.width = '0%';
-  progressNote.textContent = 'preparing…';
-  setEscape(null);
+  progressNote.textContent = 'starting';
 
-  // Two separate failure modes, both of which used to look identical:
-  //   - a genuine stall (no progress at all), and
-  //   - a run that is simply long, where the bar moves but the tab is
-  //     unusable for a minute and the user has no idea how long is left.
-  // Elapsed time is always shown past a few seconds, and an escape appears for
-  // either condition. Chunked progress keeps resetting the stall timer, so a
-  // long run must be caught on total elapsed time, not on quiet alone.
-  // One click has to land somewhere usable. Halving 60 days × 200 identities
-  // still leaves ~91,000 events and another long wait, so the escape resets to
-  // the known-good default rather than stepping down.
-  const offerSmaller = () => setEscape({
-    label: 'Cancel and load the default corpus',
-    action: () => {
-      cancelled = true;
-      controller.abort();          // stop the running pipeline, not just the dialog
-      state.generator.days = DEFAULT_GENERATOR.days;
-      state.generator.users = DEFAULT_GENERATOR.users;
-      saveSettings();
-      dismiss();
-      loadSynthetic();
-      // Let the aborted run unwind at its next checkpoint before starting the
-      // replacement, so the two never share the main thread.
-      setTimeout(() => runAnalysis(), 0);
-    },
-  });
-
-  const watchdog = setInterval(() => {
-    const now = performance.now();
-    const quiet = now - lastTick;
-    const elapsed = now - started;
-    if (elapsed < 4000) return;
-
-    const secs = Math.round(elapsed / 1000);
-    if (quiet >= 8000) {
-      progress.classList.add('is-stalled');
-      progressTitle.textContent = 'Still working…';
-      progressNote.textContent =
-        `"${lastStage}" has not reported for ${Math.round(quiet / 1000)}s (${secs}s total).`;
-      offerSmaller();
-      return;
-    }
-
-    progressTitle.textContent = `Analysing ${num(state.events.length)} events — ${secs}s`;
-    if (elapsed >= 12000) {
-      progressNote.textContent =
-        `${lastStage} · a corpus this size takes a while, and the tab stays busy until it finishes.`;
-      offerSmaller();
-    }
-  }, 1000);
-
-  const dismiss = () => {
-    clearInterval(watchdog);
+  const finish = () => {
+    clearInterval(ticker);
     progress.hidden = true;
     progress.classList.remove('is-stalled', 'is-error');
-    setEscape(null);
+    setActions([]);
     analysisRunning = false;
   };
 
+  // Cancel is offered from the first second, not after a timeout. Stopping a
+  // run the user no longer wants should never require waiting for a watchdog.
+  const cancel = () => {
+    cancelled = true;
+    cancelRun();
+    finish();
+    toast('Analysis cancelled');
+    renderView();
+  };
+
+  const resetToDefault = () => {
+    cancelled = true;
+    cancelRun();
+    state.generator.days = DEFAULT_GENERATOR.days;
+    state.generator.users = DEFAULT_GENERATOR.users;
+    saveSettings();
+    finish();
+    runAnalysis({ generate: true });
+  };
+
+  setActions([{ label: 'Cancel', action: cancel }]);
+
+  const ticker = setInterval(() => {
+    if (cancelled) return;
+    const now = performance.now();
+    const elapsed = now - started;
+    const quiet = now - lastTick;
+    const secs = Math.round(elapsed / 1000);
+    if (elapsed < 3000) return;
+
+    const size = state.events.length
+      ? `${num(state.events.length)} events — `
+      : '';
+    progressTitle.textContent = `Analysing ${size}${secs}s`;
+
+    if (quiet >= 10000) {
+      progress.classList.add('is-stalled');
+      progressNote.textContent = `"${lastStage}" has not reported for ${Math.round(quiet / 1000)}s`;
+    }
+    // A long run is a size problem, so offer the size remedy alongside cancel.
+    if (elapsed >= 10000) {
+      setActions([
+        { label: 'Use the default corpus', action: resetToDefault },
+        { label: 'Cancel', action: cancel },
+      ]);
+    }
+  }, 1000);
+
   try {
     await run((pct, message) => {
-      if (controller.signal.aborted) return;
+      if (cancelled) return;
       lastStage = message;
       lastTick = performance.now();
       progress.classList.remove('is-stalled');
       progressBar.style.width = `${pct}%`;
       progressNote.textContent = message;
-      // Leave the title and escape alone once the watchdog has taken over, so
-      // a long run does not flicker between "Analysing…" and its own status.
-      if (lastTick - started < 4000) progressTitle.textContent = 'Analysing corpus…';
-    }, controller.signal);
+    }, { generate });
     if (cancelled) return;
     renderView();
     const s = state.result.summary;
     toast(`${num(s.alerts)} alerts across ${num(s.incidents)} incidents (${s.alertRate.toFixed(1)} per 1k events)`);
-    dismiss();
+    finish();
   } catch (err) {
-    clearInterval(watchdog);
-    // A cancelled run is an expected outcome, not a failure to report.
-    if (cancelled || err.name === 'AnalysisCancelled') { analysisRunning = false; return; }
+    clearInterval(ticker);
+    if (cancelled) { analysisRunning = false; return; }
     console.error(err);
-    // Show the failure where the user is already looking.
     progress.classList.add('is-error');
     progressTitle.textContent = 'Analysis failed';
     progressNote.textContent = `${err.message} — stage: ${lastStage}`;
-    setEscape({
-      label: 'Dismiss',
-      action: () => { dismiss(); if (!state.result) setView('data'); },
-    });
+    setActions([
+      { label: 'Use the default corpus', action: resetToDefault },
+      { label: 'Dismiss', action: () => { finish(); renderView(); } },
+    ]);
     analysisRunning = false;
   }
 }
 
-/** Render (or clear) the overlay's escape-hatch button. */
-function setEscape(escape) {
+/** Render the status strip's action buttons. */
+function setActions(actions) {
   const host = $('#progressEscape');
   if (!host) return;
   host.innerHTML = '';
-  if (!escape) { host.hidden = true; return; }
-  host.hidden = false;
-  const btn = document.createElement('button');
-  btn.className = 'btn btn-sm';
-  btn.textContent = escape.label;
-  btn.addEventListener('click', escape.action);
-  host.appendChild(btn);
+  for (const a of actions) {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-sm';
+    btn.textContent = a.label;
+    btn.addEventListener('click', a.action);
+    host.appendChild(btn);
+  }
 }
 
 function bindChrome() {
@@ -239,8 +250,9 @@ async function boot() {
   if (VIEWS[initial]) state.view = initial;
 
   renderView();
-  loadSynthetic();
-  await runAnalysis();
+  // The worker generates the corpus as well as analysing it, so the shell
+  // paints and stays interactive from the very first frame.
+  await runAnalysis({ generate: true });
   saveSettings();
 }
 

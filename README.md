@@ -178,21 +178,26 @@ midnight, so every persona's "9am" landed at whatever hour the corpus happened t
 diurnal structure the off-hours rules depend on simply was not there. Fixing it cut off-hours rule
 firings by two thirds and more than doubled their true-positive rate.
 
-**6. A progress bar with no exit is a trap.** The generator's day and identity counts are persisted,
-and at the top of their range the estate is ~330,000 events — 26 seconds of arithmetic and 600 MB on
-a *fast* desktop, minutes on a phone. Because the setting is saved, every reload reproduced it, and
-the overlay offered no elapsed time, no cancel and no diagnosis. It now shows the projected corpus
-size *before* you commit to it, reports elapsed time, and offers an escape that resets to a
-known-good default. Cancellation reaches the pipeline itself rather than just hiding the dialog —
-otherwise the abandoned run keeps competing for the main thread and can still overwrite the result
-you asked for. ([`app.js`](web/ui/app.js), [`pipeline.js`](web/core/pipeline.js))
+**6. A blocking progress dialog is the bug, not the slow work behind it.** The generator's day and
+identity counts are persisted, and at the top of their range the estate is ~330,000 events — 26
+seconds of arithmetic and 600 MB on a *fast* desktop. Because the setting is saved, every reload
+reproduced it, and a modal overlay sat on top of the console the whole time: no elapsed time, no
+cancel, and no way to reach the settings page that caused it. I first tried to make the modal
+smarter — a watchdog, a stall detector, an escape hatch — which was treating the symptom. A
+progress dialog that locks the analyst out of the tool is wrong even when the work behind it is
+fast. The engine now runs in a **worker**: the console is interactive from the first frame,
+navigation stays at ~30 ms while a 333,000-event analysis runs, cancel is a `terminate()` rather
+than a request a busy thread might never notice, and the status strip reports without covering
+anything. ([`worker.js`](web/core/worker.js), [`state.js`](web/ui/state.js), [`app.js`](web/ui/app.js))
 
-**7. The fix for a stall can cause a stall.** Slicing the heavy loops so the bar keeps moving added
-a yield between slices — and browsers clamp `setTimeout` to one second in a background tab, so
-switching away turned a 2-second analysis into a 13-second one. Yields now go through a
-MessageChannel, which is a task rather than a timer and is not throttled, and slices size themselves
-by measuring the first one: work that will finish inside 200 ms runs straight through, because
-yielding cost more than the work it was interrupting. ([`pipeline.js`](web/core/pipeline.js))
+**7. The fix for a stall can cause a stall.** Before the worker existed I sliced the heavy loops so
+the bar would keep moving, which added a yield between slices — and browsers clamp `setTimeout` to
+one second in a background tab, so switching away turned a 2-second analysis into a 13-second one.
+Yields go through a MessageChannel, which is a task rather than a timer and is not throttled, and
+slices size themselves by measuring the first one: work that will finish inside 200 ms runs straight
+through, because yielding cost more than the work it was interrupting. The slicing still earns its
+place on the fallback path for browsers without module workers.
+([`pipeline.js`](web/core/pipeline.js))
 
 ---
 
@@ -231,6 +236,7 @@ metric implementations checked against hand-computed values.
 ```
 web/                    the rebuild
   core/                 detection engine — no DOM, runs under Node too
+    worker.js           runs the pipeline off the main thread
     parse.js            six log formats + generic CSV/JSONL, format sniffing
     generate.js         synthetic estate with labelled multi-stage campaigns
     features.js         streaming feature extraction and identity baselines

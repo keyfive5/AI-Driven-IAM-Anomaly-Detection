@@ -2,7 +2,7 @@ import { esc, num, ts, duration, on, toast } from '../dom.js';
 import { ingest, FORMAT_LABELS } from '../../core/parse.js';
 import { CAMPAIGN_IDS, campaignInfo } from '../../core/generate.js';
 import { RULES } from '../../core/rules.js';
-import { state, loadSynthetic, loadEvents, saveSettings, removeSuppression, MAX_EVENTS } from '../state.js';
+import { state, loadEvents, saveSettings, removeSuppression, MAX_EVENTS } from '../state.js';
 
 const SAMPLES = [
   { file: 'sample_aws_cloudtrail.json', name: 'AWS CloudTrail', note: 'Real-shaped management events: IAM, EC2, console sign-ins.' },
@@ -228,8 +228,9 @@ export function mount(root, ctx) {
   });
 
   on(root, 'click', '#btnGenerate', async () => {
-    loadSynthetic();
-    await ctx.runAnalysis();
+    // Generation happens in the worker alongside the analysis, so a large
+    // estate no longer blocks the page before the run even starts.
+    await ctx.runAnalysis({ generate: true });
     ctx.setView('overview');
   });
 
